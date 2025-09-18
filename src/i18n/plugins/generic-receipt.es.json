@@ -1,0 +1,25 @@
+{
+  "name": "Recibos Genéricos",
+  "description": "Procesa recibos de cualquier tienda usando análisis de imagen con IA con validación de seguridad mejorada y procesamiento en tiempo real.",
+  "features": {
+    "aiImageProcessing": "Procesamiento de Imagen con IA",
+    "multiFormatSupport": "Soporte Multi-Formato", 
+    "securityValidation": "Validación de Seguridad",
+    "auditLogging": "Registro de Auditoría"
+  },
+  "capabilities": {
+    "manualEntryAvailable": "Entrada manual disponible",
+    "batchProcessingSupported": "Procesamiento por lotes compatible",
+    "aiImageProcessing": "Procesamiento de imagen con IA",
+    "maxSize": "Tamaño máx"
+  },
+  "actions": {
+    "upload": "Subir",
+    "uploading": "Subiendo...",
+    "manualEntry": "Entrada Manual"
+  },
+  "validation": {
+    "fileValidationFailed": "Falló la validación del archivo",
+    "fileWarnings": "Advertencias del archivo"
+  }
+}

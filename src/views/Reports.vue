@@ -1,0 +1,325 @@
+<template>
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="text-center sm:text-left">
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{{ $t('reports.title') }}</h1>
+      <p class="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base">
+        {{ $t('reports.subtitle') }}
+      </p>
+    </div>
+
+    <!-- Report Plugins -->
+    <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
+      <div
+        v-for="plugin in localizedReportPlugins"
+        :key="plugin.key"
+        class="card p-6"
+      >
+        <!-- Plugin Header -->
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 space-y-3 sm:space-y-0">
+          <div class="flex items-center flex-1">
+            <div
+              class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center text-white text-lg sm:text-xl flex-shrink-0"
+              :style="{ backgroundColor: plugin.color }"
+            >
+              {{ plugin.icon }}
+            </div>
+            <div class="ml-3 sm:ml-4 min-w-0 flex-1">
+              <h3 class="text-base sm:text-lg font-medium text-gray-900 dark:text-white">
+                {{ plugin.name }}
+              </h3>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ plugin.description }}</p>
+            </div>
+          </div>
+
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 flex-shrink-0 self-start sm:self-auto"
+          >
+            {{ plugin.category }}
+          </span>
+        </div>
+
+        <!-- Plugin Details -->
+        <div class="mb-6 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <div class="flex items-center">
+            <span class="w-4 h-4 mr-2">📅</span>
+            <span>{{
+              plugin.requiresDateRange
+                ? $t('reports.dateRangeRequired')
+                : $t('reports.noDateRangeRequired')
+            }}</span>
+          </div>
+          <div class="flex items-center">
+            <span class="w-4 h-4 mr-2">📊</span>
+            <span>{{
+              plugin.supportsExport ? $t('reports.exportSupported') : $t('reports.viewOnly')
+            }}</span>
+          </div>
+          <div
+            v-if="plugin.supportedExportFormats.length > 0"
+            class="flex items-center"
+          >
+            <span class="w-4 h-4 mr-2">💾</span>
+            <span
+              >{{ $t('reports.formats') }}:
+              {{ plugin.supportedExportFormats.join(", ").toUpperCase() }}</span
+            >
+          </div>
+        </div>
+
+        <!-- Date Range Selection (if required) -->
+        <div v-if="plugin.requiresDateRange" class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >{{ $t('reports.dateRange') }}</label
+          >
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <LocalizedDateInput
+              :model-value="dateRanges[plugin.key]?.startDate || ''"
+              class="input text-sm"
+              @update:model-value="
+                updateDateRange(
+                  plugin.key,
+                  'startDate',
+                  $event,
+                )
+              "
+            />
+            <LocalizedDateInput
+              :model-value="dateRanges[plugin.key]?.endDate || ''"
+              class="input text-sm"
+              @update:model-value="
+                updateDateRange(
+                  plugin.key,
+                  'endDate',
+                  $event,
+                )
+              "
+            />
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+          <button
+            :disabled="
+              plugin.requiresDateRange && !isDateRangeValid(plugin.key)
+            "
+            class="btn btn-primary disabled:opacity-50 w-full sm:w-auto"
+            @click="generateReport(plugin)"
+          >
+            {{
+              loadingReports[plugin.key] ? $t('reports.generating') : $t('reports.generateReport')
+            }}
+          </button>
+
+          <div v-if="plugin.supportsExport" class="flex flex-wrap gap-2 justify-center sm:justify-end">
+            <button
+              v-for="format in plugin.supportedExportFormats"
+              :key="format"
+              :disabled="!currentReports[plugin.key]"
+              class="btn btn-secondary disabled:opacity-50 text-sm px-3 py-1.5"
+              @click="exportReport(plugin, format)"
+            >
+              {{ format.toUpperCase() }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="loadingReports[plugin.key]" class="mt-4 text-center py-4">
+          <div class="inline-flex items-center space-x-2 text-sm text-gray-500">
+            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+            <span>{{ $t('reports.generatingPlugin', { plugin: plugin.name.toLowerCase() }) }}</span>
+          </div>
+        </div>
+
+        <!-- Report Data (for plugins that don't redirect) -->
+        <div
+          v-else-if="
+            currentReports[plugin.key] &&
+            !['category-analytics', 'price-trends'].includes(plugin.key)
+          "
+          class="mt-6 space-y-4"
+        >
+          <div class="border-t border-gray-200 pt-4">
+            <h4 class="text-sm font-medium text-gray-900 mb-3">
+              {{ currentReports[plugin.key].title }}
+            </h4>
+
+            <!-- Generic data display for other report types -->
+            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <pre class="text-xs text-gray-600 whitespace-pre-wrap">{{
+                JSON.stringify(currentReports[plugin.key].data, null, 2)
+              }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div
+      v-if="localizedReportPlugins.length === 0"
+      class="text-center py-12"
+    >
+      <div class="text-gray-500 mb-4">{{ $t('reports.noPluginsAvailable') }}</div>
+      <p class="text-sm text-gray-400">
+        {{ $t('reports.pluginsWillAppearWhenEnabled') }}
+      </p>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, reactive, computed } from "vue";
+import { useRouter } from "vue-router";
+import { usePluginsStore } from "@/stores/plugins";
+import { useReportsStore } from "@/stores/reports";
+import { usePluginLocalization } from "@/composables/usePluginLocalization";
+import LocalizedDateInput from "@/components/common/LocalizedDateInput.vue";
+import CategoryAnalyticsReport from "@/components/reports/CategoryAnalyticsReport.vue";
+import PriceTrendsReport from "@/components/reports/PriceTrendsReport.vue";
+import type { ReportPlugin } from "@/types/plugin";
+import type { ReportData, DateRange } from "@/types/report";
+
+const router = useRouter();
+const pluginsStore = usePluginsStore();
+const reportsStore = useReportsStore();
+const { localizePlugins } = usePluginLocalization();
+
+const dateRanges = reactive<Record<string, DateRange>>({});
+const loadingReports = reactive<Record<string, boolean>>({});
+const currentReports = reactive<Record<string, ReportData>>({});
+
+// Computed property to get localized plugins
+const localizedReportPlugins = computed(() => {
+  return localizePlugins(pluginsStore.enabledReportPlugins);
+});
+
+const updateDateRange = (
+  pluginKey: string,
+  field: "startDate" | "endDate",
+  value: string,
+) => {
+  if (!dateRanges[pluginKey]) {
+    dateRanges[pluginKey] = { startDate: "", endDate: "" };
+  }
+  dateRanges[pluginKey][field] = value;
+};
+
+const isDateRangeValid = (pluginKey: string) => {
+  const range = dateRanges[pluginKey];
+  return (
+    range &&
+    range.startDate &&
+    range.endDate &&
+    range.startDate <= range.endDate
+  );
+};
+
+const generateReport = async (plugin: ReportPlugin) => {
+  // For category analytics, redirect to detailed analytics view
+  if (plugin.key === "category-analytics") {
+    const query: Record<string, string> = {};
+    const dateRange = dateRanges[plugin.key];
+
+    if (dateRange && dateRange.startDate) {
+      query.startDate = dateRange.startDate;
+    }
+    if (dateRange && dateRange.endDate) {
+      query.endDate = dateRange.endDate;
+    }
+
+    router.push({
+      path: "/analytics/categories",
+      query,
+    });
+    return;
+  }
+
+  // For price trends, redirect to dedicated price trends view
+  if (plugin.key === "price-trends") {
+    const query: Record<string, string> = {};
+    const dateRange = dateRanges[plugin.key];
+
+    if (dateRange && dateRange.startDate) {
+      query.startDate = dateRange.startDate;
+    }
+    if (dateRange && dateRange.endDate) {
+      query.endDate = dateRange.endDate;
+    }
+
+    router.push({
+      path: "/analytics/price-trends",
+      query,
+    });
+    return;
+  }
+
+  loadingReports[plugin.key] = true;
+
+  try {
+    const request = {
+      pluginKey: plugin.key,
+      dateRange: plugin.requiresDateRange ? dateRanges[plugin.key] : undefined,
+      parameters: {},
+    };
+
+    const reportData = await reportsStore.generateReport(request);
+    currentReports[plugin.key] = reportData;
+  } catch (error) {
+    console.error("Failed to generate report:", error);
+  } finally {
+    loadingReports[plugin.key] = false;
+  }
+};
+
+const exportReport = async (plugin: ReportPlugin, format: string) => {
+  try {
+    const request = {
+      pluginKey: plugin.key,
+      dateRange: plugin.requiresDateRange ? dateRanges[plugin.key] : undefined,
+      parameters: {},
+    };
+
+    await reportsStore.exportReport(request, format);
+  } catch (error) {
+    console.error("Failed to export report:", error);
+  }
+};
+
+// Initialize default date ranges
+const initializeDefaultDateRanges = () => {
+  localizedReportPlugins.value.forEach((plugin) => {
+    if (plugin.requiresDateRange) {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setMonth(endDate.getMonth() - 1);
+
+      dateRanges[plugin.key] = {
+        startDate: startDate.toISOString().split("T")[0],
+        endDate: endDate.toISOString().split("T")[0],
+      };
+    }
+  });
+};
+
+onMounted(async () => {
+  await pluginsStore.fetchAllPlugins();
+  initializeDefaultDateRanges();
+});
+</script>

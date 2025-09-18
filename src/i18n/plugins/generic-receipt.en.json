@@ -1,0 +1,25 @@
+{
+  "name": "Generic Receipts",
+  "description": "Process receipts from any store using AI image analysis with enhanced security validation and real-time processing.",
+  "features": {
+    "aiImageProcessing": "AI Image Processing",
+    "multiFormatSupport": "Multi-Format Support", 
+    "securityValidation": "Security Validation",
+    "auditLogging": "Audit Logging"
+  },
+  "capabilities": {
+    "manualEntryAvailable": "Manual entry available",
+    "batchProcessingSupported": "Batch processing supported",
+    "aiImageProcessing": "AI image processing",
+    "maxSize": "Max size"
+  },
+  "actions": {
+    "upload": "Upload",
+    "uploading": "Uploading...",
+    "manualEntry": "Manual Entry"
+  },
+  "validation": {
+    "fileValidationFailed": "File validation failed",
+    "fileWarnings": "File warnings"
+  }
+}

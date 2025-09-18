@@ -1,0 +1,493 @@
+/* ShopTrack Mobile Optimizations */
+
+/* Touch-friendly button sizing */
+@media (max-width: 640px) {
+  .btn {
+    min-height: 44px; /* iOS recommended minimum touch target */
+    padding: 12px 16px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  .btn-sm {
+    min-height: 36px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
+
+/* Better form input sizing on mobile */
+@media (max-width: 640px) {
+  .input,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  input[type="number"],
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 12px;
+  }
+}
+
+/* Improved card spacing on mobile */
+@media (max-width: 640px) {
+  .card {
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+
+  .space-y-6 > * + * {
+    margin-top: 1rem; /* Reduce spacing between cards on mobile */
+  }
+}
+
+/* Better text sizing and readability */
+@media (max-width: 640px) {
+  /* Ensure minimum text size for readability */
+  .text-xs {
+    font-size: 12px; /* Minimum readable size */
+  }
+
+  .text-sm {
+    font-size: 14px;
+  }
+
+  /* Improve line height for better readability */
+  p, span, div {
+    line-height: 1.5;
+  }
+
+  /* Better heading hierarchy on mobile */
+  h1 {
+    font-size: 1.75rem; /* 28px */
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  h2 {
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Improved modal and dropdown positioning */
+@media (max-width: 640px) {
+  /* Ensure dropdowns don't go off-screen */
+  .dropdown-menu {
+    position: fixed !important;
+    top: auto !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    bottom: 1rem !important;
+    width: auto !important;
+    max-height: calc(100vh - 8rem);
+    overflow-y: auto;
+    z-index: 50;
+  }
+
+  /* Better modal sizing */
+  .modal {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+}
+
+/* Navigation improvements */
+@media (max-width: 768px) {
+  /* Sticky navigation for better UX */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  /* Better mobile menu transitions */
+  .mobile-menu {
+    transition: all 0.3s ease-in-out;
+  }
+
+  .mobile-menu-enter {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  .mobile-menu-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .mobile-menu-leave {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .mobile-menu-leave-active {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Grid improvements for mobile */
+@media (max-width: 640px) {
+  /* Ensure grids stack properly on mobile */
+  .grid-cols-2 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .grid-cols-3 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .grid-cols-4 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  /* But allow 2-column layout for certain components */
+  .grid-mobile-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.75rem;
+  }
+}
+
+/* Table improvements */
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-responsive table {
+    min-width: 600px;
+  }
+
+  /* Card-style tables on mobile */
+  .table-card-mobile tbody tr {
+    display: block;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: white;
+  }
+
+  .table-card-mobile tbody td {
+    display: block;
+    text-align: left !important;
+    border: none;
+    padding: 0.25rem 0;
+  }
+
+  .table-card-mobile tbody td:before {
+    content: attr(data-label) ": ";
+    font-weight: 600;
+    color: #374151;
+  }
+}
+
+/* Form improvements */
+@media (max-width: 640px) {
+  /* Stack form elements on mobile */
+  .form-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Better checkbox and radio button sizing */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Improve file input styling */
+  input[type="file"] {
+    padding: 12px;
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    background-color: #f9fafb;
+    text-align: center;
+  }
+}
+
+/* Loading states */
+@media (max-width: 640px) {
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .loading-spinner {
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+/* Safe area for devices with notches */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Utility classes for mobile-specific styling */
+@media (max-width: 640px) {
+  .mobile-hide {
+    display: none !important;
+  }
+
+  .mobile-show {
+    display: block !important;
+  }
+
+  .mobile-flex {
+    display: flex !important;
+  }
+
+  .mobile-full-width {
+    width: 100% !important;
+  }
+
+  .mobile-text-center {
+    text-align: center !important;
+  }
+
+  .mobile-text-left {
+    text-align: left !important;
+  }
+
+  .mobile-margin-0 {
+    margin: 0 !important;
+  }
+
+  .mobile-padding-4 {
+    padding: 1rem !important;
+  }
+}
+
+/* Dark mode mobile optimizations */
+@media (max-width: 640px) {
+  .dark .card {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+
+  .dark .dropdown-menu {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+
+  .dark .modal {
+    background-color: #1f2937;
+  }
+}
+
+/* Performance optimizations */
+@media (max-width: 640px) {
+  /* Reduce animation complexity on mobile for better performance */
+  .reduced-motion {
+    animation-duration: 0.1s !important;
+    transition-duration: 0.1s !important;
+  }
+
+  /* Optimize images for mobile */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Prevent text selection on touch interfaces for UI elements */
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Optimize scrolling performance */
+  .scroll-smooth {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hardware acceleration for transitions */
+  .card,
+  .btn,
+  .modal {
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
+
+/* Focus improvements for accessibility */
+@media (max-width: 640px) {
+  /* Better focus indicators on mobile */
+  button:focus,
+  input:focus,
+  select:focus,
+  textarea:focus,
+  a:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Skip to content link for screen readers */
+  .skip-to-content {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .skip-to-content:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    background: #000;
+    color: #fff;
+    padding: 8px 16px;
+    z-index: 1000;
+  }
+}
+
+/* Mobile-specific component improvements */
+@media (max-width: 640px) {
+  /* Receipt card optimizations */
+  .receipt-card {
+    margin-bottom: 1rem;
+  }
+
+  /* Report plugin cards */
+  .report-plugin-card .plugin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  /* Category analytics improvements */
+  .category-card {
+    padding: 1rem;
+  }
+
+  .category-card .category-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  /* Price trends filters */
+  .price-trends-filters {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Receipt detail improvements */
+  .receipt-detail-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .receipt-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .receipt-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Very small screens (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  .card {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+  }
+
+  .btn {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .btn-sm {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .input {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+
+/* Landscape mobile optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  /* Reduce header height in landscape */
+  .navigation-header {
+    padding: 0.5rem 0;
+  }
+
+  /* Optimize modal height */
+  .modal {
+    max-height: 80vh;
+  }
+
+  /* Compact filters */
+  .filters-card {
+    padding: 0.75rem;
+  }
+
+  /* Reduce spacing */
+  .space-y-6 > * + * {
+    margin-top: 0.75rem;
+  }
+}

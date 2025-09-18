@@ -1,0 +1,25 @@
+{
+  "name": "Amazon Orders",
+  "description": "Import Amazon order data with enhanced security validation and comprehensive order processing capabilities.",
+  "features": {
+    "secureImport": "Secure Import",
+    "orderTracking": "Order Tracking", 
+    "dataValidation": "Data Validation",
+    "batchProcessing": "Batch Processing"
+  },
+  "capabilities": {
+    "manualEntryAvailable": "Manual entry available",
+    "batchProcessingSupported": "Batch processing supported",
+    "orderDataProcessing": "Order data processing",
+    "maxSize": "Max size"
+  },
+  "actions": {
+    "upload": "Upload",
+    "uploading": "Uploading...",
+    "manualEntry": "Manual Entry"
+  },
+  "validation": {
+    "fileValidationFailed": "File validation failed",
+    "fileWarnings": "File warnings"
+  }
+}

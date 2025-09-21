@@ -12,43 +12,51 @@ export function useWebAuthn() {
   const error = ref<string | null>(null);
   const isSupported = ref(false);
 
-  // Immediately check WebAuthn support
-  const supported = !!(
-    window.navigator &&
-    window.navigator.credentials &&
-    window.PublicKeyCredential &&
-    typeof window.PublicKeyCredential === "function"
-  );
+  // Safely check WebAuthn support with proper error handling
+  const checkWebAuthnSupport = () => {
+    try {
+      return !!(
+        typeof window !== 'undefined' &&
+        window.navigator &&
+        window.navigator.credentials &&
+        window.PublicKeyCredential &&
+        typeof window.PublicKeyCredential === "function"
+      );
+    } catch {
+      return false;
+    }
+  };
 
-  isSupported.value = supported;
+  // Initial support check
+  isSupported.value = checkWebAuthnSupport();
 
-  // Check WebAuthn support after component is mounted
+  const isPlatformAuthenticatorAvailable = ref<boolean | null>(null);
+
+  // Check WebAuthn support and platform authenticator after component is mounted
   onMounted(() => {
-    const supported = !!(
-      window.navigator &&
-      window.navigator.credentials &&
-      window.PublicKeyCredential &&
-      typeof window.PublicKeyCredential === "function"
-    );
+    isSupported.value = checkWebAuthnSupport();
 
-    isSupported.value = supported;
+    // Check platform authenticator availability only after mount
+    if (isSupported.value && typeof PublicKeyCredential !== 'undefined') {
+      try {
+        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+          .then((available) => {
+            isPlatformAuthenticatorAvailable.value = available;
+          })
+          .catch(() => {
+            isPlatformAuthenticatorAvailable.value = false;
+          });
+      } catch (e) {
+        // PublicKeyCredential API not available, fail silently
+        isPlatformAuthenticatorAvailable.value = false;
+      }
+    } else {
+      isPlatformAuthenticatorAvailable.value = false;
+    }
 
     // Ensure loading state is properly reset
     loading.value = false;
   });
-
-  const isPlatformAuthenticatorAvailable = ref<boolean | null>(null);
-
-  // Check platform authenticator availability on initialization
-  if (isSupported.value) {
-    PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-      .then((available) => {
-        isPlatformAuthenticatorAvailable.value = available;
-      })
-      .catch(() => {
-        isPlatformAuthenticatorAvailable.value = false;
-      });
-  }
 
   function clearError() {
     error.value = null;

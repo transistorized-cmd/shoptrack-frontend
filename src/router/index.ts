@@ -102,27 +102,33 @@ const router = createRouter({
 
 // Navigation guards
 router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore();
+  try {
+    const authStore = useAuthStore();
 
-  // Initialize auth store if not already done
-  if (!authStore.isAuthenticated && !authStore.loading) {
-    await authStore.initialize();
-  }
+    // Initialize auth store if not already done
+    if (!authStore.isAuthenticated && !authStore.loading) {
+      await authStore.initialize();
+    }
 
-  const isAuthenticated = authStore.isAuthenticated;
-  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
-  const requiresGuest = to.matched.some((record) => record.meta.requiresGuest);
+    const isAuthenticated = authStore.isAuthenticated;
+    const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+    const requiresGuest = to.matched.some((record) => record.meta.requiresGuest);
 
-  if (requiresAuth && !isAuthenticated) {
-    // Redirect to login with return URL
-    next({
-      path: "/login",
-      query: { redirect: to.fullPath },
-    });
-  } else if (requiresGuest && isAuthenticated) {
-    // Redirect authenticated users away from auth pages
-    next("/");
-  } else {
+    if (requiresAuth && !isAuthenticated) {
+      // Redirect to login with return URL
+      next({
+        path: "/login",
+        query: { redirect: to.fullPath },
+      });
+    } else if (requiresGuest && isAuthenticated) {
+      // Redirect authenticated users away from auth pages
+      next("/");
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.error("Navigation guard error:", error);
+    // On error, allow navigation to continue to avoid blocking the user
     next();
   }
 });

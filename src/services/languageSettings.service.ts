@@ -31,6 +31,7 @@ export class LanguageSettingsService {
         "Failed to load language from user settings, using current locale:",
         error,
       );
+      // Ensure this doesn't throw - errors should be contained
     }
   }
 

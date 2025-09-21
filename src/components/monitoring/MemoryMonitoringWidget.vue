@@ -225,7 +225,7 @@ const isVisible = ref(true);
 const isRefreshing = ref(false);
 const isPerformingAction = ref(false);
 const chartCanvas = ref<HTMLCanvasElement | null>(null);
-const isDevelopment = ref(process.env.NODE_ENV === 'development');
+const isDevelopment = ref(import.meta.env.MODE === 'development');
 
 // Computed properties
 const widgetClasses = computed(() => ({

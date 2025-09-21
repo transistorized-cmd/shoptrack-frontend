@@ -212,11 +212,11 @@ const initializeApp = async () => {
   app.use(memoryMonitoringPlugin, {
     autoStart: true, // Automatically start monitoring when app mounts
     registerAllStores: true, // Register all Pinia stores for monitoring
-    showWidget: process.env.NODE_ENV === 'development', // Show widget only in development
+    showWidget: import.meta.env.MODE === 'development', // Show widget only in development
     config: {
       // Override default configuration if needed
       monitoring: {
-        interval: process.env.NODE_ENV === 'development' ? 15000 : 60000, // More frequent in dev
+        interval: import.meta.env.MODE === 'development' ? 15000 : 60000, // More frequent in dev
       }
     }
   });
@@ -240,11 +240,16 @@ const initializeApp = async () => {
     console.error("Failed to initialize authentication system:", error);
   }
 
-  // Preload categories for all supported locales so UI can switch languages without refetching
+  // Preload categories only if user is authenticated
   try {
-    const categoriesStore = useCategoriesStore();
-    await categoriesStore.fetchAllLocales(availableLocales.map((l) => l.code));
-    console.info("Categories preloaded for locales:", availableLocales.map((l) => l.code).join(", "));
+    const authStore = useAuthStore();
+    if (authStore.isAuthenticated) {
+      const categoriesStore = useCategoriesStore();
+      await categoriesStore.fetchAllLocales(availableLocales.map((l) => l.code));
+      console.info("Categories preloaded for locales:", availableLocales.map((l) => l.code).join(", "));
+    } else {
+      console.info("Skipping categories preload - user not authenticated");
+    }
   } catch (error) {
     console.error("Failed to preload categories:", error);
   }

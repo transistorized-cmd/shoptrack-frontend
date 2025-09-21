@@ -98,7 +98,7 @@ export const memoryMonitoringPlugin = {
     }
 
     // Development helpers
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.MODE === 'development') {
       addDevelopmentHelpers(app, memoryStore, config);
     }
 

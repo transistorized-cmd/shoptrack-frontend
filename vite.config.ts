@@ -100,7 +100,7 @@ export default defineConfig(() => {
     server: {
       proxy: {
         "/api": {
-          target: `https://localhost:${process.env.VITE_API_PORT || "5201"}`,
+          target: "https://localhost:5201",
           changeOrigin: true,
           secure: false, // Allow self-signed certificates in development
         },

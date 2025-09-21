@@ -309,7 +309,7 @@ class MemoryMonitoringService {
     console.warn('Potential memory issue:', description, metadata);
 
     // In production, you might want to send this to an analytics service
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.MODE === 'production') {
       // Example: Send to monitoring service
       // this.sendToMonitoringService('memory_issue', { description, metadata });
     }
@@ -338,7 +338,7 @@ class MemoryMonitoringService {
     });
 
     // In production, send to monitoring service
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.MODE === 'production') {
       // this.sendToMonitoringService('memory_leak', memoryLeak);
     }
   }

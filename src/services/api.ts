@@ -11,12 +11,17 @@ export const TIMEOUT_CONFIG = Object.freeze({
 
 // Helper function to build API base URL from environment variables
 export const getApiBaseUrl = (): string => {
+  // In development, use relative URLs to go through Vite proxy
+  if (import.meta.env.MODE === 'development') {
+    return '/api';
+  }
+
   // Use full URL if provided
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
 
-  // Build URL from components
+  // Build URL from components for production
   const protocol = import.meta.env.VITE_API_PROTOCOL || "https";
   const host = import.meta.env.VITE_API_HOST || "localhost";
   const port = import.meta.env.VITE_API_PORT || "5298";
@@ -85,25 +90,30 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
-    console.error("API Error:", error);
-
     if (error.response?.status === 401) {
       // Handle unauthorized - but be selective about when to logout
-      console.warn("Unauthorized request detected");
-
-      // Don't trigger logout for these endpoints/scenarios:
       const url = error.config?.url || "";
-      const shouldTriggerLogout =
-        !url.includes("/auth/login") && // Login attempts
-        !url.includes("/auth/register") && // Registration attempts
-        !url.includes("/auth/refresh-token") && // Token refresh attempts (updated endpoint)
-        !url.includes("/auth/me") && // Auth status checks (updated endpoint)
-        !url.includes("/auth/verify") && // Email verification
-        !url.includes("/auth/passkey") && // Passkey operations
-        !url.includes("/passkey") && // Passkey operations (direct endpoint)
-        !url.includes("/auth/oauth") && // OAuth operations
-        !url.includes("/auth/forgot-password") && // Password reset
-        !url.includes("/auth/reset-password") && // Password reset
+
+      // Don't log errors for expected auth-checking endpoints
+      const isExpectedAuthCheck =
+        url.includes("/auth/login") || // Login attempts
+        url.includes("/auth/register") || // Registration attempts
+        url.includes("/auth/refresh-token") || // Token refresh attempts (updated endpoint)
+        url.includes("/auth/me") || // Auth status checks (updated endpoint)
+        url.includes("/auth/verify") || // Email verification
+        url.includes("/auth/passkey") || // Passkey operations
+        url.includes("/passkey") || // Passkey operations (direct endpoint)
+        url.includes("/auth/oauth") || // OAuth operations
+        url.includes("/auth/forgot-password") || // Password reset
+        url.includes("/auth/reset-password") || // Password reset
+        url.includes("/categories"); // Categories endpoint calls before auth
+
+      if (!isExpectedAuthCheck) {
+        console.error("API Error:", error);
+        console.warn("Unauthorized request detected");
+      }
+
+      const shouldTriggerLogout = !isExpectedAuthCheck &&
         error.config?.headers?.["X-Skip-Auth-Logout"] !== "true"; // Allow manual override
 
       if (shouldTriggerLogout) {
@@ -121,7 +131,12 @@ api.interceptors.response.use(
             console.error("Failed to handle auth store logout:", err);
           });
       }
-    } else if (error.response?.status === 403) {
+    } else {
+      // Log all non-401 errors
+      console.error("API Error:", error);
+    }
+
+    if (error.response?.status === 403) {
       // CSRF token invalid/mismatch
       console.warn("CSRF token invalid detected, invalidating token");
       csrfManager.invalidateToken();

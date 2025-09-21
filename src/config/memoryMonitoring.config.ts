@@ -137,8 +137,8 @@ const stagingConfig: MemoryMonitoringConfig = {
     enableErrorReporting: true,
     enableAnalytics: true,
     enableExport: true,
-    reportingEndpoint: process.env.VITE_STAGING_MONITORING_ENDPOINT,
-    analyticsKey: process.env.VITE_STAGING_ANALYTICS_KEY
+    reportingEndpoint: import.meta.env.VITE_STAGING_MONITORING_ENDPOINT,
+    analyticsKey: import.meta.env.VITE_STAGING_ANALYTICS_KEY
   },
   ui: {
     showWidget: true, // Show for staging testing
@@ -191,8 +191,8 @@ const productionConfig: MemoryMonitoringConfig = {
     enableErrorReporting: true,
     enableAnalytics: true,
     enableExport: false, // Security: disable export in production
-    reportingEndpoint: process.env.VITE_MONITORING_ENDPOINT,
-    analyticsKey: process.env.VITE_ANALYTICS_KEY
+    reportingEndpoint: import.meta.env.VITE_MONITORING_ENDPOINT,
+    analyticsKey: import.meta.env.VITE_ANALYTICS_KEY
   },
   ui: {
     showWidget: false, // Hidden in production by default
@@ -214,7 +214,7 @@ const productionConfig: MemoryMonitoringConfig = {
  * Get configuration based on current environment
  */
 export function getMemoryMonitoringConfig(): MemoryMonitoringConfig {
-  const env = process.env.NODE_ENV as 'development' | 'staging' | 'production';
+  const env = import.meta.env.MODE as 'development' | 'staging' | 'production';
 
   switch (env) {
     case 'production':
@@ -428,7 +428,7 @@ export function isFeatureEnabled(feature: keyof MemoryMonitoringConfig['monitori
  * Get environment-specific override from localStorage (development only)
  */
 export function getLocalStorageOverrides(): Partial<MemoryMonitoringConfig> | null {
-  if (process.env.NODE_ENV !== 'development' || typeof localStorage === 'undefined') {
+  if (import.meta.env.MODE !== 'development' || typeof localStorage === 'undefined') {
     return null;
   }
 
@@ -445,7 +445,7 @@ export function getLocalStorageOverrides(): Partial<MemoryMonitoringConfig> | nu
  * Save configuration override to localStorage (development only)
  */
 export function saveLocalStorageOverrides(config: Partial<MemoryMonitoringConfig>): void {
-  if (process.env.NODE_ENV !== 'development' || typeof localStorage === 'undefined') {
+  if (import.meta.env.MODE !== 'development' || typeof localStorage === 'undefined') {
     return;
   }
 

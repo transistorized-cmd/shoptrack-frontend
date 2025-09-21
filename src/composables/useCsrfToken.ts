@@ -29,14 +29,20 @@ class CsrfTokenManager {
 
   /**
    * Helper function to build API base URL from environment variables
+   * This matches the logic in api.ts to ensure consistent session handling
    */
   private getApiBaseURL(): string {
+    // In development, use relative URLs to go through Vite proxy
+    if (import.meta.env.MODE === 'development') {
+      return '/api';
+    }
+
     // Use full URL if provided
     if (import.meta.env.VITE_API_URL) {
       return import.meta.env.VITE_API_URL;
     }
 
-    // Build URL from components
+    // Build URL from components for production
     const protocol = import.meta.env.VITE_API_PROTOCOL || "https";
     const host = import.meta.env.VITE_API_HOST || "localhost";
     const port = import.meta.env.VITE_API_PORT || "5298";

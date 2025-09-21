@@ -197,9 +197,11 @@ function handleSearchResultSelect(result: SearchResultItem) {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
-  // Preload categories for all locales once
-  const categoriesStore = useCategoriesStore();
-  categoriesStore.fetchAllLocales(availableLocales.map(l => l.code));
+  // Preload categories only if user is authenticated
+  if (authStore.isAuthenticated) {
+    const categoriesStore = useCategoriesStore();
+    categoriesStore.fetchAllLocales(availableLocales.map(l => l.code));
+  }
 });
 
 onUnmounted(() => {

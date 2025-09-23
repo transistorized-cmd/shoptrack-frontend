@@ -1,10 +1,22 @@
-# Environment variables
-.env.local
+# =================================
+# DOTNET / C# / ASP.NET Core
+# =================================
 
-# Build outputs
-bin/
-obj/
-out/
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
 
 # Visual Studio / VS Code
 .vs/
@@ -13,55 +25,150 @@ out/
 *.suo
 *.userosscache
 *.sln.docstates
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
 
-# Logs (root and nested)
-logs/
-**/logs/
-*.log
+# Caches
+*.cache
+project.lock.json
+project.fragment.lock.json
+artifacts/
 
-# Runtime files
-*.dll
-*.exe
-*.pdb
-
-# Package files
+# NuGet
+packages/
 *.nupkg
 *.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
 
-# Test results
-TestResults/
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
 *.trx
 *.coverage
 *.coveragexml
+*.testlog
+TestResults/
+test-results/
+coverage.opencover.xml
 
-# Content files (uploaded images, documents, etc.)
-Content/
+# Entity Framework
+*.edmx.diagram
+*.edmx.sql
+**/Migrations/*.Designer.cs
+# Comment out the line below if you want to checkin your web deploy settings
+# but database connection strings (with potential passwords) will be unencrypted
+*.pubxml
+*.publishproj
 
-# Secrets and local env
-.env
-.env.*
+# Microsoft Azure Web App publish settings
+PublishProfiles/
 
-# Dev TLS certs and cookies dumps
-certs/
-**/cookies*.txt
+# =================================
+# NODE.JS / NPM / FRONTEND
+# =================================
 
-# Temporary files
-*.tmp
-*.temp
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
 
-# macOS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
+# Lock files (keep package-lock.json, exclude others)
+yarn.lock
+pnpm-lock.yaml
 
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
+# Distribution / Build outputs
+dist/
+build/
+.output/
+.nuxt/
+.next/
+out/
+.svelte-kit/
 
-# iOS/Xcode
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output
+
+# ESLint cache
+.eslintcache
+
+# Vite
+.vite/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# NPM package-lock backup
+package-lock.json.backup
+
+# Storybook build outputs
+storybook-static/
+
+# Parcel cache
+.parcel-cache/
+
+# =================================
+# VUE.JS SPECIFIC
+# =================================
+
+# Vue build outputs
+dist-ssr/
+*.local
+
+# Vite temp files
+.vite/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Vue devtools
+.vue-devtools/
+
+# Vue i18n
+locales/*.json.tmp
+
+# Vitest
+coverage/
+test-results/
+*.spec.js.map
+*.test.js.map
+
+# =================================
+# iOS / XCODE / SWIFT
+# =================================
+
+# Xcode
 *.xcodeproj/*
 !*.xcodeproj/project.pbxproj
 !*.xcodeproj/xcshareddata/
@@ -71,12 +178,156 @@ Desktop.ini
 *.xcodeproj/xcuserdata/
 *.xcworkspace/xcuserdata/
 *.xcuserstate
+
+# Build generated
 DerivedData/
+build/
+Build/
+
+# Archives
+*.xcarchive
 *.ipa
 *.dSYM.zip
 *.dSYM
+
+# CocoaPods
+Pods/
+*.xcworkspace
+Podfile.lock
+
+# Carthage
+Carthage/Build/
+Cartfile.resolved
+
+# Swift Package Manager
+.swiftpm/
+Packages/
+Package.resolved
+.build/
+
+# fastlane
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+fastlane/README.md
+
+# Code Injection
 iOSInjectionProject/
+
+# Xcode Patches
+*.xcscmblueprint
+*.xccheckout
+
+# Swift Playgrounds
+*.playground
+
+# OSX
+.DS_Store
+
+# =================================
+# ENVIRONMENT & SECRETS
+# =================================
+
+# Environment files
+.env
+.env.*
+!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Secrets
+appsettings.Production.json
+appsettings.Staging.json
+secrets.json
+*.secrets
+
+# Dev certificates
+certs/
+*.pfx
+*.p12
+
+# =================================
+# OPERATING SYSTEMS
+# =================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+
+# =================================
+# IDEs & EDITORS
+# =================================
+
+# JetBrains IDEs
+.idea/
+*.sln.iml
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Atom
+.atom/
+
+# =================================
+# LOGS & TEMPORARY FILES
+# =================================
+
+# Logs
+logs/
+**/logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# =================================
+# PROJECT SPECIFIC
+# =================================
+
+# Content uploads
+Content/
+wwwroot/uploads/
+uploads/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Cookies dumps
+**/cookies*.txt
+
+# Documentation that's auto-generated
+docs/build/

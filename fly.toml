@@ -11,8 +11,16 @@ primary_region = 'fra'
     VITE_API_HOST = 'api.shoptrack.app'
     VITE_API_PORT = '443'
     VITE_API_PROTOCOL = 'https'
+    VITE_ENABLE_DEVTOOLS = 'true'
+    NODE_ENV = 'production'
+    # Add other required variables here as needed:
+    # VITE_GOOGLE_CLIENT_ID = 'your-google-client-id'
+    # VITE_APPLE_CLIENT_ID = 'your-apple-client-id'
+    # VITE_ERROR_LOGGING_ENDPOINT = 'your-endpoint'
+    # VITE_ERROR_LOGGING_API_KEY = 'your-api-key'
 
 [env]
+  # Runtime environment variables (not used by Vite)
   NODE_ENV = 'production'
 
 [http_service]

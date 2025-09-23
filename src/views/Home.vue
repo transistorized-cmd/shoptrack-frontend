@@ -3,10 +3,10 @@
     <!-- Hero Section -->
     <div class="text-center px-4 sm:px-0">
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white sm:text-4xl lg:text-5xl">
-        {{ $t('home.welcomeToShopTrack') }}
+        {{ t('home.welcomeToShopTrack') }}
       </h1>
       <p class="mt-3 sm:mt-4 text-lg sm:text-xl text-gray-600 dark:text-gray-300">
-        {{ $t('home.intelligentReceiptTracking') }}
+        {{ t('home.intelligentReceiptTracking') }}
       </p>
     </div>
 
@@ -27,7 +27,7 @@
           <div class="ml-5 w-0 flex-1">
             <dl>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                {{ $t('home.totalReceipts') }}
+                {{ t('home.totalReceipts') }}
               </dt>
               <dd class="text-lg font-medium text-gray-900 dark:text-white">
                 {{ receiptsStore.pagination.totalCount }}
@@ -49,7 +49,7 @@
           <div class="ml-5 w-0 flex-1">
             <dl>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                {{ $t('home.pending') }}
+                {{ t('home.pending') }}
               </dt>
               <dd class="text-lg font-medium text-gray-900 dark:text-white">
                 {{ receiptsStore.pendingReceipts.length }}
@@ -71,7 +71,7 @@
           <div class="ml-5 w-0 flex-1">
             <dl>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                {{ $t('home.completed') }}
+                {{ t('home.completed') }}
               </dt>
               <dd class="text-lg font-medium text-gray-900 dark:text-white">
                 {{ receiptsStore.completedReceipts.length }}
@@ -93,7 +93,7 @@
           <div class="ml-5 w-0 flex-1">
             <dl>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                {{ $t('home.availablePlugins') }}
+                {{ t('home.availablePlugins') }}
               </dt>
               <dd class="text-lg font-medium text-gray-900 dark:text-white">
                 {{ pluginsStore.receiptPlugins.length }}
@@ -106,7 +106,7 @@
 
     <!-- Quick Actions -->
     <div class="card p-4 sm:p-6">
-      <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ $t('home.quickActions') }}</h2>
+      <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ t('home.quickActions') }}</h2>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <RouterLink
           to="/upload"
@@ -120,8 +120,8 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $t('home.uploadReceipt') }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('home.processNewReceipts') }}</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('home.uploadReceipt') }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('home.processNewReceipts') }}</p>
           </div>
         </RouterLink>
 
@@ -137,8 +137,8 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $t('home.viewReceipts') }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('home.manageYourReceipts') }}</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('home.viewReceipts') }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('home.manageYourReceipts') }}</p>
           </div>
         </RouterLink>
 
@@ -154,8 +154,8 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $t('home.viewReports') }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('home.analyzeYourSpending') }}</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('home.viewReports') }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('home.analyzeYourSpending') }}</p>
           </div>
         </RouterLink>
       </div>
@@ -164,12 +164,12 @@
     <!-- Recent Receipts -->
     <div v-if="receiptsStore.hasReceipts" class="card p-4 sm:p-6">
       <div class="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:items-center sm:justify-between mb-4">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">{{ $t('home.recentReceipts') }}</h2>
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">{{ t('home.recentReceipts') }}</h2>
         <RouterLink
           to="/receipts"
           class="text-sm text-shoptrack-600 hover:text-shoptrack-500 dark:text-shoptrack-400 dark:hover:text-shoptrack-300 text-center sm:text-right"
         >
-          {{ $t('home.viewAll') }}
+          {{ t('home.viewAll') }}
         </RouterLink>
       </div>
       <div class="space-y-3">
@@ -195,7 +195,7 @@
                 {{
                   receipt.receiptDate
                     ? new Date(receipt.receiptDate).toLocaleDateString()
-                    : $t('home.noDate')
+                    : t('home.noDate')
                 }}
               </p>
             </div>
@@ -204,7 +204,7 @@
           <div class="flex items-center justify-between sm:justify-end sm:space-x-4">
             <div class="text-left sm:text-right">
               <p class="text-sm font-medium text-gray-900 dark:text-white">
-                {{ receipt.successfullyParsed }} {{ $t('home.items') }}
+                {{ receipt.successfullyParsed }} {{ t('home.items') }}
               </p>
               <p class="text-xs text-gray-500 dark:text-gray-400 capitalize">
                 {{ receipt.processingStatus }}
@@ -219,7 +219,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                <span class="hidden sm:inline ml-1">{{ $t('common.view') }}</span>
+                <span class="hidden sm:inline ml-1">{{ t('common.view') }}</span>
               </RouterLink>
             </div>
           </div>
@@ -251,7 +251,7 @@
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           />
         </svg>
-        <span class="text-gray-500 dark:text-gray-400">{{ $t('home.loading') }}</span>
+        <span class="text-gray-500 dark:text-gray-400">{{ t('home.loading') }}</span>
       </div>
     </div>
   </div>
@@ -259,12 +259,14 @@
 
 <script setup lang="ts">
 import { onMounted, computed } from "vue";
+import { useTranslation } from "@/composables/useTranslation";
 import { RouterLink } from "vue-router";
 import { useReceiptsStore } from "@/stores/receipts";
 import { usePluginsStore } from "@/stores/plugins";
 
 const receiptsStore = useReceiptsStore();
 const pluginsStore = usePluginsStore();
+const { t } = useTranslation();
 
 const recentReceipts = computed(() => receiptsStore.receipts.slice(0, 5));
 

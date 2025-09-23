@@ -1,17 +1,36 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { mount } from "@vue/test-utils";
-import { nextTick } from "vue";
+import { nextTick, ref } from "vue";
 import LanguageSwitcher from "../LanguageSwitcher.vue";
 import { createI18n } from "vue-i18n";
 
-// Mock the i18n module
-vi.mock("@/i18n", () => ({
+// Mock the useTranslation composable
+const mockLocale = ref("en");
+const mockSetLocale = vi.fn((newLocale) => {
+  mockLocale.value = newLocale;
+});
+
+vi.mock("@/composables/useTranslation", () => ({
+  useTranslation: () => ({
+    locale: mockLocale,
+    setLocale: mockSetLocale,
+    t: (key: string) => key,
+  }),
+}));
+
+// Mock the useDarkMode composable
+vi.mock("@/composables/useDarkMode", () => ({
+  useDarkMode: () => ({
+    isDarkMode: ref(false),
+  }),
+}));
+
+// Mock the i18nUtils module
+vi.mock("@/utils/i18nUtils", () => ({
   availableLocales: [
     { code: "en", name: "English", flag: "🇺🇸" },
     { code: "es", name: "Español", flag: "🇪🇸" },
   ],
-  setLocale: vi.fn(),
-  getCurrentLocale: vi.fn(() => "en"),
   getLocaleName: vi.fn((code) =>
     code === "en" ? "English" : code === "es" ? "Español" : code,
   ),
@@ -38,6 +57,8 @@ describe("LanguageSwitcher Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSetLocale.mockClear();
+    mockLocale.value = "en"; // Reset to default locale
 
     // Mock document event listeners
     vi.spyOn(document, "addEventListener").mockImplementation(() => {});
@@ -180,6 +201,8 @@ describe("LanguageSwitcher Component", () => {
 
   describe("Language Selection", () => {
     it("should highlight current locale in dropdown", async () => {
+      mockLocale.value = "en"; // Ensure we start with English
+
       wrapper = mount(LanguageSwitcher, {
         global: {
           plugins: [createTestI18n("en")],
@@ -202,6 +225,8 @@ describe("LanguageSwitcher Component", () => {
     });
 
     it("should show checkmark for current locale", async () => {
+      mockLocale.value = "en"; // Ensure we start with English
+
       wrapper = mount(LanguageSwitcher, {
         global: {
           plugins: [createTestI18n("en")],
@@ -224,8 +249,6 @@ describe("LanguageSwitcher Component", () => {
     });
 
     it("should call setLocale when language option is clicked", async () => {
-      const { setLocale } = await vi.importMock("@/i18n");
-
       wrapper = mount(LanguageSwitcher, {
         global: {
           plugins: [createTestI18n()],
@@ -240,7 +263,7 @@ describe("LanguageSwitcher Component", () => {
 
       await spanishOption.trigger("click");
 
-      expect(setLocale).toHaveBeenCalledWith("es");
+      expect(mockSetLocale).toHaveBeenCalledWith("es");
     });
 
     it("should close dropdown after language selection", async () => {

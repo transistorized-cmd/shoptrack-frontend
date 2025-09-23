@@ -14,12 +14,12 @@
           </svg>
         </div>
         <h2 class="mt-4 sm:mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">
-          {{ $t('auth.signIn') }}
+          {{ t('auth.signIn') }}
         </h2>
         <p class="mt-2 text-center text-sm sm:text-base text-gray-600 dark:text-gray-300">
-          {{ $t('common.or') }}
+          {{ t('common.or') }}
           <router-link to="/register" class="font-medium text-shoptrack-600 hover:text-shoptrack-500 dark:text-shoptrack-400 dark:hover:text-shoptrack-300">
-            {{ $t('auth.createAccount') }}
+            {{ t('auth.createAccount') }}
           </router-link>
         </p>
       </div>
@@ -34,7 +34,7 @@
           </div>
           <div class="ml-3">
             <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
-              {{ $t('common.error') }}
+              {{ t('common.error') }}
             </h3>
             <div class="mt-2 text-sm text-red-700 dark:text-red-300">
               <p>{{ translatedError }}</p>
@@ -53,7 +53,7 @@
           </div>
           <div class="ml-3">
             <p class="text-sm text-yellow-700 dark:text-yellow-300">
-              {{ $t('auth.sessionExpired') }}
+              {{ t('auth.sessionExpired') }}
             </p>
           </div>
         </div>
@@ -70,7 +70,7 @@
       >
         <div class="rounded-md shadow-sm -space-y-px">
           <div>
-            <label for="email" class="sr-only">{{ $t('auth.email') }}</label>
+            <label for="email" class="sr-only">{{ t('auth.email') }}</label>
             <input
               id="email"
               name="email"
@@ -78,12 +78,12 @@
               autocomplete="username"
               required
               class="appearance-none rounded-none relative block w-full px-3 py-3 sm:px-4 sm:py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-t-md focus:outline-none focus:ring-shoptrack-500 focus:border-shoptrack-500 dark:focus:ring-shoptrack-400 dark:focus:border-shoptrack-400 focus:z-10 text-base sm:text-sm transition-colors"
-              :placeholder="$t('auth.email')"
+              :placeholder="t('auth.email')"
               :disabled="loading"
             />
           </div>
           <div class="relative">
-            <label for="password" class="sr-only">{{ $t('auth.password') }}</label>
+            <label for="password" class="sr-only">{{ t('auth.password') }}</label>
             <input
               id="password"
               name="password"
@@ -91,7 +91,7 @@
               autocomplete="current-password"
               required
               class="appearance-none rounded-none relative block w-full px-3 py-3 pr-12 sm:px-4 sm:py-2 sm:pr-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-b-md focus:outline-none focus:ring-shoptrack-500 focus:border-shoptrack-500 dark:focus:ring-shoptrack-400 dark:focus:border-shoptrack-400 focus:z-10 text-base sm:text-sm transition-colors"
-              :placeholder="$t('auth.password')"
+              :placeholder="t('auth.password')"
               :disabled="loading"
             />
             <button
@@ -131,13 +131,13 @@
               class="h-4 w-4 text-shoptrack-600 focus:ring-shoptrack-500 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded transition-colors"
             />
             <label for="remember-me" class="ml-2 block text-sm sm:text-sm text-gray-900 dark:text-gray-100">
-              {{ $t('auth.rememberMe') }}
+              {{ t('auth.rememberMe') }}
             </label>
           </div>
 
           <div class="text-sm text-center sm:text-right">
             <router-link to="/forgot-password" class="font-medium text-shoptrack-600 hover:text-shoptrack-500 dark:text-shoptrack-400 dark:hover:text-shoptrack-300">
-              {{ $t('auth.forgotPassword') }}
+              {{ t('auth.forgotPassword') }}
             </router-link>
           </div>
         </div>
@@ -169,7 +169,7 @@
                 <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2z" clip-rule="evenodd" />
               </svg>
             </span>
-            {{ loading ? $t('auth.signingIn') : $t('auth.signIn') }}
+            {{ loading ? t('auth.signingIn') : t('auth.signIn') }}
           </button>
         </div>
 
@@ -180,7 +180,7 @@
               <div class="w-full border-t border-gray-300 dark:border-gray-600" />
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400">{{ $t('auth.continueWith') }}</span>
+              <span class="px-2 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400">{{ t('auth.continueWith') }}</span>
             </div>
           </div>
 
@@ -198,7 +198,7 @@
               <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M6 10v2h2v-2H6zm0 4v2h2v-2H6zm4-4v2h2v-2h-2zm0 4v2h2v-2h-2zm4-4v2h2v-2h-2zm0 4v2h2v-2h-2zm2-10V2H4v2h12zm0 2H4v12h12V6zM2 2v20h20V2H2z"/>
               </svg>
-              {{ webauthn.loading.value ? $t('auth.authenticating') : $t('auth.signInWithPasskey') }}
+              {{ webauthn.loading.value ? t('auth.authenticating') : t('auth.signInWithPasskey') }}
             </button>
 
             <!-- TODO: Implement Google and Apple OAuth login
@@ -215,13 +215,13 @@
       <!-- Security Notice -->
       <div class="mt-4 text-center text-xs sm:text-xs text-gray-500 dark:text-gray-400 px-2">
         <p class="leading-relaxed">
-          {{ $t('auth.iAgreeToThe') }}
-          <a href="/terms" class="text-shoptrack-600 dark:text-shoptrack-400 hover:text-shoptrack-500 dark:hover:text-shoptrack-300 transition-colors underline">{{ $t('auth.termsOfService') }}</a>
-          {{ $t('auth.and') }}
-          <a href="/privacy" class="text-shoptrack-600 dark:text-shoptrack-400 hover:text-shoptrack-500 dark:hover:text-shoptrack-300 transition-colors underline">{{ $t('auth.privacyPolicy') }}</a>
+          {{ t('auth.iAgreeToThe') }}
+          <a href="/terms" class="text-shoptrack-600 dark:text-shoptrack-400 hover:text-shoptrack-500 dark:hover:text-shoptrack-300 transition-colors underline">{{ t('auth.termsOfService') }}</a>
+          {{ t('auth.and') }}
+          <a href="/privacy" class="text-shoptrack-600 dark:text-shoptrack-400 hover:text-shoptrack-500 dark:hover:text-shoptrack-300 transition-colors underline">{{ t('auth.privacyPolicy') }}</a>
         </p>
         <p class="mt-2 leading-relaxed">
-          {{ $t('auth.securityNoticeRegistration') }}
+          {{ t('auth.securityNoticeRegistration') }}
         </p>
       </div>
     </div>
@@ -234,6 +234,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useWebAuthn } from '@/composables/useWebAuthn';
 import { useOAuth } from '@/composables/useOAuth';
+import { useTranslation } from '@/composables/useTranslation';
 import { translateError } from '@/utils/errorTranslation';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import type { LoginRequest } from '@/types/auth';
@@ -243,6 +244,7 @@ const route = useRoute();
 const authStore = useAuthStore();
 const webauthn = useWebAuthn();
 const oauth = useOAuth();
+const { t } = useTranslation();
 
 const showPassword = ref(false);
 const loading = ref(false);
@@ -325,23 +327,43 @@ async function handleFormSubmission(event: Event) {
   }
 }
 
-// Handle successful login with password manager integration
+// Handle successful login with CSP-safe password manager integration
 async function handleLoginSuccess(email: string, password: string) {
-  // 1. Store credentials using Credential Management API (modern browsers)
-  if ('credentials' in navigator && 'PasswordCredential' in window) {
-    try {
-      const credential = new PasswordCredential({
-        id: email,
-        password: password,
-        name: email.split('@')[0]
-      });
-      
-      await navigator.credentials.store(credential);
-    } catch (error) {
-      console.debug('Credential Management API failed:', error);
-    }
+  // 1. Use form-based credential storage instead of PasswordCredential API
+  // This approach is CSP-safe and works with most password managers
+  try {
+    // Create a hidden form element to signal password managers
+    const form = document.createElement('form');
+    form.style.display = 'none';
+    form.method = 'post';
+    form.action = '/login';
+
+    const emailInput = document.createElement('input');
+    emailInput.type = 'email';
+    emailInput.name = 'email';
+    emailInput.value = email;
+    emailInput.autocomplete = 'username';
+
+    const passwordInput = document.createElement('input');
+    passwordInput.type = 'password';
+    passwordInput.name = 'password';
+    passwordInput.value = password;
+    passwordInput.autocomplete = 'current-password';
+
+    form.appendChild(emailInput);
+    form.appendChild(passwordInput);
+    document.body.appendChild(form);
+
+    // Signal successful authentication to password managers
+    // Most password managers detect this pattern
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    // Clean up the form
+    document.body.removeChild(form);
+  } catch (error) {
+    console.debug('Password manager integration failed:', error);
   }
-  
+
   // 2. Critical timing for password manager detection
   // Password managers look for successful authentication signals
   await new Promise(resolve => setTimeout(resolve, 100));

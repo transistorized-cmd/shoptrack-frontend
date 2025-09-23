@@ -58,9 +58,9 @@
           class="flex justify-between text-xs"
         >
           <span class="text-gray-600 dark:text-gray-300 truncate pr-2">{{ item.itemName }}</span>
-          <span class="text-gray-900 dark:text-white font-medium flex-shrink-0"
-            >${{ item.totalPrice.toFixed(2) }}</span
-          >
+          <span class="text-gray-900 dark:text-white font-medium flex-shrink-0">
+            {{ formatAmountCompact(item.totalPrice, receipt.currency) }}
+          </span>
         </div>
         <div
           v-if="receipt.items.length > 3"
@@ -99,9 +99,11 @@
 import { useRouter } from "vue-router";
 import type { Receipt } from "@/types/receipt";
 import { useDateLocalization } from "@/composables/useDateLocalization";
+import { useCurrencyFormat } from "@/composables/useCurrencyFormat";
 
 const router = useRouter();
 const { formatDate } = useDateLocalization();
+const { formatAmountCompact } = useCurrencyFormat();
 
 const props = defineProps<{
   receipt: Receipt;

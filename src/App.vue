@@ -21,21 +21,21 @@
                   class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap"
                   :class="{ 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400': $route.name === 'upload' }"
                 >
-                  📤 {{ $t('common.upload') }}
+                  📤 {{ t('common.upload') }}
                 </RouterLink>
                 <RouterLink
                   to="/receipts"
                   class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap"
                   :class="{ 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400': $route.name === 'receipts' }"
                 >
-                  🧾 {{ $t('navigation.receipts') }}
+                  🧾 {{ t('navigation.receipts') }}
                 </RouterLink>
                 <RouterLink
                   to="/reports"
                   class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap"
                   :class="{ 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400': $route.name === 'reports' }"
                 >
-                  📊 {{ $t('navigation.reports') }}
+                  📊 {{ t('navigation.reports') }}
                 </RouterLink>
               </nav>
 
@@ -43,7 +43,7 @@
               <div class="hidden lg:flex ml-4 lg:ml-6">
                 <SearchInput
                   :config="{
-                    placeholder: $t('search.placeholder', 'Search receipts, items, categories...'),
+                    placeholder: t('search.placeholder'),
                     minQueryLength: 2,
                     maxResults: 8
                   }"
@@ -72,7 +72,7 @@
               <NotificationMenu />
 
               <div class="hidden lg:flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
-                <span class="truncate max-w-32">{{ $t('common.hello', { name: displayName }) }}</span>
+                <span class="truncate max-w-32">{{ t('common.hello', { name: displayName }) }}</span>
               </div>
 
               <!-- User Menu Dropdown -->
@@ -100,7 +100,7 @@
                         <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
-                        {{ $t('profile.title') }}
+                        {{ t('profile.title') }}
                       </RouterLink>
                     </div>
                     <div class="py-1">
@@ -108,7 +108,7 @@
                         <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
-                        {{ $t('navigation.logout') }}
+                        {{ t('navigation.logout') }}
                       </button>
                     </div>
                   </div>
@@ -121,13 +121,13 @@
           <div v-show="mobileMenuOpen" class="md:hidden border-t border-gray-200 dark:border-gray-700">
             <div class="px-2 pt-2 pb-3 space-y-1">
               <RouterLink to="/upload" class="block px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors" :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20': $route.name === 'upload' }" @click="mobileMenuOpen = false">
-                📤 {{ $t('common.upload') }}
+                📤 {{ t('common.upload') }}
               </RouterLink>
               <RouterLink to="/receipts" class="block px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors" :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20': $route.name === 'receipts' }" @click="mobileMenuOpen = false">
-                🧾 {{ $t('navigation.receipts') }}
+                🧾 {{ t('navigation.receipts') }}
               </RouterLink>
               <RouterLink to="/reports" class="block px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors" :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20': $route.name === 'reports' }" @click="mobileMenuOpen = false">
-                📊 {{ $t('navigation.reports') }}
+                📊 {{ t('navigation.reports') }}
               </RouterLink>
             </div>
           </div>
@@ -150,7 +150,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import EnhancedErrorBoundary from '@/components/EnhancedErrorBoundary.vue';
 import NotificationContainer from '@/components/NotificationContainer.vue';
 import { RouterLink, useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
+import { useTranslation } from '@/composables/useTranslation';
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import NotificationMenu from '@/components/notifications/NotificationMenu.vue';
@@ -162,7 +162,7 @@ import { availableLocales } from '@/i18n';
 import type { SearchResultItem } from '@/types/search';
 
 const authStore = useAuthStore();
-const { t } = useI18n();
+const { t } = useTranslation();
 const router = useRouter();
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);

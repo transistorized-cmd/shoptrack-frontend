@@ -5,6 +5,10 @@ export interface Receipt {
   imageHash?: string;
   receiptNumber?: string;
   storeName?: string;
+  storeType?: string;
+  currency?: string;
+  paymentMethod?: string;
+  paymentCardNumber?: string;
   processingStatus: "pending" | "processing" | "completed" | "failed";
   claudeResponseJson?: ClaudeResponse;
   imageQualityAssessment?: string;

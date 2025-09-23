@@ -160,34 +160,39 @@ const handleError = (error: Error, type: string, info: string) => {
 };
 
 const getUserFriendlyMessage = (error: Error, type: string): string => {
+  // Authentication errors - don't show generic error for expected auth failures
+  if (error.message.includes("401") || error.message.includes("Unauthorized")) {
+    return "Your session has expired. Please log in again.";
+  }
+
   // Network/API errors
   if (error.name === 'NetworkError' || error.message.includes('fetch')) {
     return "Unable to connect to the server. Please check your internet connection and try again.";
   }
-  
+
   // Chunk loading errors (common in SPAs)
   if (error.name === "ChunkLoadError" || error.message.includes("Loading chunk")) {
     return "Failed to load application resources. Please refresh the page.";
   }
-  
+
   // HTTP status errors
   if (error.message.includes("404") || error.message.includes("Not Found")) {
     return "The requested resource was not found.";
   }
-  
+
   if (error.message.includes("403") || error.message.includes("Forbidden")) {
     return "You don't have permission to access this resource.";
   }
-  
+
   if (error.message.includes("500") || error.message.includes("Internal Server Error")) {
     return "Server error occurred. Please try again later.";
   }
-  
+
   // Async errors specific messages
   if (type === 'Async Error') {
     return "An error occurred while loading data. Please try refreshing the page.";
   }
-  
+
   // Plugin-related errors
   if (error.message.includes("plugin") || error.message.includes("Plugin")) {
     return "A plugin error occurred. The page may still work, but some features might be unavailable.";
@@ -234,11 +239,21 @@ const retry = () => {
 const goHome = () => {
   hasError.value = false;
   retryCount.value = 0;
-  router.push("/").catch((err) => {
-    console.error("Failed to navigate to home:", err);
-    // If navigation fails, reload the page
-    window.location.href = "/";
-  });
+
+  // If this is an authentication error, redirect to login instead of home
+  if (errorType.value === 'Component Error' &&
+      (errorDetails.value?.includes('401') || errorDetails.value?.includes('Unauthorized'))) {
+    router.push("/login").catch((err) => {
+      console.error("Failed to navigate to login:", err);
+      window.location.href = "/login";
+    });
+  } else {
+    router.push("/").catch((err) => {
+      console.error("Failed to navigate to home:", err);
+      // If navigation fails, reload the page
+      window.location.href = "/";
+    });
+  }
 };
 
 const logErrorToService = (error: Error, type: string, info: string) => {

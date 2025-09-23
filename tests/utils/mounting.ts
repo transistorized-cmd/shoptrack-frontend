@@ -4,9 +4,12 @@
  */
 import { mount, shallowMount, VueWrapper, MountingOptions } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { createPinia } from 'pinia';
-import { Component, defineComponent } from 'vue';
+import { createPinia, setActivePinia } from 'pinia';
+import { Component, defineComponent, ref } from 'vue';
+import { vi } from 'vitest';
 import { createMockRouter } from './router';
+import { createAuthStoreMock, createAuthenticatedAuthStoreMock, createUnauthenticatedAuthStoreMock } from './authStore';
+import type { User } from '@/types/auth';
 
 /**
  * Default mounting options for consistent test setup
@@ -45,6 +48,37 @@ export interface TestMountingOptions<T = any> extends MountingOptions<T> {
    * Custom stubs for child components
    */
   componentStubs?: Record<string, Component | string | boolean>;
+
+  /**
+   * Auth store configuration
+   */
+  authStore?: {
+    /**
+     * Whether user should be authenticated
+     * @default false
+     */
+    authenticated?: boolean;
+    /**
+     * Custom user data (implies authenticated: true)
+     */
+    user?: Partial<User>;
+    /**
+     * Custom auth store mock
+     */
+    customMock?: ReturnType<typeof createAuthStoreMock>;
+  };
+}
+
+/**
+ * Create reactive test locale for mocking useTranslation
+ */
+export function createTestLocale(initialLocale = 'en') {
+  const locale = ref(initialLocale);
+  const setLocale = vi.fn((newLocale: string) => {
+    locale.value = newLocale;
+  });
+
+  return { locale, setLocale };
 }
 
 /**
@@ -271,13 +305,33 @@ function getDefaultMountingOptions<T>(options: TestMountingOptions<T> = {}): Mou
     locale = 'en',
     i18nMessages = {},
     componentStubs = {},
+    authStore,
     ...vueMountingOptions
   } = options;
 
   const plugins: any[] = [];
+  let pinia: ReturnType<typeof createPinia> | undefined;
 
   if (withPinia) {
-    plugins.push(createPinia());
+    pinia = createPinia();
+    setActivePinia(pinia);
+    plugins.push(pinia);
+
+    // Setup auth store if configured
+    if (authStore) {
+      let authStoreMock: ReturnType<typeof createAuthStoreMock>;
+
+      if (authStore.customMock) {
+        authStoreMock = authStore.customMock;
+      } else if (authStore.user || authStore.authenticated) {
+        authStoreMock = createAuthenticatedAuthStoreMock(authStore.user || {});
+      } else {
+        authStoreMock = createUnauthenticatedAuthStoreMock();
+      }
+
+      // The auth store mock is now set up through the global mock in setup.ts
+      // Individual tests can override this by importing and setting their own mock
+    }
   }
 
   if (withI18n) {
@@ -396,6 +450,54 @@ export function shallowMountView<T extends Component>(
   options: TestMountingOptions<T> = {}
 ): VueWrapper {
   return shallowMountComponent(component, {
+    withRouter: true,
+    withPinia: true,
+    withI18n: true,
+    ...options,
+  });
+}
+
+/**
+ * Mount component with authenticated user
+ */
+export function mountWithAuthenticatedUser<T extends Component>(
+  component: T,
+  userOverrides: Partial<User> = {},
+  options: TestMountingOptions<T> = {}
+): VueWrapper {
+  return mountComponent(component, {
+    authStore: {
+      authenticated: true,
+      user: userOverrides,
+    },
+    ...options,
+  });
+}
+
+/**
+ * Mount component with unauthenticated state
+ */
+export function mountWithUnauthenticatedUser<T extends Component>(
+  component: T,
+  options: TestMountingOptions<T> = {}
+): VueWrapper {
+  return mountComponent(component, {
+    authStore: {
+      authenticated: false,
+    },
+    ...options,
+  });
+}
+
+/**
+ * Mount view with authenticated user (commonly needed pattern)
+ */
+export function mountViewWithAuth<T extends Component>(
+  component: T,
+  userOverrides: Partial<User> = {},
+  options: TestMountingOptions<T> = {}
+): VueWrapper {
+  return mountWithAuthenticatedUser(component, userOverrides, {
     withRouter: true,
     withPinia: true,
     withI18n: true,

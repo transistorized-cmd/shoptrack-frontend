@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopTrack Production Build Test</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https:; script-src 'self'; object-src 'none';">
+
+  <!-- Production build assets -->
+  <link rel="stylesheet" href="./dist/css/index-YmsFg1CP.css">
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- Production build script -->
+  <script type="module" src="./dist/js/index-BMp8MV9t.js"></script>
+
+  <script>
+    // Test script to verify vue-i18n works without CSP violations
+    window.addEventListener('load', () => {
+      console.log('✅ Production build loaded successfully');
+
+      // Check for any CSP violations
+      document.addEventListener('securitypolicyviolation', (e) => {
+        console.error('❌ CSP Violation:', {
+          violatedDirective: e.violatedDirective,
+          sourceFile: e.sourceFile,
+          lineNumber: e.lineNumber,
+          sample: e.sample
+        });
+      });
+
+      // Test i18n after a short delay
+      setTimeout(() => {
+        try {
+          // Try to access the Vue app instance
+          const app = document.getElementById('app');
+          if (app && app.__vue_app__) {
+            console.log('✅ Vue app instance found');
+
+            // Check if i18n is working
+            const i18n = app.__vue_app__.config.globalProperties.$i18n;
+            if (i18n) {
+              console.log('✅ i18n instance found');
+
+              // Test translation
+              try {
+                const testTranslation = i18n.global.t('auth.signIn');
+                console.log('✅ Translation test passed:', testTranslation);
+              } catch (error) {
+                console.error('❌ Translation test failed:', error);
+              }
+            } else {
+              console.error('❌ i18n instance not found');
+            }
+          } else {
+            console.error('❌ Vue app instance not found');
+          }
+        } catch (error) {
+          console.error('❌ Production build test failed:', error);
+        }
+      }, 2000);
+    });
+  </script>
+</body>
+</html>

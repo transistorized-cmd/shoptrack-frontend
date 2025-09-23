@@ -10,7 +10,7 @@
 
     <!-- Filters -->
     <div class="card p-4 sm:p-6">
-      <h2 class="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-4 sm:hidden">{{ $t('receipts.filters.title', 'Filters') }}</h2>
+      <h2 class="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-4 sm:hidden">{{ $t('receipts.filters.title') }}</h2>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <label
@@ -179,14 +179,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { RouterLink } from "vue-router";
-import { useI18n } from "vue-i18n";
+import { useTranslation } from "@/composables/useTranslation";
 import { TIMEOUT } from "@/constants/app";
 import { useReceiptsStore } from "@/stores/receipts";
 import ReceiptCard from "@/components/receipts/ReceiptCard.vue";
 import LocalizedDateInput from "@/components/common/LocalizedDateInput.vue";
 import { useDebounceFn } from "@vueuse/core";
 
-const { t } = useI18n();
+const { t } = useTranslation();
 const receiptsStore = useReceiptsStore();
 
 const filters = ref({

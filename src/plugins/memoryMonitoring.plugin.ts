@@ -271,8 +271,23 @@ function addDevelopmentHelpers(app: App, memoryStore: any, config: MemoryMonitor
     console.log('Memory monitoring development helpers available on window.memoryMonitoring');
   }
 
-  // Add Vue devtools integration if available
-  if (app.config.devtools) {
+  // Add Vue devtools integration ONLY in development mode
+  // Browser detection for Chrome-specific features
+  const isChromeBrowser = (): boolean => {
+    if (typeof window === 'undefined' || !window.navigator) return false;
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const vendor = window.navigator.vendor?.toLowerCase() || '';
+    return (
+      vendor.includes('google') ||
+      (userAgent.includes('chrome') && !userAgent.includes('safari')) ||
+      userAgent.includes('crios')
+    );
+  };
+
+  // Only integrate with DevTools if they're available (dev mode or Chrome in prod)
+  const shouldIntegrateDevTools = import.meta.env.DEV || (import.meta.env.PROD && isChromeBrowser());
+
+  if (shouldIntegrateDevTools && app.config.devtools) {
     try {
       // Register memory monitoring data with Vue devtools
       app.config.globalProperties.__VUE_DEVTOOLS_MEMORY_MONITORING__ = {

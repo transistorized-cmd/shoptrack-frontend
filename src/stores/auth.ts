@@ -103,8 +103,22 @@ export const useAuthStore = defineStore("auth", () => {
         user.value = null;
         sessionExpired.value = false;
       }
-    } catch (err) {
+    } catch (err: any) {
       // If getCurrentUser fails, we're not authenticated
+      // Don't treat 401 errors as application errors - they're expected when not logged in
+      if (err?.response?.status === 401 || err?.status === 401) {
+        console.info("User not authenticated - this is expected behavior");
+      } else {
+        console.warn("Authentication initialization failed:", err);
+        // Only set error for non-authentication related issues
+        if (err?.response?.status !== 401 && err?.status !== 401) {
+          setError({
+            code: "INIT_ERROR",
+            message: "Failed to initialize authentication system",
+          });
+        }
+      }
+
       user.value = null;
       sessionExpired.value = false;
     } finally {
@@ -131,15 +145,8 @@ export const useAuthStore = defineStore("auth", () => {
           }
         }
 
-        // Initialize language from user settings after successful login
-        try {
-          await languageSettingsService.initializeFromUserSettings();
-        } catch (error) {
-          console.warn(
-            "Failed to initialize language from user settings after login:",
-            error,
-          );
-        }
+        // Initialize user data (settings, language, etc.) after successful login
+        await initializeUserData();
 
         // Tokens are now handled by secure HTTP-only cookies
         updateLastActivity();
@@ -234,15 +241,8 @@ export const useAuthStore = defineStore("auth", () => {
         updateLastActivity();
         sessionExpired.value = false;
 
-        // Initialize language from user settings after successful OAuth login
-        try {
-          await languageSettingsService.initializeFromUserSettings();
-        } catch (error) {
-          console.warn(
-            "Failed to initialize language from user settings after OAuth login:",
-            error,
-          );
-        }
+        // Initialize user data (settings, language, etc.) after successful OAuth login
+        await initializeUserData();
       }
 
       return response;
@@ -278,15 +278,8 @@ export const useAuthStore = defineStore("auth", () => {
         updateLastActivity();
         sessionExpired.value = false;
 
-        // Initialize language from user settings after successful passkey login
-        try {
-          await languageSettingsService.initializeFromUserSettings();
-        } catch (error) {
-          console.warn(
-            "Failed to initialize language from user settings after passkey login:",
-            error,
-          );
-        }
+        // Initialize user data (settings, language, etc.) after successful passkey login
+        await initializeUserData();
       }
 
       return response;
@@ -483,8 +476,20 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       const response = await authService.registerPasskey(request);
 
-      if (response.success && user.value) {
-        user.value.passkeysEnabled = true;
+      if (response.success) {
+        // Refresh user from backend to ensure latest state (e.g., passkeysEnabled)
+        try {
+          const freshUser = await authService.getCurrentUser();
+          if (freshUser) {
+            user.value = freshUser;
+          } else if (user.value) {
+            // Fallback: optimistically set the flag
+            user.value.passkeysEnabled = true;
+          }
+        } catch {
+          // Network or auth issue; fallback to optimistic update
+          if (user.value) user.value.passkeysEnabled = true;
+        }
       }
 
       return response;
@@ -741,6 +746,23 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
+  // Helper function to initialize user-specific data after successful authentication
+  const initializeUserData = async () => {
+    try {
+      // Initialize language settings
+      await languageSettingsService.initializeFromUserSettings();
+
+      // Initialize settings store
+      const { useSettingsStore } = await import("@/stores/settings");
+      const settingsStore = useSettingsStore();
+      await settingsStore.fetchSettings();
+
+      console.info("User data initialized successfully");
+    } catch (error) {
+      console.error("Failed to initialize user data:", error);
+    }
+  };
+
   return {
     // State
     user,
@@ -782,6 +804,8 @@ export const useAuthStore = defineStore("auth", () => {
     getSessions,
     revokeSession,
     revokeAllSessions,
+    // Internal helper
+    initializeUserData,
   };
 });
 

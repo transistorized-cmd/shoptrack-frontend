@@ -33,6 +33,9 @@ RUN npm ci --legacy-peer-deps
 # Copy source code
 COPY . .
 
+# Set NODE_ENV to production for build
+ENV NODE_ENV=production
+
 # Build the application (skip type checking for production build)
 RUN npm run build-only
 

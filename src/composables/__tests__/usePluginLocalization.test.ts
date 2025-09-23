@@ -1,18 +1,27 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { ref } from 'vue'
 import { usePluginLocalization } from '../usePluginLocalization'
 import type { ReportPlugin, ReceiptPlugin } from '@/types/plugin'
 
-// Mock vue-i18n
+// Mock useTranslation composable
 const mockT = vi.fn()
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: mockT
+const mockLocale = ref('en')
+const mockSetLocale = vi.fn()
+
+vi.mock('@/composables/useTranslation', () => ({
+  useTranslation: () => ({
+    t: mockT,
+    locale: mockLocale,
+    setLocale: mockSetLocale,
   })
 }))
 
 describe('usePluginLocalization', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockT.mockClear()
+    mockSetLocale.mockClear()
+    mockLocale.value = 'en'
   })
 
   afterEach(() => {
@@ -163,8 +172,9 @@ describe('usePluginLocalization', () => {
         type: 'receipt'
       }
 
-      // Mock t to return undefined
-      mockT.mockImplementation(() => undefined)
+      // Mock t to return the translation key (indicating no translation found)
+      // Since the composable checks if translated !== translationKey
+      mockT.mockImplementation((key: string) => key)
 
       // Act
       const { getLocalizedPluginName } = usePluginLocalization()

@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom";
 import { config } from "@vue/test-utils";
 import { vi } from "vitest";
+import { computed } from "vue";
 
 // Setup jest-axe for accessibility testing
 import { toHaveNoViolations } from 'jest-axe';
@@ -107,6 +108,54 @@ vi.mock("@/composables/useJobNotifications", () => ({
     initialize: vi.fn(), // This should be 'initialize', not 'initializeNotifications'
   }),
 }));
+
+// Mock translation composable to prevent i18n errors
+vi.mock("@/composables/useTranslation", () => ({
+  useTranslation: () => ({
+    t: vi.fn((key: string, valuesOrDefault?: Record<string, any> | string) => {
+      // Basic translation mock that returns keys or fallbacks
+      const translations: Record<string, string> = {
+        "auth.signIn": "Sign In",
+        "auth.signingIn": "Signing in...",
+        "auth.email": "Email",
+        "auth.password": "Password",
+        "auth.signInButton": "Sign In",
+        "auth.createAccount": "Create Account",
+        "auth.forgotPassword": "Forgot Password?",
+        "auth.signInWithPasskey": "Sign in with Passkey",
+        "auth.sessionExpired": "Your session has expired. Please sign in again.",
+        "auth.rememberMe": "Remember me",
+        "auth.continueWith": "Continue with",
+        "auth.iAgreeToThe": "I agree to the",
+        "auth.termsOfService": "Terms of Service",
+        "auth.and": "and",
+        "auth.privacyPolicy": "Privacy Policy",
+        "auth.securityNotice": "Security Notice",
+        "common.or": "Or",
+        "common.loading": "Loading",
+        "profile.updating": "Updating",
+        "errors.network": "Network error",
+        "errors.unauthorized": "Unauthorized",
+      };
+
+      if (typeof valuesOrDefault === 'string') {
+        return translations[key] || valuesOrDefault;
+      }
+      return translations[key] || key;
+    }),
+    locale: computed(() => 'en'),
+    setLocale: vi.fn(),
+  }),
+}));
+
+// Mock auth store to prevent unmocked method calls
+vi.mock("@/stores/auth", () => {
+  const { createUnauthenticatedAuthStoreMock, mockAuthStoreModule } =
+    vi.importActual<typeof import("../tests/utils/authStore")>("../tests/utils/authStore");
+
+  const defaultAuthStoreMock = createUnauthenticatedAuthStoreMock();
+  return mockAuthStoreModule(defaultAuthStoreMock);
+});
 
 // Vue Test Utils global configuration
 config.global.stubs = {

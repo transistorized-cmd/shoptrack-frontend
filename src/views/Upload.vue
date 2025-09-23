@@ -298,7 +298,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { RouterLink, useRouter } from "vue-router";
-import { useI18n } from "vue-i18n";
+import { useTranslation } from "@/composables/useTranslation";
 import { usePluginsStore } from "@/stores/plugins";
 import { useReceiptsStore } from "@/stores/receipts";
 import QuickUpload from "@/components/QuickUpload.vue";
@@ -313,7 +313,7 @@ import { getPluginTranslations, hasPluginTranslations } from "@/i18n/plugins";
 import { getCurrentLocale } from "@/i18n";
 
 const router = useRouter();
-const { t } = useI18n();
+const { t } = useTranslation();
 const pluginsStore = usePluginsStore();
 const receiptsStore = useReceiptsStore();
 

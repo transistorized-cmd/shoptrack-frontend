@@ -45,8 +45,8 @@
             <div class="relative inline-block mb-4 sm:mb-6">
               <img
                 v-if="authStore.user?.profilePicture"
-                :src="safeImageUrl(authStore.user.profilePicture)"
-                :alt="`${authStore.user.firstName || 'User'}'s avatar`"
+                :src="safeImageUrl(authStore.user?.profilePicture)"
+                :alt="`${authStore.user?.firstName || 'User'}'s avatar`"
                 class="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-gray-200 dark:border-white/20"
               />
               <div
@@ -100,13 +100,13 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span class="text-sm text-gray-700 dark:text-gray-300">
-                {{ authStore.isEmailConfirmed ? 'Email verified' : 'Email not verified' }}
+                {{ authStore.isEmailConfirmed ? $t('profile.emailVerified') : $t('profile.emailNotVerified') }}
               </span>
             </div>
             
             <!-- Member Since -->
             <div class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-              Member since {{ memberSince }}
+              {{ $t('profile.memberSince') }} {{ memberSince }}
             </div>
 
             <!-- Action Buttons -->
@@ -117,14 +117,14 @@
                 :disabled="loading"
                 @click="resendEmailConfirmation"
               >
-                {{ loading ? 'Sending...' : 'Verify Email' }}
+                {{ loading ? $t('profile.sending') : $t('profile.verifyEmail') }}
               </button>
               
               <button
                 class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-medium transition-colors"
                 @click="handleLogout"
               >
-                Sign Out
+                {{ $t('profile.signOut') }}
               </button>
             </div>
           </div>
@@ -138,14 +138,14 @@
               <svg class="w-6 h-6 text-blue-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Personal Information</h3>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $t('profile.personalInformation') }}</h3>
             </div>
             
             <form @submit.prevent="updatePersonalInfo" class="space-y-6">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    First Name *
+                    {{ $t('profile.firstName') }} *
                   </label>
                   <input
                     id="firstName"
@@ -154,13 +154,13 @@
                     autocomplete="given-name"
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
                     :disabled="loading"
-                    placeholder="Enter your first name"
+                    :placeholder="$t('profile.enterFirstName')"
                   />
                 </div>
                 
                 <div>
                   <label for="lastName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Last Name *
+                    {{ $t('profile.lastName') }} *
                   </label>
                   <input
                     id="lastName"
@@ -169,14 +169,14 @@
                     autocomplete="family-name"
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
                     :disabled="loading"
-                    placeholder="Enter your last name"
+                    :placeholder="$t('profile.enterLastName')"
                   />
                 </div>
               </div>
               
               <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Email Address *
+                  {{ $t('profile.emailAddress') }} *
                 </label>
                 <input
                   id="email"
@@ -185,16 +185,16 @@
                   autocomplete="email"
                   class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
                   :disabled="loading"
-                  placeholder="Enter your email address"
+                  :placeholder="$t('profile.enterEmailAddress')"
                 />
                 <p v-if="personalInfoForm.email !== authStore.user?.email" class="mt-2 text-sm text-amber-600 dark:text-amber-400">
-                  ⚠️ Changing your email will require re-verification
+                  {{ $t('profile.emailChangeWarning') }}
                 </p>
               </div>
               
               <div>
                 <label for="userName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Username
+                  {{ $t('profile.username') }}
                 </label>
                 <input
                   id="userName"
@@ -203,7 +203,7 @@
                   autocomplete="username"
                   class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
                   :disabled="loading"
-                  placeholder="Choose a username (optional)"
+                  :placeholder="$t('profile.chooseUsername')"
                 />
               </div>
               
@@ -213,7 +213,7 @@
                   class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   :disabled="loading"
                 >
-                  {{ loading ? 'Updating...' : 'Update Information' }}
+                  {{ loading ? $t('profile.updating') : $t('profile.updateInformation') }}
                 </button>
               </div>
             </form>
@@ -225,7 +225,7 @@
               <svg class="w-6 h-6 text-red-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Security Settings</h3>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $t('profile.securitySettings') }}</h3>
             </div>
             
             <!-- Change Password -->
@@ -234,7 +234,7 @@
                 <svg class="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                Password
+                {{ $t('profile.passwordSection') }}
               </h4>
               
               <div v-if="!authStore.hasPassword" class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
@@ -246,7 +246,7 @@
                   </div>
                   <div class="ml-3">
                     <p class="text-sm text-blue-800 dark:text-blue-200">
-                      You signed in with a social account. Set a password to enable password-based login.
+                      {{ $t('profile.socialAccountPassword') }}
                     </p>
                   </div>
                 </div>
@@ -255,7 +255,7 @@
               <form @submit.prevent="changePassword" class="space-y-4">
                 <div v-if="authStore.hasPassword">
                   <label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Current Password *
+                    {{ $t('profile.currentPassword') }} *
                   </label>
                   <input
                     id="currentPassword"
@@ -265,13 +265,13 @@
                     required
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
                     :disabled="loading"
-                    placeholder="Enter your current password"
+                    :placeholder="$t('profile.enterCurrentPassword')"
                   />
                 </div>
                 
                 <div>
                   <label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ authStore.hasPassword ? 'New Password *' : 'Password *' }}
+                    {{ authStore.hasPassword ? $t('profile.newPassword') + ' *' : $t('profile.passwordSection') + ' *' }}
                   </label>
                   <input
                     id="newPassword"
@@ -281,13 +281,13 @@
                     required
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
                     :disabled="loading"
-                    placeholder="Enter a strong password (min. 8 characters)"
+                    :placeholder="$t('profile.enterStrongPassword')"
                   />
                 </div>
                 
                 <div>
                   <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Confirm Password *
+                    {{ $t('profile.confirmPassword') }} *
                   </label>
                   <input
                     id="confirmPassword"
@@ -297,7 +297,7 @@
                     required
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors"
                     :disabled="loading"
-                    placeholder="Confirm your password"
+                    :placeholder="$t('profile.confirmYourPassword')"
                   />
                 </div>
                 
@@ -307,7 +307,7 @@
                     class="px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     :disabled="loading || !isPasswordFormValid"
                   >
-                    {{ loading ? 'Updating...' : (authStore.hasPassword ? 'Change Password' : 'Set Password') }}
+                    {{ loading ? $t('profile.updating') : (authStore.hasPassword ? $t('profile.changePassword') : $t('profile.setPassword')) }}
                   </button>
                 </div>
               </form>
@@ -319,25 +319,25 @@
                 <svg class="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                 </svg>
-                Passkey Management
+                {{ $t('profile.passkeyManagement') }}
               </h4>
               
               <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
                     <div class="flex items-center mb-2">
-                      <h5 class="font-medium text-gray-900 dark:text-white">Passwordless Sign-In</h5>
+                      <h5 class="font-medium text-gray-900 dark:text-white">{{ $t('profile.passwordlessSignIn') }}</h5>
                       <span v-if="authStore.passkeysEnabled" class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                         </svg>
-                        Active
+                        {{ $t('profile.passkeyActive') }}
                       </span>
                     </div>
                     <p class="text-sm text-gray-600 dark:text-gray-400">
-                      {{ authStore.passkeysEnabled 
-                        ? 'Passkeys are enabled on your account. You can sign in using your device\'s built-in authentication.'
-                        : 'Set up passkeys for faster, more secure sign-in without passwords using your device\'s biometrics or security key.'
+                      {{ authStore.passkeysEnabled
+                        ? $t('profile.passkeyEnabled')
+                        : $t('profile.passkeySetupDescription')
                       }}
                     </p>
                   </div>
@@ -347,20 +347,20 @@
                       class="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
                       @click="setupPasskey"
                     >
-                      Create Passkey
+                      {{ $t('profile.createPasskey') }}
                     </button>
                     <button
                       v-else-if="authStore.passkeysEnabled"
                       @click="removePasskey"
                       class="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
                     >
-                      Remove Passkey
+                      {{ $t('profile.removePasskey') }}
                     </button>
                     <span
                       v-else
                       class="text-sm text-gray-500 dark:text-gray-400"
                     >
-                      Not supported on this device
+                      {{ $t('profile.notSupportedDevice') }}
                     </span>
                   </div>
                 </div>
@@ -375,7 +375,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Preferences</h3>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $t('profile.preferences') }}</h3>
             </div>
             
             <!-- Language Preference -->
@@ -385,7 +385,7 @@
                   <svg class="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                   </svg>
-                  Display Language
+                  {{ $t('profile.displayLanguage') }}
                 </div>
               </label>
               <div class="relative">
@@ -412,7 +412,7 @@
                 </div>
               </div>
               <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Choose your preferred language for the interface. Changes apply immediately.
+                {{ $t('profile.languageChangeDescription') }}
               </p>
             </div>
 
@@ -423,7 +423,7 @@
                   <svg class="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
-                  Currency
+                  {{ $t('profile.currency') }}
                 </div>
               </label>
               <div class="relative">
@@ -449,7 +449,7 @@
                 </div>
               </div>
               <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Choose your preferred currency for displaying prices and financial data.
+                {{ $t('profile.currencyDescription') }}
               </p>
             </div>
 
@@ -462,14 +462,14 @@
                   :disabled="loading || settingsLoading"
                   class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {{ settingsLoading ? 'Saving...' : 'Save Settings' }}
+                  {{ settingsLoading ? $t('profile.saving') : $t('profile.saveSettings') }}
                 </button>
                 <div v-else class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                   <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    All settings saved
+                    {{ $t('profile.settingsSaved') }}
                   </div>
                 </div>
               </div>
@@ -485,20 +485,21 @@
           -->
         </div>
       </div>
+
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
+import { useTranslation } from '@/composables/useTranslation';
 import { useAuthStore } from '@/stores/auth';
 import { useWebAuthn } from '@/composables/useWebAuthn';
 import { useOAuth } from '@/composables/useOAuth';
 import { authService } from '@/services/auth.service';
 import { safeImageUrl } from '@/utils/urlSanitizer';
-import { availableLocales, setLocale, getCurrentLocale, type LocaleCode } from '@/i18n';
+import { availableLocales, type LocaleCode } from '@/i18n';
 import type { UpdateProfileRequest, ChangePasswordRequest, ConnectedAccount } from '@/types/auth';
 import type { UserSettings, DisplaySettings } from '@/types/settings';
 import { settingsService } from '@/services/settings.service';
@@ -506,7 +507,7 @@ import { languageSettingsService } from '@/services/languageSettings.service';
 import { CURRENCY_OPTIONS } from '@/types/settings';
 
 const router = useRouter();
-const { t } = useI18n();
+const { t, locale: currentLocale, setLocale } = useTranslation();
 const authStore = useAuthStore();
 const webauthn = useWebAuthn();
 const oauth = useOAuth();
@@ -516,12 +517,18 @@ const settingsLoading = ref(false);
 const successMessage = ref('');
 const error = ref('');
 
+
 // User settings
 const userSettings = ref<UserSettings | null>(null);
 const originalSettings = ref<UserSettings | null>(null);
 
-// Language preference
-const selectedLanguage = ref<LocaleCode>(getCurrentLocale());
+// Language preference - use reactive locale from useTranslation
+const selectedLanguage = ref<LocaleCode>(currentLocale.value as LocaleCode);
+
+// Keep selectedLanguage in sync with the global locale
+watch(currentLocale, (newLocale) => {
+  selectedLanguage.value = newLocale as LocaleCode;
+});
 
 // Currency preference
 const selectedCurrency = ref<string>('USD');
@@ -696,7 +703,7 @@ async function loadUserSettings() {
     console.warn('Failed to load user settings, using defaults:', err);
     // Use defaults if settings don't exist yet
     selectedCurrency.value = 'USD';
-    selectedLanguage.value = getCurrentLocale();
+    selectedLanguage.value = currentLocale.value as LocaleCode;
   } finally {
     settingsLoading.value = false;
   }
@@ -717,13 +724,23 @@ async function saveSettings() {
       } as DisplaySettings
     };
 
-    const response = await settingsService.updateSettings(settingsToUpdate);
+    // If only currency changed, use the individual update method that works
+    const currencyChanged = selectedCurrency.value !== originalSettings.value.display.currency;
+    const languageChanged = originalSettings.value && selectedLanguage.value !== originalSettings.value.display.language;
+
+    let response;
+    if (currencyChanged && !languageChanged) {
+      // Only currency changed - use the working individual update method
+      response = await settingsService.updateCurrency(selectedCurrency.value);
+    } else {
+      // Multiple settings or language changed - use full update
+      response = await settingsService.updateSettings(settingsToUpdate);
+    }
 
     if (response.success) {
       showSuccess('Settings saved successfully!');
 
-      // Check if language changed to apply it immediately
-      const languageChanged = originalSettings.value && selectedLanguage.value !== originalSettings.value.display.language;
+      // Apply language change if needed (languageChanged already defined above)
 
       // Update original settings to reflect saved state
       if (originalSettings.value) {
@@ -731,10 +748,8 @@ async function saveSettings() {
         originalSettings.value.display.currency = selectedCurrency.value;
       }
 
-      // Apply language change to the UI immediately (settings already saved above)
-      if (languageChanged) {
-        handleLanguageChange();
-      }
+      // Language change was already applied when user selected it from dropdown
+      // No need to call handleLanguageChange() again here
     } else {
       showError(response.message || 'Failed to save settings');
     }
@@ -763,7 +778,7 @@ async function setupPasskey() {
 }
 
 async function removePasskey() {
-  if (!confirm('Are you sure you want to remove your passkey? You will need to set it up again to use passkey authentication.')) {
+  if (!confirm(t('profile.passkeyRemoveConfirm'))) {
     return;
   }
   

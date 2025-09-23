@@ -1,4 +1,5 @@
 import api, { apiWithTimeout } from "./api";
+import { csrfManager } from "@/composables/useCsrfToken";
 import { errorLogger } from "./errorLogging";
 
 export interface AsyncJobResult {
@@ -239,8 +240,30 @@ export const asyncJobsService = {
    */
   async markAllNotificationsRead(): Promise<void> {
     try {
+      // Proactively ensure CSRF token is initialized/refreshed for state-changing request
+      try {
+        await csrfManager.initialize();
+      } catch {}
+
       await apiWithTimeout.fast.patch("/notifications/mark-all-read");
-    } catch (error) {
+    } catch (error: any) {
+      // If CSRF failed, refresh token and retry once
+      const status = error?.response?.status;
+      if ((status === 403 || status === 419) && !error?.config?._retried) {
+        try {
+          await csrfManager.initialize();
+          const cfg = { ...(error.config || {}) };
+          cfg._retried = true;
+          return await apiWithTimeout.fast.patch("/notifications/mark-all-read", undefined, cfg as any);
+        } catch (retryErr) {
+          errorLogger.logApiError(
+            retryErr instanceof Error ? retryErr : new Error(String(retryErr)),
+            "/notifications/mark-all-read",
+          );
+          throw retryErr;
+        }
+      }
+
       errorLogger.logApiError(
         error instanceof Error ? error : new Error(String(error)),
         "/notifications/mark-all-read",

@@ -370,7 +370,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useI18n } from "vue-i18n";
+import { useTranslation } from "@/composables/useTranslation";
 import { useDateLocalization } from "@/composables/useDateLocalization";
 import { useCategoriesStore } from "@/stores/categories";
 import LocalizedDateInput from "@/components/common/LocalizedDateInput.vue";
@@ -416,7 +416,7 @@ interface Breadcrumb {
 
 const router = useRouter();
 const route = useRoute();
-const { t } = useI18n();
+const { t } = useTranslation();
 const categoriesStore = useCategoriesStore();
 const { formatDate } = useDateLocalization();
 

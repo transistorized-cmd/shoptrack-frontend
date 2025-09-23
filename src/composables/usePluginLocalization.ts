@@ -1,4 +1,4 @@
-import { useI18n } from "vue-i18n";
+import { useTranslation } from "@/composables/useTranslation";
 import type { ReportPlugin, ReceiptPlugin } from "@/types/plugin";
 
 /**
@@ -6,7 +6,7 @@ import type { ReportPlugin, ReceiptPlugin } from "@/types/plugin";
  * Maps backend plugin keys to frontend translation keys
  */
 export const usePluginLocalization = () => {
-  const { t } = useI18n();
+  const { t } = useTranslation();
 
   /**
    * Get localized name for a plugin

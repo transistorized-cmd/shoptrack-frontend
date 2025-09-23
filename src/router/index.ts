@@ -107,7 +107,16 @@ router.beforeEach(async (to, from, next) => {
 
     // Initialize auth store if not already done
     if (!authStore.isAuthenticated && !authStore.loading) {
-      await authStore.initialize();
+      try {
+        await authStore.initialize();
+      } catch (initError: any) {
+        // Don't block navigation if auth initialization fails
+        // 401 errors are expected when user is not logged in
+        if (initError?.response?.status !== 401 && initError?.status !== 401) {
+          console.warn("Auth initialization failed in router guard:", initError);
+        }
+        // Continue with navigation assuming user is not authenticated
+      }
     }
 
     const isAuthenticated = authStore.isAuthenticated;
@@ -126,10 +135,26 @@ router.beforeEach(async (to, from, next) => {
     } else {
       next();
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Navigation guard error:", error);
-    // On error, allow navigation to continue to avoid blocking the user
-    next();
+
+    // For authentication-related routes, still allow navigation to prevent blocking
+    if (to.path.startsWith('/login') || to.path.startsWith('/register') || to.path.startsWith('/forgot-password')) {
+      next();
+      return;
+    }
+
+    // For protected routes where auth check failed, redirect to login
+    const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+    if (requiresAuth) {
+      next({
+        path: "/login",
+        query: { redirect: to.fullPath },
+      });
+    } else {
+      // For public routes, allow navigation to continue
+      next();
+    }
   }
 });
 

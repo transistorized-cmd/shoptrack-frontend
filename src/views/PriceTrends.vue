@@ -136,7 +136,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useI18n } from "vue-i18n";
+import { useTranslation } from "@/composables/useTranslation";
 import { useReportsStore } from "@/stores/reports";
 import { useCategoriesStore } from "@/stores/categories";
 import { getCurrentLocale } from "@/i18n";
@@ -144,7 +144,7 @@ import PriceTrendsReport from "@/components/reports/PriceTrendsReport.vue";
 import LocalizedDateInput from "@/components/common/LocalizedDateInput.vue";
 import type { ReportData, DateRange } from "@/types/report";
 
-const { t } = useI18n();
+const { t } = useTranslation();
 
 const route = useRoute();
 const router = useRouter();

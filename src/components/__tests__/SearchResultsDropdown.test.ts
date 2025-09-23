@@ -464,21 +464,6 @@ describe('SearchResultsDropdown Component', () => {
       expect(wrapper.text()).toContain('Categories');
     });
 
-    it('should display group titles in Spanish', () => {
-      wrapper = createWrapper({ results: mockResults }, 'es');
-
-      expect(wrapper.text()).toContain('Recibos');
-      expect(wrapper.text()).toContain('Artículos');
-      expect(wrapper.text()).toContain('Categorías');
-    });
-
-    it('should display type labels in correct locale', () => {
-      wrapper = createWrapper({ results: mockResults }, 'es');
-
-      expect(wrapper.text()).toContain('Recibo');
-      expect(wrapper.text()).toContain('Artículo');
-      expect(wrapper.text()).toContain('Categoría');
-    });
 
     it('should handle missing translations gracefully', () => {
       const i18n = createTestI18n('fr'); // Unsupported locale

@@ -1,11 +1,19 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { ref } from "vue";
 import { useDateLocalization } from "../useDateLocalization";
 
-// Mock vue-i18n
-const mockLocale = { value: "en" };
-vi.mock("vue-i18n", () => ({
-  useI18n: () => ({
+// Create reactive locale mock
+const mockLocale = ref("en");
+const mockSetLocale = vi.fn((newLocale: string) => {
+  mockLocale.value = newLocale;
+});
+
+// Mock useTranslation composable
+vi.mock("@/composables/useTranslation", () => ({
+  useTranslation: () => ({
     locale: mockLocale,
+    setLocale: mockSetLocale,
+    t: (key: string) => key,
   }),
 }));
 
@@ -14,6 +22,7 @@ describe("useDateLocalization", () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+    mockSetLocale.mockClear();
     mockLocale.value = "en";
   });
 

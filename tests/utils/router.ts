@@ -1,10 +1,10 @@
 import { vi } from "vitest";
-import { createRouter, createWebHistory, type RouteLocationNormalizedLoaded } from "vue-router";
+import { createRouter, createMemoryHistory, type RouteLocationNormalizedLoaded } from "vue-router";
 
 export const createMockRouter = (initialRoute = "/") => {
-  // Create a real router instance with mock history for better compatibility
+  // Create a real router instance with memory history for testing
   const mockRouter = createRouter({
-    history: createWebHistory(),
+    history: createMemoryHistory(),
     routes: [
       { path: "/", name: "Home", component: { template: "<div>Home</div>" } },
       {
@@ -71,6 +71,41 @@ export const createMockRouter = (initialRoute = "/") => {
   vi.spyOn(mockRouter, "go").mockImplementation(() => {});
   vi.spyOn(mockRouter, "back").mockImplementation(() => {});
   vi.spyOn(mockRouter, "forward").mockImplementation(() => {});
+
+  // Mock the resolve method to handle invalid inputs gracefully
+  vi.spyOn(mockRouter, "resolve").mockImplementation((to: any) => {
+    // Handle invalid inputs that might cause NaN errors
+    if (typeof to !== "string" && typeof to !== "object") {
+      console.warn("Invalid route location passed to router.resolve:", to);
+      return {
+        href: "/",
+        fullPath: "/",
+        path: "/",
+        name: "Home",
+        params: {},
+        query: {},
+        hash: "",
+        matched: [],
+        meta: {},
+        redirectedFrom: undefined,
+      } as any;
+    }
+
+    // For valid inputs, return a sensible default
+    const path = typeof to === "string" ? to : (to.path || "/");
+    return {
+      href: path,
+      fullPath: path,
+      path: path,
+      name: path === "/" ? "Home" : undefined,
+      params: {},
+      query: {},
+      hash: "",
+      matched: [],
+      meta: {},
+      redirectedFrom: undefined,
+    } as any;
+  });
 
   const mockRoute: Partial<RouteLocationNormalizedLoaded> = {
     path: initialRoute,

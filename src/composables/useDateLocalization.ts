@@ -1,11 +1,11 @@
-import { useI18n } from "vue-i18n";
+import { useTranslation } from "@/composables/useTranslation";
 
 /**
  * Composable for localizing date formatting
- * Automatically uses the current locale from vue-i18n
+ * Automatically uses the current locale from our translation system
  */
 export const useDateLocalization = () => {
-  const { locale } = useI18n();
+  const { locale } = useTranslation();
 
   /**
    * Maps vue-i18n locale codes to JavaScript locale strings

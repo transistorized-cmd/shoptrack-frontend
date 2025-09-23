@@ -5,9 +5,11 @@
     <link rel="icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShopTrack</title>
-    
-    <!-- Security headers are handled by the backend API server -->
-    <!-- CSP allows 'unsafe-eval' and 'unsafe-inline' for development with Vite HMR -->
+
+    <!-- Content Security Policy is handled by the server-side StrictSecurityHeadersMiddleware -->
+
+    <!-- Fallback meta tags for browsers that don't support CSP -->
+    <meta name="referrer" content="strict-origin-when-cross-origin">
   </head>
   <body>
     <div id="app"></div>

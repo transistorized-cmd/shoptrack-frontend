@@ -60,15 +60,17 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { availableLocales, setLocale, getCurrentLocale, getLocaleName, getLocaleFlag, type LocaleCode } from '@/i18n'
+import { useTranslation } from '@/composables/useTranslation'
 import { useDarkMode } from '@/composables/useDarkMode'
+import { availableLocales, getLocaleName, getLocaleFlag } from '@/utils/i18nUtils'
+import type { LocaleCode } from '@/i18n'
 
-const { locale } = useI18n()
 const isOpen = ref(false)
 const { isDarkMode } = useDarkMode()
+const { locale, setLocale } = useTranslation()
 
-const currentLocale = computed(() => getCurrentLocale())
+// Use the reactive locale from useTranslation - locale is already a computed ref
+const currentLocale = computed(() => locale.value)
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value

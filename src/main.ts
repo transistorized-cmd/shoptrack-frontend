@@ -4,7 +4,9 @@ import "./assets/styles/main.css";
 import "./styles/mobile-optimizations.css";
 import App from "./App.vue";
 import router from "./router";
+// Conditional i18n import - use production-safe version in production
 import i18n from "./i18n";
+import { productionSafeI18n } from "./i18n/productionSafe";
 import { initializePlugins } from "./plugins";
 import { csrfManager } from "./composables/useCsrfToken";
 import ErrorBoundary from "./components/ErrorBoundary.vue";
@@ -167,6 +169,85 @@ const initializeApp = async () => {
   const app = createApp(App);
   const pinia = createPinia();
 
+  // Browser detection for Chrome-specific features
+  const isChromeBrowser = (): boolean => {
+    if (typeof window === 'undefined' || !window.navigator) return false;
+
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const vendor = window.navigator.vendor?.toLowerCase() || '';
+
+    // Check for Chrome browser (including Edge Chromium but not Safari)
+    const isChrome = (
+      vendor.includes('google') ||
+      (userAgent.includes('chrome') && !userAgent.includes('safari')) ||
+      userAgent.includes('crios') // Chrome on iOS
+    );
+
+    // Exclude browsers that might falsely report as Chrome
+    const isNotSafari = !userAgent.includes('safari') || userAgent.includes('chrome');
+    const isNotFirefox = !userAgent.includes('firefox');
+
+    return isChrome && isNotSafari && isNotFirefox;
+  };
+
+  // Configure Vue DevTools based on environment and browser
+  if (import.meta.env.PROD) {
+    const isChrome = isChromeBrowser();
+
+    if (isChrome) {
+      // Enable DevTools for Chrome in production
+      app.config.devtools = true;
+
+      if (typeof window !== 'undefined') {
+        // Enable production DevTools for Chrome
+        (window as any).__VUE_PROD_DEVTOOLS__ = true;
+
+        // Ensure the DevTools hook is properly initialized for Chrome
+        if (!(window as any).__VUE_DEVTOOLS_GLOBAL_HOOK__) {
+          (window as any).__VUE_DEVTOOLS_GLOBAL_HOOK__ = {
+            enabled: true,
+            events: new Map(),
+            on(event: string, fn: Function) {
+              if (!this.events.has(event)) {
+                this.events.set(event, []);
+              }
+              this.events.get(event)?.push(fn);
+            },
+            off(event: string, fn: Function) {
+              const fns = this.events.get(event);
+              if (fns) {
+                const index = fns.indexOf(fn);
+                if (index > -1) {
+                  fns.splice(index, 1);
+                }
+              }
+            },
+            emit(event: string, ...args: any[]) {
+              const fns = this.events.get(event);
+              if (fns) {
+                fns.forEach((fn: Function) => fn(...args));
+              }
+            }
+          };
+        }
+
+        console.info('[App] Vue DevTools enabled in production for Chrome browser');
+      }
+    } else {
+      // Disable DevTools for non-Chrome browsers in production
+      app.config.devtools = false;
+
+      if (typeof window !== 'undefined') {
+        (window as any).__VUE_PROD_DEVTOOLS__ = false;
+        console.info('[App] Vue DevTools disabled in production for non-Chrome browser');
+      }
+    }
+  } else if (import.meta.env.DEV) {
+    // Always enable DevTools in development
+    app.config.devtools = true;
+    console.info('[App] Vue DevTools enabled in development mode');
+  }
+
   // Global error handlers
   app.config.errorHandler = (err: unknown, instance, info: string) => {
     const error = err instanceof Error ? err : new Error(String(err));
@@ -205,7 +286,39 @@ const initializeApp = async () => {
 
   app.use(pinia);
   app.use(router);
-  app.use(i18n);
+
+  // Conditional i18n setup - use vue-i18n in development, production-safe in production
+  try {
+    if (import.meta.env.PROD) {
+      // Production: Use CSP-safe implementation
+      console.info('[i18n] Initializing production-safe i18n...');
+      console.info('[i18n] productionSafeI18n available:', !!productionSafeI18n);
+      console.info('[i18n] productionSafeI18n.t available:', typeof productionSafeI18n.t);
+      console.info('[i18n] Current locale:', productionSafeI18n.getCurrentLocale());
+
+      // Test a translation to ensure it's working
+      const testTranslation = productionSafeI18n.t('common.loading');
+      console.info('[i18n] Test translation (common.loading):', testTranslation);
+
+      app.config.globalProperties.$t = productionSafeI18n.t;
+      app.provide('i18n', productionSafeI18n);
+      console.info('[i18n] ✅ Production-safe i18n configured successfully');
+    } else {
+      // Development: Use full vue-i18n
+      app.use(i18n);
+      console.info('[i18n] ✅ Vue-i18n configured successfully');
+    }
+  } catch (error) {
+    console.error('[i18n] ❌ Failed to configure i18n:', error);
+    // Provide a fallback
+    app.config.globalProperties.$t = (key: string) => key;
+    app.provide('i18n', {
+      t: (key: string) => key,
+      getCurrentLocale: () => 'en',
+      setLocale: () => {},
+      locale: 'en'
+    });
+  }
 
   // Install Memory Monitoring Plugin
   // This will automatically initialize memory monitoring in production-ready mode
@@ -236,22 +349,35 @@ const initializeApp = async () => {
 
     await authStore.initialize();
     console.info("Authentication system initialized");
-  } catch (error) {
-    console.error("Failed to initialize authentication system:", error);
+  } catch (error: any) {
+    // Don't treat 401 errors as critical - they're expected when user is not logged in
+    if (error?.response?.status === 401 || error?.status === 401) {
+      console.info("User not authenticated during app initialization - this is expected");
+    } else {
+      console.error("Failed to initialize authentication system:", error);
+      // Only show user notification for non-authentication errors
+      if (shouldShowErrorNotification(error)) {
+        showErrorToUser(error);
+      }
+    }
   }
 
-  // Preload categories only if user is authenticated
+  // Preload categories and settings only if user is authenticated
   try {
     const authStore = useAuthStore();
     if (authStore.isAuthenticated) {
+      // Preload categories
       const categoriesStore = useCategoriesStore();
       await categoriesStore.fetchAllLocales(availableLocales.map((l) => l.code));
       console.info("Categories preloaded for locales:", availableLocales.map((l) => l.code).join(", "));
+
+      // Initialize user data (settings, language)
+      await authStore.initializeUserData();
     } else {
-      console.info("Skipping categories preload - user not authenticated");
+      console.info("Skipping categories and settings preload - user not authenticated");
     }
   } catch (error) {
-    console.error("Failed to preload categories:", error);
+    console.error("Failed to preload categories and settings:", error);
   }
 
   // Register ErrorBoundary components globally
@@ -263,10 +389,51 @@ const initializeApp = async () => {
     (window as any).shopTrackErrorLogger = errorLogger;
   }
 
-  app.mount("#app");
+  // Mount the Vue application
+  const appElement = document.getElementById("app");
+
+  if (!appElement) {
+    console.error('[Main] #app element not found! Cannot mount Vue app.');
+    return;
+  }
+
+  try {
+    app.mount("#app");
+    console.info('[Main] Vue app mounted successfully');
+  } catch (error) {
+    console.error('[Main] Failed to mount Vue app:', error);
+    // Create a fallback message
+    appElement.innerHTML = '<div style="padding: 20px; color: red;">Failed to load application. Check console for details.</div>';
+  }
 };
 
-// Start the application
-initializeApp().catch((error) => {
-  console.error("Failed to initialize application:", error);
-});
+// Application initialization
+
+// Function to start the application when DOM is ready
+const startApp = () => {
+  initializeApp().catch((error) => {
+    console.error("[Main] Failed to initialize application:", error);
+
+    // Show error to user if app fails to initialize
+    const appElement = document.getElementById("app");
+    if (appElement) {
+      appElement.innerHTML = `
+        <div style="padding: 20px; background: #fee; border: 1px solid #f00; margin: 20px; border-radius: 8px;">
+          <h2 style="color: #c00; margin: 0 0 10px 0;">Application Failed to Load</h2>
+          <p style="margin: 0; color: #600;">An error occurred during application initialization. Please check the console for details.</p>
+          <details style="margin-top: 10px;">
+            <summary style="cursor: pointer; color: #600;">Technical Details</summary>
+            <pre style="background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; overflow: auto; font-size: 12px;">${error.toString()}</pre>
+          </details>
+        </div>
+      `;
+    }
+  });
+};
+
+// Wait for DOM to be ready before starting the application
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startApp);
+} else {
+  startApp();
+}

@@ -103,56 +103,57 @@
     </div>
 
     <div v-else class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-        <!-- Image Section -->
-        <div class="card p-6">
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-white dark:text-white mb-6">
-            {{ $t('receipts.receiptDetail.receiptImageTitle') }}
-          </h2>
-          <div class="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
-            <img
-              v-if="imageUrl && !imageError"
-              :src="imageUrl"
-              :alt="receipt.filename"
-              class="w-full h-auto object-contain max-h-[600px]"
-              @error="handleImageError"
-            />
-            <div
-              v-else
-              class="flex items-center justify-center h-64 text-gray-500"
-            >
-              <div class="text-center">
-                <svg
-                  class="w-12 h-12 mx-auto mb-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-                <p>
-                  {{
-                    imageError ? $t('receipts.receiptDetail.failedToLoadImage') : $t('receipts.receiptDetail.imageNotAvailable')
-                  }}
-                </p>
-                <p v-if="imageError" class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  {{ imageError }}
-                </p>
+      <!-- Combined Image and Receipt Information -->
+      <div class="card p-6 mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          <!-- Image Section -->
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              {{ $t('receipts.receiptDetail.receiptImageTitle') }}
+            </h2>
+            <div class="bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden h-64 flex items-center justify-center">
+              <img
+                v-if="imageUrl && !imageError"
+                :src="imageUrl"
+                :alt="receipt.filename"
+                class="max-w-full max-h-full object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                @error="handleImageError"
+                @click="showImageModal = true"
+              />
+              <div
+                v-else
+                class="flex items-center justify-center h-full text-gray-500"
+              >
+                <div class="text-center">
+                  <svg
+                    class="w-12 h-12 mx-auto mb-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <p>
+                    {{
+                      imageError ? $t('receipts.receiptDetail.failedToLoadImage') : $t('receipts.receiptDetail.imageNotAvailable')
+                    }}
+                  </p>
+                  <p v-if="imageError" class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    {{ imageError }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Details Section -->
-        <div class="space-y-6">
-          <!-- Basic Information -->
-          <div class="card p-6">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white dark:text-white mb-4">
+          <!-- Receipt Information -->
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               {{ $t('receipts.receiptDetail.receiptInformation') }}
             </h2>
             <div class="space-y-4">
@@ -236,6 +237,12 @@
                     >{{ $t('receipts.receiptNumber') }}</label
                   >
                   <div class="text-gray-700 dark:text-gray-300">{{ receipt.receiptNumber }}</div>
+                </div>
+                <div v-if="receipt.currency">
+                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1"
+                    >{{ $t('receipts.currency') || 'Currency' }}</label
+                  >
+                  <div class="text-gray-700 dark:text-gray-300">{{ receipt.currency }}</div>
                 </div>
               </div>
 
@@ -383,314 +390,311 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- Items List -->
-          <div
-            v-if="receipt.items && receipt.items.length > 0"
-            class="card p-6"
-          >
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-                {{ $t('receipts.receiptDetail.items', { count: receipt.items.length }) }}
-              </h2>
-              <div class="text-lg font-bold text-gray-900 dark:text-white">
-                {{ $t('receipts.receiptDetail.total', {
-                  amount: receipt.items
-                    .reduce((sum, item) => sum + item.totalPrice, 0)
-                    .toFixed(2)
-                }) }}
-              </div>
-            </div>
+      <!-- Claude Response (Debug) -->
+      <div
+        v-if="receipt.claudeResponseJson && showDebugInfo"
+        class="card p-6 mb-6"
+      >
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white dark:text-white mb-4">
+          {{ $t('receipts.receiptDetail.claudeResponse') }}
+        </h2>
+        <pre
+          class="bg-gray-100 dark:bg-gray-700 p-4 rounded text-xs overflow-x-auto text-gray-700 dark:text-gray-300"
+          >{{ JSON.stringify(receipt.claudeResponseJson, null, 2) }}</pre
+        >
+      </div>
 
-            <div class="space-y-3">
-              <div
-                v-for="item in receipt.items"
-                :key="item.id"
-                class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                <div v-if="!editingItems[item.id]" class="group">
-                  <div class="flex justify-between items-start mb-2">
-                    <h3 class="font-medium text-gray-900 dark:text-white">
-                      {{ capitalizeFirst(item.itemName) }}
-                    </h3>
-                    <div class="flex items-center space-x-2">
-                      <span class="font-semibold text-gray-900 dark:text-white"
-                        >${{ item.totalPrice.toFixed(2) }}</span
-                      >
-                      <button
-                        class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-opacity"
-                        @click="startEditingItem(item)"
-                      >
-                        <svg
-                          class="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  <div
-                    class="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400"
-                  >
-                    <div class="flex space-x-4">
-                      <span>{{ $t('receipts.receiptDetail.quantity', { qty: item.quantity || 1 }) }}</span>
-                      <span
-                        >{{ $t('receipts.receiptDetail.unitPrice', { price: (item.pricePerUnit || 0).toFixed(2) }) }}</span
-                      >
-                      <span v-if="item.weightOriginal"
-                        >{{ $t('receipts.receiptDetail.weightInfo', {
-                          weight: item.weightOriginal,
-                          unit: item.unit ? capitalizeFirst(item.unit) : ''
-                        }) }}</span
-                      >
-                    </div>
-                    <span
-                      v-if="(item.category?.id && categoriesStore.getName(item.category.id, (locale as any))) || item.category?.name || item.categoryRaw || (item as any).category"
-                      class="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400 px-2 py-1 rounded text-xs"
-                    >
-                      {{ capitalizeFirst((item.category?.id && categoriesStore.getName(item.category.id, (locale as any))) || item.category?.name || item.categoryRaw || (item as any).category) }}
-                    </span>
-                  </div>
-                  <div v-if="item.notes" class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    {{ item.notes }}
-                  </div>
-                </div>
-
-                <!-- Editing Mode -->
-                <div v-else class="space-y-3">
-                  <!-- Item Name with Autocomplete -->
-                  <div class="relative">
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                      >{{ $t('receipts.receiptDetail.itemName') }}</label
-                    >
-                    <input
-                      v-model="editedItems[item.id].itemName"
-                      type="text"
-                      class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                      :placeholder="$t('receipts.receiptDetail.enterItemName')"
-                      @input="onItemNameInput(item.id)"
-                      @keydown="
-                        onAutocompleteKeydown($event, item.id, 'itemName')
-                      "
-                      @blur="hideItemSuggestions(item.id, 'itemName')"
-                    />
-                    <div
-                      v-if="
-                        itemSuggestions[item.id]?.itemName?.show &&
-                        (itemSuggestions[item.id]?.itemName?.options?.length ??
-                          0) > 0
-                      "
-                      class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-20 max-h-32 overflow-y-auto"
-                    >
-                      <div
-                        v-for="(suggestion, index) in itemSuggestions[item.id]
-                          ?.itemName?.options ?? []"
-                        :key="suggestion"
-                        class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white"
-                        :class="{
-                          'bg-blue-100 dark:bg-blue-900':
-                            index ===
-                            (itemSuggestions[item.id]?.itemName
-                              ?.selectedIndex ?? -1),
-                        }"
-                        @mousedown="
-                          selectSuggestion(item.id, 'itemName', suggestion)
-                        "
-                      >
-                        {{ suggestion }}
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Category with Autocomplete -->
-                  <div class="relative">
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                      {{ $t('receipts.receiptDetail.category') }}
-                    </label>
-                    <input
-                      v-model="editedItems[item.id].categoryInput"
-                      type="text"
-                      class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                      :placeholder="$t('receipts.receiptDetail.selectOrEnterCategory') || 'Select or enter category'"
-                      @input="onCategoryInputChange(item.id)"
-                      @keydown="onAutocompleteKeydown($event, item.id, 'category')"
-                      @blur="hideItemSuggestions(item.id, 'category')"
-                    />
-                    <div
-                      v-if="
-                        itemSuggestions[item.id]?.category?.show &&
-                        (itemSuggestions[item.id]?.category?.options?.length ?? 0) > 0
-                      "
-                      class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-20 max-h-32 overflow-y-auto"
-                    >
-                      <div
-                        v-for="(suggestion, index) in itemSuggestions[item.id]?.category?.options ?? []"
-                        :key="suggestion.id || suggestion"
-                        class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white"
-                        :class="{
-                          'bg-blue-100 dark:bg-blue-900':
-                            index === (itemSuggestions[item.id]?.category?.selectedIndex ?? -1),
-                        }"
-                        @mousedown="selectCategorySuggestion(item.id, suggestion)"
-                      >
-                        {{ suggestion.name || suggestion }}
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Quantity, Price Per Unit, Weight, Unit in a row -->
-                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <div>
-                      <label
-                        class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                        >{{ $t('receipts.receiptDetail.quantity') }}</label
-                      >
-                      <input
-                        v-model.number="editedItems[item.id].quantity"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                        @input="calculateTotalPrice(item.id)"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                        >{{ $t('receipts.receiptDetail.pricePerUnit') }}</label
-                      >
-                      <input
-                        v-model.number="editedItems[item.id].pricePerUnit"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                        @input="calculateTotalPrice(item.id)"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                        >{{ $t('receipts.receiptDetail.weight') }}</label
-                      >
-                      <input
-                        v-model.number="editedItems[item.id].weightOriginal"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                      />
-                    </div>
-                    <div class="relative">
-                      <label
-                        class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                        >{{ $t('receipts.receiptDetail.unit') }}</label
-                      >
-                      <input
-                        v-model="editedItems[item.id].unit"
-                        type="text"
-                        class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                        :placeholder="$t('receipts.receiptDetail.unitPlaceholder')"
-                        @input="onUnitInput(item.id)"
-                        @keydown="
-                          onAutocompleteKeydown($event, item.id, 'unit')
-                        "
-                        @blur="hideItemSuggestions(item.id, 'unit')"
-                      />
-                      <div
-                        v-if="
-                          itemSuggestions[item.id]?.unit?.show &&
-                          (itemSuggestions[item.id]?.unit?.options?.length ??
-                            0) > 0
-                        "
-                        class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-20 max-h-32 overflow-y-auto"
-                      >
-                        <div
-                          v-for="(suggestion, index) in itemSuggestions[item.id]
-                            ?.unit?.options ?? []"
-                          :key="suggestion"
-                          class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white"
-                          :class="{
-                            'bg-blue-100 dark:bg-blue-900':
-                              index ===
-                              (itemSuggestions[item.id]?.unit?.selectedIndex ??
-                                -1),
-                          }"
-                          @mousedown="
-                            selectSuggestion(item.id, 'unit', suggestion)
-                          "
-                        >
-                          {{ suggestion }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Notes -->
-                  <div>
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
-                      >{{ $t('receipts.receiptDetail.notes') }}</label
-                    >
-                    <textarea
-                      v-model="editedItems[item.id].notes"
-                      rows="2"
-                      class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none"
-                      :placeholder="$t('receipts.receiptDetail.additionalNotes')"
-                    />
-                  </div>
-
-                  <!-- Total Price Display -->
-                  <div class="bg-gray-50 dark:bg-gray-600 rounded px-3 py-2">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300"
-                      >{{ $t('receipts.receiptDetail.totalPrice') }}
-                    </span>
-                    <span class="font-semibold text-gray-900 dark:text-white"
-                      >${{
-                        (editedItems[item.id].totalPrice || 0).toFixed(2)
-                      }}</span
-                    >
-                  </div>
-
-                  <!-- Action buttons -->
-                  <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-2">
-                    <button
-                      class="btn-success w-full sm:w-auto"
-                      @click="saveEditedItem(item.id)"
-                    >
-                      {{ $t('receipts.receiptDetail.save') }}
-                    </button>
-                    <button
-                      class="btn-secondary w-full sm:w-auto"
-                      @click="cancelEditingItem(item.id)"
-                    >
-                      {{ $t('receipts.receiptDetail.cancel') }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <!-- Items List (Full Width) -->
+      <div
+        v-if="receipt.items && receipt.items.length > 0"
+        class="card p-6 mt-6"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            {{ $t('receipts.receiptDetail.items', { count: receipt.items.length }) }}
+          </h2>
+          <div class="text-lg font-bold text-gray-900 dark:text-white">
+            {{ $t('receipts.receiptDetail.total', {
+              amount: formatAmount(
+                receipt.items.reduce((sum, item) => sum + item.totalPrice, 0),
+                receipt.currency || 'USD'
+              )
+            }) }}
           </div>
+        </div>
 
-          <!-- Claude Response (Debug) -->
+        <div class="space-y-3">
           <div
-            v-if="receipt.claudeResponseJson && showDebugInfo"
-            class="card p-6"
+            v-for="item in receipt.items"
+            :key="item.id"
+            class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white dark:text-white mb-4">
-              {{ $t('receipts.receiptDetail.claudeResponse') }}
-            </h2>
-            <pre
-              class="bg-gray-100 dark:bg-gray-700 p-4 rounded text-xs overflow-x-auto text-gray-700 dark:text-gray-300"
-              >{{ JSON.stringify(receipt.claudeResponseJson, null, 2) }}</pre
-            >
+            <div v-if="!editingItems[item.id]" class="group">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-medium text-gray-900 dark:text-white">
+                  {{ capitalizeFirst(item.itemName) }}
+                </h3>
+                <div class="flex items-center space-x-2">
+                  <span class="font-semibold text-gray-900 dark:text-white">{{
+                    formatAmount(item.totalPrice, receipt.currency || 'USD')
+                  }}</span>
+                  <button
+                    class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-opacity"
+                    @click="startEditingItem(item)"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div
+                class="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400"
+              >
+                <div class="flex space-x-4">
+                  <span>{{ $t('receipts.receiptDetail.quantity', { qty: item.quantity || 1 }) }}</span>
+                  <span>{{ $t('receipts.receiptDetail.unitPrice', { price: formatUnitPrice(item.pricePerUnit || 0) }) }}</span>
+                  <span v-if="item.weightOriginal"
+                    >{{ $t('receipts.receiptDetail.weightInfo', {
+                      weight: item.weightOriginal,
+                      unit: item.unit ? capitalizeFirst(item.unit) : ''
+                    }) }}</span
+                  >
+                </div>
+                <span
+                  v-if="(item.category?.id && categoriesStore.getName(item.category.id, (locale as any))) || item.category?.name || item.categoryRaw || (item as any).category"
+                  class="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400 px-2 py-1 rounded text-xs"
+                >
+                  {{ capitalizeFirst((item.category?.id && categoriesStore.getName(item.category.id, (locale as any))) || item.category?.name || item.categoryRaw || (item as any).category) }}
+                </span>
+              </div>
+              <div v-if="item.notes" class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                {{ item.notes }}
+              </div>
+            </div>
+
+            <!-- Editing Mode -->
+            <div v-else class="space-y-3">
+              <!-- Item Name with Autocomplete -->
+              <div class="relative">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+                  >{{ $t('receipts.receiptDetail.itemName') }}</label
+                >
+                <input
+                  v-model="editedItems[item.id].itemName"
+                  type="text"
+                  class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  :placeholder="$t('receipts.receiptDetail.enterItemName')"
+                  @input="onItemNameInput(item.id)"
+                  @keydown="
+                    onAutocompleteKeydown($event, item.id, 'itemName')
+                  "
+                  @blur="hideItemSuggestions(item.id, 'itemName')"
+                />
+                <div
+                  v-if="
+                    itemSuggestions[item.id]?.itemName?.show &&
+                    (itemSuggestions[item.id]?.itemName?.options?.length ??
+                      0) > 0
+                  "
+                  class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-20 max-h-32 overflow-y-auto"
+                >
+                  <div
+                    v-for="(suggestion, index) in itemSuggestions[item.id]
+                      ?.itemName?.options ?? []"
+                    :key="suggestion"
+                    class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white"
+                    :class="{
+                      'bg-blue-100 dark:bg-blue-900':
+                        index ===
+                        (itemSuggestions[item.id]?.itemName
+                          ?.selectedIndex ?? -1),
+                    }"
+                    @mousedown="
+                      selectSuggestion(item.id, 'itemName', suggestion)
+                    "
+                  >
+                    {{ suggestion }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Category with Autocomplete -->
+              <div class="relative">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  {{ $t('receipts.receiptDetail.category') }}
+                </label>
+                <input
+                  v-model="editedItems[item.id].categoryInput"
+                  type="text"
+                  class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  :placeholder="$t('receipts.receiptDetail.selectOrEnterCategory') || 'Select or enter category'"
+                  @input="onCategoryInputChange(item.id)"
+                  @keydown="onAutocompleteKeydown($event, item.id, 'category')"
+                  @blur="hideItemSuggestions(item.id, 'category')"
+                />
+                <div
+                  v-if="
+                    itemSuggestions[item.id]?.category?.show &&
+                    (itemSuggestions[item.id]?.category?.options?.length ?? 0) > 0
+                  "
+                  class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-20 max-h-32 overflow-y-auto"
+                >
+                  <div
+                    v-for="(suggestion, index) in itemSuggestions[item.id]?.category?.options ?? []"
+                    :key="suggestion.id || suggestion"
+                    class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white"
+                    :class="{
+                      'bg-blue-100 dark:bg-blue-900':
+                        index === (itemSuggestions[item.id]?.category?.selectedIndex ?? -1),
+                    }"
+                    @mousedown="selectCategorySuggestion(item.id, suggestion)"
+                  >
+                    {{ suggestion.name || suggestion }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quantity, Price Per Unit, Weight, Unit in a row -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div>
+                  <label
+                    class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+                    >{{ $t('receipts.receiptDetail.quantity') }}</label
+                  >
+                  <input
+                    v-model.number="editedItems[item.id].quantity"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    @input="calculateTotalPrice(item.id)"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+                    >{{ $t('receipts.receiptDetail.pricePerUnit') }}</label
+                  >
+                  <input
+                    v-model.number="editedItems[item.id].pricePerUnit"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    @input="calculateTotalPrice(item.id)"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+                    >{{ $t('receipts.receiptDetail.weight') }}</label
+                  >
+                  <input
+                    v-model.number="editedItems[item.id].weightOriginal"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  />
+                </div>
+                <div class="relative">
+                  <label
+                    class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+                    >{{ $t('receipts.receiptDetail.unit') }}</label
+                  >
+                  <input
+                    v-model="editedItems[item.id].unit"
+                    type="text"
+                    class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    :placeholder="$t('receipts.receiptDetail.unitPlaceholder')"
+                    @input="onUnitInput(item.id)"
+                    @keydown="
+                      onAutocompleteKeydown($event, item.id, 'unit')
+                    "
+                    @blur="hideItemSuggestions(item.id, 'unit')"
+                  />
+                  <div
+                    v-if="
+                      itemSuggestions[item.id]?.unit?.show &&
+                      (itemSuggestions[item.id]?.unit?.options?.length ??
+                        0) > 0
+                    "
+                    class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-20 max-h-32 overflow-y-auto"
+                  >
+                    <div
+                      v-for="(suggestion, index) in itemSuggestions[item.id]
+                        ?.unit?.options ?? []"
+                      :key="suggestion"
+                      class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white"
+                      :class="{
+                        'bg-blue-100 dark:bg-blue-900':
+                          index ===
+                          (itemSuggestions[item.id]?.unit?.selectedIndex ??
+                            -1),
+                      }"
+                      @mousedown="
+                        selectSuggestion(item.id, 'unit', suggestion)
+                      "
+                    >
+                      {{ suggestion }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Notes -->
+              <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1"
+                  >{{ $t('receipts.receiptDetail.notes') }}</label
+                >
+                <textarea
+                  v-model="editedItems[item.id].notes"
+                  rows="2"
+                  class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none"
+                  :placeholder="$t('receipts.receiptDetail.additionalNotes')"
+                />
+              </div>
+
+              <!-- Total Price Display -->
+              <div class="bg-gray-50 dark:bg-gray-600 rounded px-3 py-2">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300"
+                  >{{ $t('receipts.receiptDetail.totalPrice') }}
+                </span>
+                <span class="font-semibold text-gray-900 dark:text-white">{{
+                  formatAmount(editedItems[item.id].totalPrice || 0, receipt.currency || 'USD')
+                }}</span>
+              </div>
+
+              <!-- Action buttons -->
+              <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-2">
+                <button
+                  class="btn-success w-full sm:w-auto"
+                  @click="saveEditedItem(item.id)"
+                >
+                  {{ $t('receipts.receiptDetail.save') }}
+                </button>
+                <button
+                  class="btn-secondary w-full sm:w-auto"
+                  @click="cancelEditingItem(item.id)"
+                >
+                  {{ $t('receipts.receiptDetail.cancel') }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -706,12 +710,41 @@
       </div>
     </div>
   </div>
+
+  <!-- Full-size Image Modal -->
+  <div
+    v-if="showImageModal"
+    class="fixed inset-0 z-50 bg-black bg-opacity-75"
+    @click="showImageModal = false"
+  >
+    <div class="w-full h-full overflow-auto p-4" @click.stop>
+      <div class="min-h-full flex items-center justify-center">
+        <div class="relative">
+          <img
+            v-if="imageUrl && !imageError"
+            :src="imageUrl"
+            :alt="receipt.filename"
+            class="max-w-full h-auto"
+          />
+          <!-- Close button - fixed position -->
+          <button
+            class="fixed top-4 right-4 text-white hover:text-gray-300 bg-black bg-opacity-50 rounded-full p-2 transition-colors z-10"
+            @click="showImageModal = false"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useI18n } from "vue-i18n";
+import { useTranslation } from "@/composables/useTranslation";
 import { TIMEOUT } from "@/constants/app";
 import { useReceiptsStore } from "@/stores/receipts";
 import { useCategoriesStore } from "@/stores/categories";
@@ -721,21 +754,29 @@ import { receiptsService } from "@/services/receipts";
 import { useNotifications } from "@/composables/useNotifications";
 import { useRouteValidation } from "@/utils/routeValidation";
 import { useDateLocalization } from "@/composables/useDateLocalization";
+import { useCurrencyFormat } from "@/composables/useCurrencyFormat";
 import type { Receipt } from "@/types/receipt";
 import { getCurrentLocale } from "@/i18n";
 
-const { t, locale } = useI18n();
+const { t, locale } = useTranslation();
 const route = useRoute();
 const router = useRouter();
 const receiptsStore = useReceiptsStore();
 const categoriesStore = useCategoriesStore();
 const { formatDate, formatDateTime } = useDateLocalization();
+const { formatAmount } = useCurrencyFormat();
 
 const receipt = ref<Receipt | null>(null);
+
+// Helper function to format unit price for translation
+const formatUnitPrice = (pricePerUnit: number) => {
+  return formatAmount(pricePerUnit, receipt.value?.currency || 'USD');
+};
 const loading = ref(true);
 const error = ref<string | null>(null);
 const showDebugInfo = ref(false);
 const imageError = ref<string | null>(null);
+const showImageModal = ref(false);
 
 // Editing state
 const editingStore = ref(false);
@@ -1331,17 +1372,30 @@ const onAutocompleteKeydown = (
   }
 };
 
+// Handle keyboard events
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && showImageModal.value) {
+    showImageModal.value = false;
+  }
+};
+
 onMounted(() => {
   const loc = getCurrentLocale();
   categoriesStore.fetchCategories(loc);
   // Start auto-refreshing categories to pick up new translations
   categoriesStore.startAutoRefresh();
   fetchReceipt();
+
+  // Add keyboard event listener
+  document.addEventListener('keydown', handleKeydown);
 });
 
 onUnmounted(() => {
   // Clean up auto-refresh when leaving the component
   categoriesStore.stopAutoRefresh();
+
+  // Remove keyboard event listener
+  document.removeEventListener('keydown', handleKeydown);
 });
 
 // React to language changes: reload categories (names update automatically)

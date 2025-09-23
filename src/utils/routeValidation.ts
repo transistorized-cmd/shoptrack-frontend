@@ -55,6 +55,31 @@ export function validateNumericId(
     };
   }
 
+  // Check for scientific notation
+  if (/^[+-]?\d*\.?\d*[eE][+-]?\d+$/.test(cleanParam)) {
+    return {
+      isValid: false,
+      error: "ID parameter must be a simple decimal integer",
+    };
+  }
+
+  // Check for hex notation (but allow leading zeros for decimals)
+  if (/^0[xX][0-9a-fA-F]+$/.test(cleanParam)) {
+    return {
+      isValid: false,
+      error: "ID parameter must be a simple decimal integer",
+    };
+  }
+
+  // Check for explicit binary/octal notation
+  if (/^0[bB][01]+$/.test(cleanParam) ||
+      /^0[oO][0-7]+$/.test(cleanParam)) {
+    return {
+      isValid: false,
+      error: "ID parameter must be a simple decimal integer",
+    };
+  }
+
   // Check if it's a valid number
   const numericValue = Number(cleanParam);
 
@@ -216,6 +241,12 @@ function containsDangerousCharacters(input: string): boolean {
     // SQL injection attempts
     /(\bunion\b|\bselect\b|\binsert\b|\bupdate\b|\bdelete\b|\bdrop\b)/i,
     /[';].*(--)/, // SQL comments
+    /[';].*[#]/, // SQL comments with hash
+    /[';].*\/\*/, // SQL comments with /*
+    /\bor\b.*=.*=/i, // OR conditions with equals
+    /\b(or|and)\s+\d+\s*=\s*\d+/i, // Simple boolean conditions like "OR 1=1"
+    /\'\s*or\s*\'/i, // Quoted OR conditions
+    /\'\s*\)\s*or\s*\(/i, // Parenthesized OR conditions
 
     // Path traversal
     /\.\./,
@@ -231,7 +262,13 @@ function containsDangerousCharacters(input: string): boolean {
     /[<>"']/,
 
     // Command injection
-    /[|&`;$()]/,
+    /[|&`;$(){}]/,
+
+    // Additional injection patterns
+    /\$\{[^}]*\}/, // Template injection
+    /`[^`]*`/, // Backtick execution
+    /data:/i, // Data URLs
+    /vbscript:/i, // VBScript
   ];
 
   return dangerousPatterns.some((pattern) => pattern.test(input));
@@ -242,6 +279,7 @@ function containsDangerousCharacters(input: string): boolean {
  */
 export function sanitizeStringParam(input: string): string {
   return input
+    .replace(/<[^>]*>/g, "") // Remove all HTML tags
     .replace(/[<>"']/g, "") // Remove HTML/XML characters
     .replace(/[|&`;$()]/g, "") // Remove command injection characters
     .replace(/\.\./g, "") // Remove path traversal
@@ -259,9 +297,10 @@ export function sanitizeItemName(input: string): string {
   return input
     .replace(/<script[^>]*>.*?<\/script>/gi, "") // Remove script tags
     .replace(/<iframe[^>]*>.*?<\/iframe>/gi, "") // Remove iframe tags
-    .replace(/javascript:/gi, "") // Remove javascript: protocol
-    .replace(/on\w+\s*=/gi, "") // Remove event handlers
+    .replace(/javascript:[^;\s]*/gi, "") // Remove javascript: protocol with following code
+    .replace(/on\w+\s*=[^;\s]*/gi, "") // Remove event handlers with following code
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "") // Remove control characters (except tab, newline, CR)
+    .replace(/[ \t]+/g, " ") // Normalize spaces and tabs but preserve line breaks
     .trim();
 }
 
@@ -274,11 +313,13 @@ export function sanitizeText(input: string): string {
     .replace(/<script[^>]*>.*?<\/script>/gi, "") // Remove script tags
     .replace(/<iframe[^>]*>.*?<\/iframe>/gi, "") // Remove iframe tags
     .replace(/<object[^>]*>.*?<\/object>/gi, "") // Remove object tags
-    .replace(/<embed[^>]*>.*?<\/embed>/gi, "") // Remove embed tags
-    .replace(/javascript:/gi, "") // Remove javascript: protocol
-    .replace(/vbscript:/gi, "") // Remove vbscript: protocol
-    .replace(/on\w+\s*=/gi, "") // Remove event handlers
+    .replace(/<embed[^>]*>/gi, "") // Remove embed tags (self-closing)
+    .replace(/<embed[^>]*>.*?<\/embed>/gi, "") // Remove embed tags (with closing)
+    .replace(/javascript:[^;\s]*/gi, "") // Remove javascript: protocol with following code
+    .replace(/vbscript:[^;\s]*/gi, "") // Remove vbscript: protocol with following code
+    .replace(/on\w+\s*=[^;\s]*/gi, "") // Remove event handlers with following code
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "") // Remove control characters (except tab, newline, CR)
+    .replace(/[ \t]+/g, " ") // Normalize spaces and tabs but preserve line breaks
     .trim();
 }
 
@@ -366,6 +407,17 @@ export function validateDateParam(
   // Check if it's a valid date
   const date = new Date(cleanParam);
   if (isNaN(date.getTime())) {
+    return {
+      isValid: false,
+      error: "Date parameter is not a valid date",
+    };
+  }
+
+  // Verify the date components match the input (catches invalid dates like Feb 30)
+  const [year, month, day] = cleanParam.split('-').map(Number);
+  if (date.getFullYear() !== year ||
+      date.getMonth() !== (month - 1) ||
+      date.getDate() !== day) {
     return {
       isValid: false,
       error: "Date parameter is not a valid date",

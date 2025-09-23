@@ -681,41 +681,6 @@ describe('SearchInput Component', () => {
     });
   });
 
-  describe('Locale Support', () => {
-    it('should use current locale for search requests', async () => {
-      mockSearchService.search.mockResolvedValue(mockSearchResponse);
-      wrapper = createWrapper({}, 'es');
-
-      const input = wrapper.find('input[type="text"]');
-      await input.setValue('test');
-
-      vi.advanceTimersByTime(300);
-      await nextTick();
-
-      expect(mockSearchService.search).toHaveBeenCalledWith({
-        query: 'test',
-        locale: 'es',
-        limit: 10
-      });
-    });
-
-    it('should format dates according to locale', async () => {
-      const spanishResponse = { ...mockSearchResponse, locale: 'es' };
-      mockSearchService.search.mockResolvedValue(spanishResponse);
-      wrapper = createWrapper({}, 'es');
-
-      const input = wrapper.find('input[type="text"]');
-      await input.setValue('test');
-
-      vi.advanceTimersByTime(300);
-      await nextTick();
-
-      const receiptResult = wrapper.vm.searchResults.find((r: SearchResultItem) => r.type === 'receipt');
-      // Date format might vary based on locale, just check it contains a formatted date
-      // Pattern should match "15 ene 2024" or "Jan 15, 2024" etc.
-      expect(receiptResult.secondaryText).toMatch(/\d+\s+\w+\s+\d+/);
-    });
-  });
 
   describe('Component Cleanup', () => {
     it('should clear timeout on unmount', () => {

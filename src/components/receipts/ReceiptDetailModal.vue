@@ -155,15 +155,15 @@
                     <h4 class="text-sm font-medium text-gray-900">
                       {{ item.itemName }}
                     </h4>
-                    <span class="text-sm font-semibold text-gray-900"
-                      >${{ item.totalPrice.toFixed(2) }}</span
-                    >
+                    <span class="text-sm font-semibold text-gray-900">
+                      {{ formatAmountCompact(item.totalPrice, receipt.currency) }}
+                    </span>
                   </div>
                   <div class="flex justify-between text-xs text-gray-500">
                     <span>Qty: {{ item.quantity || 1 }}</span>
-                    <span
-                      >Unit: ${{ (item.pricePerUnit || 0).toFixed(2) }}</span
-                    >
+                    <span>
+                      Unit: {{ formatAmountCompact(item.pricePerUnit || 0, receipt.currency) }}
+                    </span>
                     <span
                       v-if="(item.category?.id && categoriesStore.getName(item.category.id, locale)) || item.category?.name || item.categoryRaw || (item as any).category"
                       class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded"
@@ -181,10 +181,11 @@
                     >Total:</span
                   >
                   <span class="text-lg font-bold text-gray-900">
-                    ${{
-                      receipt.items
-                        .reduce((sum, item) => sum + item.totalPrice, 0)
-                        .toFixed(2)
+                    {{
+                      formatAmountCompact(
+                        receipt.items.reduce((sum, item) => sum + item.totalPrice, 0),
+                        receipt.currency
+                      )
                     }}
                   </span>
                 </div>
@@ -235,6 +236,7 @@
 import { ref, computed, watch } from "vue";
 import type { Receipt } from "@/types/receipt";
 import { useDateLocalization } from "@/composables/useDateLocalization";
+import { useCurrencyFormat } from "@/composables/useCurrencyFormat";
 import { useCategoriesStore } from "@/stores/categories";
 import { getCurrentLocale } from "@/i18n";
 
@@ -249,6 +251,7 @@ const emit = defineEmits<{
 }>();
 
 const { formatDate } = useDateLocalization();
+const { formatAmountCompact } = useCurrencyFormat();
 const categoriesStore = useCategoriesStore();
 const showDebugInfo = ref(false);
 const imageUrl = ref<string | null>(null);

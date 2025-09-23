@@ -56,7 +56,7 @@
             }}</span>
           </div>
           <div
-            v-if="plugin.supportedExportFormats.length > 0"
+            v-if="plugin.supportedExportFormats && plugin.supportedExportFormats.length > 0"
             class="flex items-center"
           >
             <span class="w-4 h-4 mr-2">💾</span>
@@ -112,7 +112,7 @@
             }}
           </button>
 
-          <div v-if="plugin.supportsExport" class="flex flex-wrap gap-2 justify-center sm:justify-end">
+          <div v-if="plugin.supportsExport && plugin.supportedExportFormats" class="flex flex-wrap gap-2 justify-center sm:justify-end">
             <button
               v-for="format in plugin.supportedExportFormats"
               :key="format"
@@ -207,7 +207,8 @@ const currentReports = reactive<Record<string, ReportData>>({});
 
 // Computed property to get localized plugins
 const localizedReportPlugins = computed(() => {
-  return localizePlugins(pluginsStore.enabledReportPlugins);
+  const plugins = pluginsStore.enabledReportPlugins || [];
+  return localizePlugins(plugins);
 });
 
 const updateDateRange = (

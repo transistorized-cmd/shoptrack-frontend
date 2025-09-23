@@ -105,7 +105,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslation } from '@/composables/useTranslation';
 import type { SearchResultItem } from '@/types/search';
 
 interface Props {
@@ -123,7 +123,7 @@ const emit = defineEmits<{
   hover: [index: number];
 }>();
 
-const { t } = useI18n();
+const { t } = useTranslation();
 
 // Group results by type
 const groupedResults = computed(() => {

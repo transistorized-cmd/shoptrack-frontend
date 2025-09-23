@@ -150,7 +150,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from "vue";
 import { useDark } from "@vueuse/core";
-import { useI18n } from "vue-i18n";
+import { useTranslation } from "@/composables/useTranslation";
 import { useDateLocalization } from "@/composables/useDateLocalization";
 import { useCategoriesStore } from "@/stores/categories";
 import { getCurrentLocale } from "@/i18n";
@@ -169,7 +169,7 @@ const chartInstances = ref<any[]>([]);
 const isDark = useDark();
 
 // Internationalization
-const { t } = useI18n();
+const { t } = useTranslation();
 
 // Date localization
 const { formatDate } = useDateLocalization();

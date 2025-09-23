@@ -56,7 +56,8 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslation } from '@/composables/useTranslation';
+import { getCurrentLocale } from '@/utils/i18nUtils';
 import { useRouter } from 'vue-router';
 import { searchService } from '@/services/search.service';
 import SearchResultsDropdown from './SearchResultsDropdown.vue';
@@ -74,7 +75,7 @@ const emit = defineEmits<{
   resultSelect: [result: SearchResultItem];
 }>();
 
-const { locale } = useI18n();
+const { t } = useTranslation();
 const router = useRouter();
 
 // Default configuration
@@ -111,7 +112,7 @@ async function performSearch(query: string) {
   try {
     const response: SearchResponse = await searchService.search({
       query,
-      locale: locale.value,
+      locale: getCurrentLocale(),
       limit: config.value.maxResults
     });
 
@@ -174,7 +175,7 @@ function formatDate(dateString: string | null): string {
 
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString(locale.value, {
+    return date.toLocaleDateString(getCurrentLocale(), {
       year: 'numeric',
       month: 'short',
       day: 'numeric'

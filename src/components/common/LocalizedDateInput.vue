@@ -97,7 +97,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useTranslation } from '@/composables/useTranslation'
 import { useDateLocalization } from '@/composables/useDateLocalization'
 
 interface Props {
@@ -117,7 +117,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
-const { t, locale } = useI18n()
+const { t, locale } = useTranslation()
 const { formatDate } = useDateLocalization()
 
 const showPicker = ref(false)

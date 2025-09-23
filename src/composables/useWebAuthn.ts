@@ -169,6 +169,26 @@ export function useWebAuthn() {
       // Get request options from server
       const options = await authService.getPasskeyRequestOptions();
 
+      // Validate rpId against current origin to prevent silent SecurityError
+      // rpId must be the current effective domain or a registrable suffix of it
+      if (options?.rpId) {
+        const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+        const rpId = options.rpId.trim().toLowerCase();
+
+        const isLocalhost = (h: string) =>
+          h === "localhost" || h === "127.0.0.1" || h === "::1";
+
+        const hostMatchesRpId =
+          currentHost === rpId ||
+          currentHost.endsWith(`.${rpId}`) ||
+          (isLocalhost(rpId) && isLocalhost(currentHost));
+
+        if (!hostMatchesRpId) {
+          error.value = `Passkey configuration mismatch: rpId '${options.rpId}' does not match current domain '${currentHost}'.`;
+          return null;
+        }
+      }
+
       // Convert base64 strings to ArrayBuffers
       const publicKeyOptions: PublicKeyCredentialRequestOptionsInit = {
         ...options,
@@ -207,6 +227,11 @@ export function useWebAuthn() {
         error.value = "Passkey authentication was cancelled or not allowed";
       } else if (err.name === "InvalidStateError") {
         error.value = "No passkey found for this account on this device";
+      } else if (err.name === "SecurityError") {
+        // Common when rpId does not match current origin (e.g., server returned localhost rpId on production)
+        const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'this site';
+        error.value =
+          `Passkey cannot be used on ${currentHost} due to a relying-party mismatch. Please try again later or contact support.`;
       } else if (err.name === "NotSupportedError") {
         error.value = "Passkeys are not supported on this device";
       } else {

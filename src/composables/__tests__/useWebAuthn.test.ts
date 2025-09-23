@@ -36,6 +36,9 @@ Object.defineProperty(globalThis, "window", {
       credentials: mockCredentials,
     },
     PublicKeyCredential: function PublicKeyCredential() {},
+    location: {
+      hostname: "localhost",
+    },
     btoa: vi.fn((str: string) => Buffer.from(str, "binary").toString("base64")),
     atob: vi.fn((str: string) => Buffer.from(str, "base64").toString("binary")),
     TextEncoder: class {
@@ -320,7 +323,7 @@ describe("useWebAuthn Composable", () => {
     const mockRequestOptions = {
       challenge: "dGVzdC1jaGFsbGVuZ2U=",
       timeout: 60000,
-      rpId: "example.com",
+      rpId: "localhost",
       allowCredentials: [{ type: "public-key", id: "existing-cred-id" }],
       userVerification: "required",
     };

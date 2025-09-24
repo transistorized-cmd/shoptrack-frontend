@@ -11,18 +11,23 @@ export const TIMEOUT_CONFIG = Object.freeze({
 
 // Helper function to build API base URL from environment variables
 export const getApiBaseUrl = (): string => {
+  console.log('getApiBaseUrl called - MODE:', import.meta.env.MODE, 'VITE_API_URL:', import.meta.env.VITE_API_URL);
+
   // In development, use relative URLs to go through Vite proxy
   if (import.meta.env.MODE === 'development') {
+    console.log('Development mode detected, returning /api');
     return '/api';
   }
 
   // Use full URL if provided
   if (import.meta.env.VITE_API_URL) {
+    console.log('Using VITE_API_URL:', import.meta.env.VITE_API_URL);
     return import.meta.env.VITE_API_URL;
   }
 
   // For production deployment, detect if we're on platform.shoptrack.app
   if (typeof window !== 'undefined' && window.location.hostname === 'platform.shoptrack.app') {
+    console.log('Platform hostname detected');
     return 'https://api.shoptrack.app/api';
   }
 
@@ -33,9 +38,13 @@ export const getApiBaseUrl = (): string => {
 
   // Only include port if it's specified and not standard (80/443)
   if (port && port !== "80" && port !== "443") {
-    return `${protocol}://${host}:${port}/api`;
+    const url = `${protocol}://${host}:${port}/api`;
+    console.log('Built URL with port:', url);
+    return url;
   } else {
-    return `${protocol}://${host}/api`;
+    const url = `${protocol}://${host}/api`;
+    console.log('Built URL without port:', url);
+    return url;
   }
 };
 

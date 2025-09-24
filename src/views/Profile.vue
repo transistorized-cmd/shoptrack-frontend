@@ -368,6 +368,9 @@
             </div>
           </div>
 
+          <!-- Subscription Management -->
+          <SubscriptionCard />
+
           <!-- Preferences -->
           <div class="card p-6">
             <div class="flex items-center mb-6">
@@ -498,6 +501,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useWebAuthn } from '@/composables/useWebAuthn';
 import { useOAuth } from '@/composables/useOAuth';
 import { authService } from '@/services/auth.service';
+import SubscriptionCard from '@/components/SubscriptionCard.vue';
 import { safeImageUrl } from '@/utils/urlSanitizer';
 import { availableLocales, type LocaleCode } from '@/i18n';
 import type { UpdateProfileRequest, ChangePasswordRequest, ConnectedAccount } from '@/types/auth';
@@ -725,7 +729,7 @@ async function saveSettings() {
     };
 
     // If only currency changed, use the individual update method that works
-    const currencyChanged = selectedCurrency.value !== originalSettings.value.display.currency;
+    const currencyChanged = originalSettings.value ? selectedCurrency.value !== originalSettings.value.display.currency : false;
     const languageChanged = originalSettings.value && selectedLanguage.value !== originalSettings.value.display.language;
 
     let response;

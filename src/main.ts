@@ -8,7 +8,7 @@ import router from "./router";
 import i18n from "./i18n";
 import { productionSafeI18n } from "./i18n/productionSafe";
 import { initializePlugins } from "./plugins";
-import { csrfManager } from "./composables/useCsrfToken";
+// CSRF token management removed - using pure cookie authentication
 import ErrorBoundary from "./components/ErrorBoundary.vue";
 import EnhancedErrorBoundary from "./components/EnhancedErrorBoundary.vue";
 import { errorLogger } from "./services/errorLogging";
@@ -158,13 +158,8 @@ const initializeApp = async () => {
   // Initialize plugin system
   initializePlugins();
 
-  // Initialize CSRF token management
-  try {
-    await csrfManager.initialize();
-    console.info("CSRF token management initialized");
-  } catch (error) {
-    console.error("Failed to initialize CSRF token management:", error);
-  }
+  // CSRF token management removed - using pure cookie authentication
+  console.info("Using cookie-based authentication - no CSRF token management needed");
 
   const app = createApp(App);
   const pinia = createPinia();

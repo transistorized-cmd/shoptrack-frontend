@@ -49,7 +49,7 @@ export const useAuthStore = defineStore("auth", () => {
   const sessionInfo = computed<SessionInfo>(() => ({
     isAuthenticated: isAuthenticated.value,
     user: user.value,
-    tokens: null, // Tokens are now in secure HTTP-only cookies
+    tokens: null, // Tokens are now in secure HTTP-only cookies - no longer used
     loading: loading.value,
     lastActivity: lastActivity.value,
   }));
@@ -148,7 +148,7 @@ export const useAuthStore = defineStore("auth", () => {
         // Initialize user data (settings, language, etc.) after successful login
         await initializeUserData();
 
-        // Tokens are now handled by secure HTTP-only cookies
+        // Authentication is now handled by secure HTTP-only cookies automatically
         updateLastActivity();
         sessionExpired.value = false;
       } else if (response.errors) {
@@ -237,7 +237,7 @@ export const useAuthStore = defineStore("auth", () => {
 
       if (response.success && response.user) {
         user.value = response.user;
-        // Tokens are now handled by secure HTTP-only cookies
+        // Authentication is now handled by secure HTTP-only cookies automatically
         updateLastActivity();
         sessionExpired.value = false;
 
@@ -274,7 +274,7 @@ export const useAuthStore = defineStore("auth", () => {
 
       if (response.success && response.user) {
         user.value = response.user;
-        // Tokens are now handled by secure HTTP-only cookies
+        // Authentication is now handled by secure HTTP-only cookies automatically
         updateLastActivity();
         sessionExpired.value = false;
 
@@ -310,7 +310,7 @@ export const useAuthStore = defineStore("auth", () => {
     } finally {
       // Always clear local state regardless of API call success
       user.value = null;
-      // Tokens are cleared by the backend via cookie deletion
+      // Authentication cookies are cleared by the backend automatically
       sessionExpired.value = false;
       clearError();
       loading.value = false;
@@ -324,15 +324,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function refreshTokens(): Promise<boolean> {
     try {
-      // Use the dedicated refresh token endpoint with cookie-only authentication
-      const response = await authService.refreshToken();
-      if (response.success && response.user) {
-        user.value = response.user;
-        updateLastActivity();
-        return true;
-      }
-
-      // If refresh token endpoint doesn't return user data, fetch it
+      // With cookie authentication, we just need to check if we're still authenticated
       const userData = await authService.getCurrentUser();
       if (userData) {
         user.value = userData;
@@ -340,7 +332,7 @@ export const useAuthStore = defineStore("auth", () => {
         return true;
       }
 
-      // Refresh failed, logout user
+      // Session expired, logout user
       await logout();
       setSessionExpired(true);
       return false;
@@ -595,7 +587,7 @@ export const useAuthStore = defineStore("auth", () => {
 
       if (response.success && response.user) {
         user.value = response.user;
-        // Tokens are now handled by secure HTTP-only cookies
+        // Authentication is now handled by secure HTTP-only cookies automatically
         updateLastActivity();
       }
 
@@ -752,10 +744,11 @@ export const useAuthStore = defineStore("auth", () => {
       // Initialize language settings
       await languageSettingsService.initializeFromUserSettings();
 
-      // Initialize settings store
-      const { useSettingsStore } = await import("@/stores/settings");
-      const settingsStore = useSettingsStore();
-      await settingsStore.fetchSettings();
+      // Initialize settings store (temporarily disabled - settings endpoint not implemented)
+      // TODO: Re-enable when settings endpoints are added to backend
+      // const { useSettingsStore } = await import("@/stores/settings");
+      // const settingsStore = useSettingsStore();
+      // await settingsStore.fetchSettings();
 
       console.info("User data initialized successfully");
     } catch (error) {

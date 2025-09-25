@@ -13,19 +13,22 @@ export class LanguageSettingsService {
    */
   async initializeFromUserSettings(): Promise<void> {
     try {
-      const settings = await settingsService.getSettings();
-      const userLanguage = settings.display.language;
+      // TODO: Re-enable when settings endpoints are implemented on backend
+      // const settings = await settingsService.getSettings();
+      // const userLanguage = settings.display.language;
 
-      if (userLanguage && this.isValidLocale(userLanguage)) {
-        setLocale(userLanguage as LocaleCode);
-        console.info(
-          `Language initialized from user settings: ${userLanguage}`,
-        );
-      } else {
-        console.warn(
-          `Invalid language in user settings: ${userLanguage}, falling back to current locale`,
-        );
-      }
+      // if (userLanguage && this.isValidLocale(userLanguage)) {
+      //   setLocale(userLanguage as LocaleCode);
+      //   console.info(
+      //     `Language initialized from user settings: ${userLanguage}`,
+      //   );
+      // } else {
+      //   console.warn(
+      //     `Invalid language in user settings: ${userLanguage}, falling back to current locale`,
+      //   );
+      // }
+
+      console.info("Language settings initialization skipped - settings endpoint not implemented");
     } catch (error) {
       console.warn(
         "Failed to load language from user settings, using current locale:",

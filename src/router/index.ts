@@ -111,7 +111,9 @@ router.beforeEach(async (to, from, next) => {
   try {
     const authStore = useAuthStore();
 
-    // Initialize auth store if not already done
+    // Temporarily disable router auth initialization to debug hanging /me endpoint
+    // The router guard was causing automatic logout due to hanging /api/auth/me calls
+    /*
     if (!authStore.isAuthenticated && !authStore.loading) {
       try {
         await authStore.initialize();
@@ -124,6 +126,7 @@ router.beforeEach(async (to, from, next) => {
         // Continue with navigation assuming user is not authenticated
       }
     }
+    */
 
     const isAuthenticated = authStore.isAuthenticated;
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);

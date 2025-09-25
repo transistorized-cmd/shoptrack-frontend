@@ -1,5 +1,4 @@
 import axios from "axios";
-import { csrfManager } from "@/composables/useCsrfToken";
 
 // Timeout configurations for different operation types - reduced to under 10s
 export const TIMEOUT_CONFIG = Object.freeze({
@@ -70,30 +69,17 @@ const api = axios.create({
   withCredentials: true, // Send cookies with all requests for authentication
 });
 
-// Request interceptor - Add CSRF token to all requests
+// Request interceptor - Add common security headers
 api.interceptors.request.use(
   async (config) => {
     try {
-      // Get current CSRF token
-      const token = await csrfManager.getToken();
-
-      // Add CSRF token to headers
-      if (token) {
-        config.headers["X-CSRF-TOKEN"] = token;
-
-        // Also add to request body for form submissions if needed
-        if (
-          config.method?.toLowerCase() === "post" &&
-          config.data instanceof FormData
-        ) {
-          config.data.append("_token", token);
-        }
-      }
-
       // Add common security headers
       config.headers["X-Requested-With"] = "XMLHttpRequest";
+
+      // Note: No longer adding CSRF tokens since we're using pure ASP.NET Core Identity cookie authentication
+      // The backend now relies on built-in anti-forgery protection
     } catch (error) {
-      console.error("Failed to attach CSRF token to request:", error);
+      console.error("Failed to configure request headers:", error);
     }
 
     return config;
@@ -156,57 +142,8 @@ api.interceptors.response.use(
     }
 
     if (error.response?.status === 403) {
-      // CSRF token invalid/mismatch
-      console.warn("CSRF token invalid detected, invalidating token");
-      csrfManager.invalidateToken();
-
-      // Try to refresh token and retry the request once
-      if (!error.config._retried) {
-        error.config._retried = true;
-        try {
-          await csrfManager.initialize();
-          const newToken = await csrfManager.getToken();
-          error.config.headers["X-CSRF-TOKEN"] = newToken;
-
-          if (error.config.data instanceof FormData) {
-            error.config.data.delete("_token");
-            error.config.data.append("_token", newToken);
-          }
-
-          return api.request(error.config);
-        } catch (retryError) {
-          console.error(
-            "Failed to retry request with new CSRF token:",
-            retryError,
-          );
-        }
-      }
-    } else if (error.response?.status === 419) {
-      // CSRF token expired
-      console.warn("CSRF token expired detected, invalidating token");
-      csrfManager.invalidateToken();
-
-      // Try to refresh token and retry the request once
-      if (!error.config._retried) {
-        error.config._retried = true;
-        try {
-          await csrfManager.initialize();
-          const newToken = await csrfManager.getToken();
-          error.config.headers["X-CSRF-TOKEN"] = newToken;
-
-          if (error.config.data instanceof FormData) {
-            error.config.data.delete("_token");
-            error.config.data.append("_token", newToken);
-          }
-
-          return api.request(error.config);
-        } catch (retryError) {
-          console.error(
-            "Failed to retry request with new CSRF token:",
-            retryError,
-          );
-        }
-      }
+      // For cookie authentication, 403 typically means insufficient permissions (not auth failure)
+      console.warn("Access denied (403) - insufficient permissions for this resource");
     } else if (error.response?.status === 500) {
       // Handle server error
       console.error("Server error occurred");

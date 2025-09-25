@@ -232,13 +232,8 @@ class AuthService {
     return response.data;
   }
 
-  // Token refresh - now using cookies only
-  async refreshToken(): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>(
-      `${this.API_BASE}/refresh-token`,
-    );
-    return response.data;
-  }
+  // Token refresh not needed with cookie authentication
+  // Cookies are automatically managed by the browser and backend
 
   // OAuth account management
   async connectOAuthAccount(provider: string): Promise<string> {
@@ -271,10 +266,27 @@ class AuthService {
     );
     return response.data;
   }
-  // Initialize auth - kept for backward compatibility
+  // Initialize auth for cookie-based authentication
   initializeAuth(): void {
+    // Clean up any old JWT tokens from localStorage/sessionStorage (one-time cleanup)
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('shoptrack_token');
+
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('accessToken');
+      sessionStorage.removeItem('refreshToken');
+      sessionStorage.removeItem('authToken');
+      sessionStorage.removeItem('shoptrack_token');
+    } catch (error) {
+      console.warn('Failed to clean up old JWT tokens:', error);
+    }
+
     // HTTP-only cookies are automatically sent with requests
-    // This method is kept for components that still call it
+    // No manual token management needed
   }
 }
 

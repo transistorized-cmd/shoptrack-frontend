@@ -508,7 +508,7 @@ import type { UpdateProfileRequest, ChangePasswordRequest, ConnectedAccount } fr
 import type { UserSettings, DisplaySettings } from '@/types/settings';
 import { settingsService } from '@/services/settings.service';
 import { languageSettingsService } from '@/services/languageSettings.service';
-import { CURRENCY_OPTIONS } from '@/types/settings';
+import { CURRENCY_OPTIONS, DEFAULT_SETTINGS } from '@/types/settings';
 
 const router = useRouter();
 const { t, locale: currentLocale, setLocale } = useTranslation();
@@ -697,17 +697,48 @@ async function loadUserSettings() {
   try {
     settingsLoading.value = true;
     const settings = await settingsService.getSettings();
-    userSettings.value = settings;
-    originalSettings.value = JSON.parse(JSON.stringify(settings)); // Deep clone
 
-    // Update reactive values
-    selectedLanguage.value = settings.display.language as LocaleCode || 'en';
-    selectedCurrency.value = settings.display.currency || 'USD';
+    const mergedSettings: UserSettings = {
+      notifications: {
+        ...DEFAULT_SETTINGS.notifications,
+        ...(settings?.notifications ?? {}),
+      },
+      display: {
+        ...DEFAULT_SETTINGS.display,
+        ...(settings?.display ?? {}),
+      },
+      privacy: {
+        ...DEFAULT_SETTINGS.privacy,
+        ...(settings?.privacy ?? {}),
+      },
+      receipts: {
+        ...DEFAULT_SETTINGS.receipts,
+        ...(settings?.receipts ?? {}),
+      },
+    };
+
+    userSettings.value = mergedSettings;
+    originalSettings.value = JSON.parse(JSON.stringify(mergedSettings));
+
+    selectedLanguage.value = (mergedSettings.display.language as LocaleCode) || 'en';
+    selectedCurrency.value = mergedSettings.display.currency || 'USD';
   } catch (err) {
     console.warn('Failed to load user settings, using defaults:', err);
     // Use defaults if settings don't exist yet
-    selectedCurrency.value = 'USD';
-    selectedLanguage.value = currentLocale.value as LocaleCode;
+    const fallback: UserSettings = {
+      notifications: { ...DEFAULT_SETTINGS.notifications },
+      display: {
+        ...DEFAULT_SETTINGS.display,
+        language: currentLocale.value,
+      },
+      privacy: { ...DEFAULT_SETTINGS.privacy },
+      receipts: { ...DEFAULT_SETTINGS.receipts },
+    };
+
+    selectedCurrency.value = fallback.display.currency;
+    selectedLanguage.value = fallback.display.language as LocaleCode;
+    userSettings.value = fallback;
+    originalSettings.value = JSON.parse(JSON.stringify(fallback));
   } finally {
     settingsLoading.value = false;
   }

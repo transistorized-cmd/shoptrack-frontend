@@ -1,5 +1,5 @@
-import { apiWithTimeout } from '@/services/api';
-import type { SearchRequest, SearchResponse } from '@/types/search';
+import { apiWithTimeout } from "@/services/api";
+import type { SearchRequest, SearchResponse } from "@/types/search";
 
 export class SearchService {
   /**
@@ -7,18 +7,18 @@ export class SearchService {
    */
   async search(request: SearchRequest): Promise<SearchResponse> {
     try {
-      const response = await apiWithTimeout.fast.get('/search', {
+      const response = await apiWithTimeout.fast.get("/search", {
         params: {
           query: request.query,
           locale: request.locale,
-          limit: request.limit
-        }
+          limit: request.limit,
+        },
       });
 
       return response.data;
     } catch (error) {
-      console.error('Search failed:', error);
-      throw new Error('Failed to perform search');
+      console.error("Search failed:", error);
+      throw new Error("Failed to perform search");
     }
   }
 
@@ -27,11 +27,11 @@ export class SearchService {
    */
   async searchPost(request: SearchRequest): Promise<SearchResponse> {
     try {
-      const response = await apiWithTimeout.fast.post('/search', request);
+      const response = await apiWithTimeout.fast.post("/search", request);
       return response.data;
     } catch (error) {
-      console.error('Search POST failed:', error);
-      throw new Error('Failed to perform search');
+      console.error("Search POST failed:", error);
+      throw new Error("Failed to perform search");
     }
   }
 }

@@ -72,8 +72,7 @@ export function validateNumericId(
   }
 
   // Check for explicit binary/octal notation
-  if (/^0[bB][01]+$/.test(cleanParam) ||
-      /^0[oO][0-7]+$/.test(cleanParam)) {
+  if (/^0[bB][01]+$/.test(cleanParam) || /^0[oO][0-7]+$/.test(cleanParam)) {
     return {
       isValid: false,
       error: "ID parameter must be a simple decimal integer",
@@ -414,10 +413,12 @@ export function validateDateParam(
   }
 
   // Verify the date components match the input (catches invalid dates like Feb 30)
-  const [year, month, day] = cleanParam.split('-').map(Number);
-  if (date.getFullYear() !== year ||
-      date.getMonth() !== (month - 1) ||
-      date.getDate() !== day) {
+  const [year, month, day] = cleanParam.split("-").map(Number);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
     return {
       isValid: false,
       error: "Date parameter is not a valid date",

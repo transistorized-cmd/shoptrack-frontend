@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import {
   getPerformanceConfig,
   loadBaseline,
   saveBaseline,
   type PerformanceBaseline,
-} from './performance.config';
-import { PerformanceBenchmark } from './utils/performance-helpers';
+} from "./performance.config";
+import { PerformanceBenchmark } from "./utils/performance-helpers";
 
 /**
  * Performance Test Suite Runner
@@ -57,10 +57,10 @@ export class PerformanceTestRunner {
     this.baseline = await loadBaseline(this.config.monitoring.baselineFile);
 
     if (this.config.monitoring.logResults) {
-      console.log('Performance Test Configuration:', {
-        environment: process.env.NODE_ENV || 'test',
-        isCI: process.env.CI === 'true',
-        isDev: process.env.VITEST_DEV === 'true',
+      console.log("Performance Test Configuration:", {
+        environment: process.env.NODE_ENV || "test",
+        isCI: process.env.CI === "true",
+        isDev: process.env.VITEST_DEV === "true",
         config: this.config,
       });
     }
@@ -85,15 +85,28 @@ export class PerformanceTestRunner {
     return passed;
   }
 
-  detectRegressions(): Array<{ testName: string; baseline: number; current: number; regression: number }> {
+  detectRegressions(): Array<{
+    testName: string;
+    baseline: number;
+    current: number;
+    regression: number;
+  }> {
     if (!this.baseline) return [];
 
-    const regressions: Array<{ testName: string; baseline: number; current: number; regression: number }> = [];
+    const regressions: Array<{
+      testName: string;
+      baseline: number;
+      current: number;
+      regression: number;
+    }> = [];
 
     for (const result of this.results) {
       const baselineMetric = this.baseline.metrics[result.name];
       if (baselineMetric) {
-        const regression = ((result.duration - baselineMetric.duration) / baselineMetric.duration) * 100;
+        const regression =
+          ((result.duration - baselineMetric.duration) /
+            baselineMetric.duration) *
+          100;
 
         if (regression > this.config.monitoring.regressionThreshold) {
           regressions.push({
@@ -112,7 +125,7 @@ export class PerformanceTestRunner {
   calculateHealthScore(): number {
     if (this.results.length === 0) return 0;
 
-    const passedTests = this.results.filter(r => r.passed).length;
+    const passedTests = this.results.filter((r) => r.passed).length;
     const baseScore = (passedTests / this.results.length) * 100;
 
     // Penalize for regressions
@@ -128,43 +141,49 @@ export class PerformanceTestRunner {
 
     const report: PerformanceReport = {
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'test',
+      environment: process.env.NODE_ENV || "test",
       config: this.config,
       results: this.results,
       regressions,
       summary: {
         totalTests: this.results.length,
-        passedTests: this.results.filter(r => r.passed).length,
-        failedTests: this.results.filter(r => !r.passed).length,
+        passedTests: this.results.filter((r) => r.passed).length,
+        failedTests: this.results.filter((r) => !r.passed).length,
         totalRegressions: regressions.length,
         overallHealthScore: healthScore,
       },
     };
 
     if (this.config.monitoring.logResults) {
-      console.log('\n🚀 Performance Test Report');
-      console.log('=' .repeat(50));
+      console.log("\n🚀 Performance Test Report");
+      console.log("=".repeat(50));
       console.log(`Environment: ${report.environment}`);
       console.log(`Timestamp: ${report.timestamp}`);
       console.log(`Total Tests: ${report.summary.totalTests}`);
       console.log(`Passed: ${report.summary.passedTests}`);
       console.log(`Failed: ${report.summary.failedTests}`);
       console.log(`Regressions: ${report.summary.totalRegressions}`);
-      console.log(`Health Score: ${report.summary.overallHealthScore.toFixed(1)}%`);
+      console.log(
+        `Health Score: ${report.summary.overallHealthScore.toFixed(1)}%`,
+      );
 
       if (regressions.length > 0) {
-        console.log('\n⚠️  Performance Regressions Detected:');
-        regressions.forEach(regression => {
-          console.log(`  ${regression.testName}: ${regression.regression.toFixed(1)}% slower`);
+        console.log("\n⚠️  Performance Regressions Detected:");
+        regressions.forEach((regression) => {
+          console.log(
+            `  ${regression.testName}: ${regression.regression.toFixed(1)}% slower`,
+          );
           console.log(`    Baseline: ${regression.baseline.toFixed(2)}ms`);
           console.log(`    Current: ${regression.current.toFixed(2)}ms`);
         });
       }
 
-      console.log('\n📊 Test Results Summary:');
-      this.results.forEach(result => {
-        const status = result.passed ? '✅' : '❌';
-        console.log(`  ${status} ${result.name}: ${result.duration.toFixed(2)}ms`);
+      console.log("\n📊 Test Results Summary:");
+      this.results.forEach((result) => {
+        const status = result.passed ? "✅" : "❌";
+        console.log(
+          `  ${status} ${result.name}: ${result.duration.toFixed(2)}ms`,
+        );
         if (result.threshold) {
           console.log(`    Threshold: ${result.threshold}ms`);
         }
@@ -177,9 +196,9 @@ export class PerformanceTestRunner {
   async saveBaseline(): Promise<void> {
     if (!this.config.monitoring.saveMetrics) return;
 
-    const metrics: PerformanceBaseline['metrics'] = {};
+    const metrics: PerformanceBaseline["metrics"] = {};
 
-    this.results.forEach(result => {
+    this.results.forEach((result) => {
       metrics[result.name] = {
         duration: result.duration,
         memoryUsage: result.memoryUsage,
@@ -215,7 +234,7 @@ export function getTestRunner(): PerformanceTestRunner {
 }
 
 // Performance test suite setup and teardown
-describe('Performance Test Suite', () => {
+describe("Performance Test Suite", () => {
   let testRunner: PerformanceTestRunner;
 
   beforeAll(async () => {
@@ -232,29 +251,34 @@ describe('Performance Test Suite', () => {
     }
 
     // Fail the test suite if there are critical regressions
-    if (testRunner.getConfig().monitoring.alertOnRegression && report.regressions.length > 0) {
-      const criticalRegressions = report.regressions.filter(r => r.regression > 50); // >50% regression
+    if (
+      testRunner.getConfig().monitoring.alertOnRegression &&
+      report.regressions.length > 0
+    ) {
+      const criticalRegressions = report.regressions.filter(
+        (r) => r.regression > 50,
+      ); // >50% regression
 
       if (criticalRegressions.length > 0) {
         throw new Error(
-          `Critical performance regressions detected:\n${
-            criticalRegressions.map(r =>
-              `  - ${r.testName}: ${r.regression.toFixed(1)}% slower`
-            ).join('\n')
-          }`
+          `Critical performance regressions detected:\n${criticalRegressions
+            .map((r) => `  - ${r.testName}: ${r.regression.toFixed(1)}% slower`)
+            .join("\n")}`,
         );
       }
     }
 
     // Fail if overall health score is too low
     if (report.summary.overallHealthScore < 70) {
-      console.warn(`Low performance health score: ${report.summary.overallHealthScore.toFixed(1)}%`);
+      console.warn(
+        `Low performance health score: ${report.summary.overallHealthScore.toFixed(1)}%`,
+      );
     }
 
     testRunner.clear();
   }, 10000);
 
-  it('should validate performance test configuration', () => {
+  it("should validate performance test configuration", () => {
     const config = testRunner.getConfig();
 
     expect(config).toBeDefined();
@@ -277,14 +301,14 @@ describe('Performance Test Suite', () => {
     expect(config.apiOptimization.minCacheHitRate).toBeLessThanOrEqual(1);
   });
 
-  it('should provide test utilities and helpers', () => {
+  it("should provide test utilities and helpers", () => {
     const benchmark = testRunner.getBenchmark();
 
     expect(benchmark).toBeDefined();
-    expect(typeof benchmark.run).toBe('function');
-    expect(typeof benchmark.getResults).toBe('function');
-    expect(typeof benchmark.getAverageMetrics).toBe('function');
-    expect(typeof benchmark.summary).toBe('function');
+    expect(typeof benchmark.run).toBe("function");
+    expect(typeof benchmark.getResults).toBe("function");
+    expect(typeof benchmark.getAverageMetrics).toBe("function");
+    expect(typeof benchmark.summary).toBe("function");
   });
 });
 

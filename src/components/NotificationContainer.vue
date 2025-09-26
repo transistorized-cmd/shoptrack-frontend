@@ -103,39 +103,11 @@
 
 <script setup lang="ts">
 import { useNotifications } from "@/composables/useNotifications";
+import { getNotificationClasses, getIconClasses, getNotificationIcon } from '@/utils/uiHelpers';
 
 const { notifications, removeNotification } = useNotifications();
 
-const getNotificationClasses = (type: string) => {
-  const classes = {
-    success: "border-l-4 border-green-500",
-    error: "border-l-4 border-red-500",
-    warning: "border-l-4 border-yellow-500",
-    info: "border-l-4 border-blue-500",
-  };
-  return classes[type as keyof typeof classes] || classes.info;
-};
 
-const getIconClasses = (type: string) => {
-  const classes = {
-    success: "text-green-400",
-    error: "text-red-400",
-    warning: "text-yellow-400",
-    info: "text-blue-400",
-  };
-  return classes[type as keyof typeof classes] || classes.info;
-};
-
-const getNotificationIcon = (type: string) => {
-  // Return SVG components as strings since we're using inline SVG
-  const icons = {
-    success: "svg",
-    error: "svg",
-    warning: "svg",
-    info: "svg",
-  };
-  return icons[type as keyof typeof icons] || icons.info;
-};
 </script>
 
 <style scoped>

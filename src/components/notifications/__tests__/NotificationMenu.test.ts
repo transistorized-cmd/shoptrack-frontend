@@ -31,8 +31,8 @@ const createTestI18n = (locale = "en") => {
           markRead: "Mark as read",
           markAllRead: "Mark all read",
           loadMore: "Load more notifications",
-          clearRead: "Clear read"
-        }
+          clearRead: "Clear read",
+        },
       },
       es: {},
     },
@@ -272,10 +272,7 @@ describe("NotificationMenu Component", () => {
       const readNotification = createMockNotification({ isRead: true });
       const unreadNotification = createMockNotification({ isRead: false });
 
-      mockJobNotifications.value =[
-        readNotification,
-        unreadNotification,
-      ];
+      mockJobNotifications.value = [readNotification, unreadNotification];
       wrapper = createWrapper();
 
       const readDotClass = wrapper.vm.getNotificationDotClass(readNotification);
@@ -336,9 +333,7 @@ describe("NotificationMenu Component", () => {
     });
 
     it("should call markAllAsRead when mark all read is clicked", async () => {
-      mockJobNotifications.value = [
-        createMockNotification({ isRead: false }),
-      ];
+      mockJobNotifications.value = [createMockNotification({ isRead: false })];
 
       wrapper = createWrapper();
 
@@ -427,10 +422,17 @@ describe("NotificationMenu Component", () => {
       // Add some unread notifications
       mockJobNotifications.value = [
         {
-          id: "notif-1", isRead: false, title: "Test", message: "Test message",
-          jobId: "job-1", userId: 123, notificationType: "job_completed",
-          data: {}, isPersistent: true, createdAt: new Date().toISOString()
-        }
+          id: "notif-1",
+          isRead: false,
+          title: "Test",
+          message: "Test message",
+          jobId: "job-1",
+          userId: 123,
+          notificationType: "job_completed",
+          data: {},
+          isPersistent: true,
+          createdAt: new Date().toISOString(),
+        },
       ];
       mockUnreadCount.value = 1;
 
@@ -446,23 +448,23 @@ describe("NotificationMenu Component", () => {
       mockMarkAllAsRead.mockReturnValue(pendingPromise);
 
       // Click the "Mark all read" button to trigger loading state
-      const markAllButton = wrapper.findAll('button').find((btn: any) =>
-        btn.text().includes('Mark all read')
-      );
+      const markAllButton = wrapper
+        .findAll("button")
+        .find((btn: any) => btn.text().includes("Mark all read"));
       expect(markAllButton?.exists()).toBe(true);
 
       // Trigger the click to start the loading state - this will start the promise
-      const clickPromise = markAllButton?.trigger('click');
+      const clickPromise = markAllButton?.trigger("click");
 
       // Wait for the click event to be processed but not for the async operation to complete
       await nextTick();
 
       // Now the button should be disabled and show loading text
-      const loadingButton = wrapper.findAll('button').find((btn: any) =>
-        btn.text().includes('Marking...')
-      );
+      const loadingButton = wrapper
+        .findAll("button")
+        .find((btn: any) => btn.text().includes("Marking..."));
       expect(loadingButton?.exists()).toBe(true);
-      expect(loadingButton?.attributes('disabled')).toBeDefined();
+      expect(loadingButton?.attributes("disabled")).toBeDefined();
 
       // Resolve the promise to clean up
       resolveMarkAll!();

@@ -10,18 +10,23 @@ export interface CurrencyInfo {
  * Get currency information by currency code
  */
 export function getCurrencyInfo(currencyCode: string): CurrencyInfo | null {
-  const currency = CURRENCY_OPTIONS.find(c => c.code === currencyCode);
-  return currency ? { code: currency.code, name: currency.name, symbol: currency.symbol } : null;
+  const currency = CURRENCY_OPTIONS.find((c) => c.code === currencyCode);
+  return currency
+    ? { code: currency.code, name: currency.name, symbol: currency.symbol }
+    : null;
 }
 
 /**
  * Check if a currency symbol is unique (not shared with other currencies)
  */
 export function isUniqueCurrencySymbol(symbol: string): boolean {
-  const symbolCounts = CURRENCY_OPTIONS.reduce((counts, currency) => {
-    counts[currency.symbol] = (counts[currency.symbol] || 0) + 1;
-    return counts;
-  }, {} as Record<string, number>);
+  const symbolCounts = CURRENCY_OPTIONS.reduce(
+    (counts, currency) => {
+      counts[currency.symbol] = (counts[currency.symbol] || 0) + 1;
+      return counts;
+    },
+    {} as Record<string, number>,
+  );
 
   return symbolCounts[symbol] === 1;
 }
@@ -47,12 +52,12 @@ export function formatCurrency(
   options: {
     decimals?: number;
     showZeroDecimals?: boolean;
-  } = {}
+  } = {},
 ): string {
   const { decimals = 2, showZeroDecimals = true } = options;
 
   // Default to user's preferred currency if receipt currency is not available
-  const currencyCode = receiptCurrency || userPreferredCurrency || 'USD';
+  const currencyCode = receiptCurrency || userPreferredCurrency || "USD";
   const currencyInfo = getCurrencyInfo(currencyCode);
 
   if (!currencyInfo) {
@@ -61,9 +66,10 @@ export function formatCurrency(
   }
 
   // Format the amount
-  const formattedAmount = showZeroDecimals || amount % 1 !== 0
-    ? amount.toFixed(decimals)
-    : amount.toString();
+  const formattedAmount =
+    showZeroDecimals || amount % 1 !== 0
+      ? amount.toFixed(decimals)
+      : amount.toString();
 
   // If no receipt currency or it matches user preference, show only symbol
   if (!receiptCurrency || receiptCurrency === userPreferredCurrency) {
@@ -97,18 +103,21 @@ export function getCurrencySymbol(currencyCode: string): string {
 export function formatCurrencyCompact(
   amount: number,
   receiptCurrency?: string,
-  userPreferredCurrency?: string
+  userPreferredCurrency?: string,
 ): string {
   return formatCurrency(amount, receiptCurrency, userPreferredCurrency, {
     decimals: 2,
-    showZeroDecimals: true
+    showZeroDecimals: true,
   });
 }
 
 /**
  * Check if two currency codes represent the same currency
  */
-export function isSameCurrency(currency1?: string, currency2?: string): boolean {
+export function isSameCurrency(
+  currency1?: string,
+  currency2?: string,
+): boolean {
   if (!currency1 || !currency2) return false;
   return currency1.toUpperCase() === currency2.toUpperCase();
 }

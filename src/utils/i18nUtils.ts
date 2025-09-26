@@ -1,5 +1,5 @@
 // Universal i18n utilities that work in both development and production
-import type { LocaleCode } from '@/i18n';
+import type { LocaleCode } from "@/i18n";
 
 // Import the appropriate implementation based on environment
 let productionSafeI18n: any = null;
@@ -9,12 +9,12 @@ let regularI18n: any = null;
 async function loadI18nModule() {
   if (import.meta.env.PROD) {
     if (!productionSafeI18n) {
-      productionSafeI18n = await import('@/i18n/productionSafe');
+      productionSafeI18n = await import("@/i18n/productionSafe");
     }
     return productionSafeI18n;
   } else {
     if (!regularI18n) {
-      regularI18n = await import('@/i18n');
+      regularI18n = await import("@/i18n");
     }
     return regularI18n;
   }
@@ -42,21 +42,21 @@ export function getLocaleFlag(code: LocaleCode): string {
 export function getCurrentLocale(): LocaleCode {
   try {
     // Try to get from localStorage first as a fallback
-    const stored = localStorage.getItem('shoptrack-locale');
-    if (stored && (stored === 'en' || stored === 'es')) {
+    const stored = localStorage.getItem("shoptrack-locale");
+    if (stored && (stored === "en" || stored === "es")) {
       return stored as LocaleCode;
     }
 
     // Check browser language
-    const browserLocale = navigator.language.split('-')[0];
-    if (browserLocale === 'es') {
-      return 'es';
+    const browserLocale = navigator.language.split("-")[0];
+    if (browserLocale === "es") {
+      return "es";
     }
 
-    return 'en';
+    return "en";
   } catch (error) {
     console.warn('Failed to get current locale, falling back to "en":', error);
-    return 'en';
+    return "en";
   }
 }
 
@@ -66,12 +66,12 @@ export async function setLocale(locale: LocaleCode): Promise<void> {
     const i18nModule = await loadI18nModule();
     i18nModule.setLocale(locale);
   } catch (error) {
-    console.warn('Failed to set locale:', locale, error);
+    console.warn("Failed to set locale:", locale, error);
     // Fallback: at least save to localStorage
     try {
-      localStorage.setItem('shoptrack-locale', locale);
+      localStorage.setItem("shoptrack-locale", locale);
     } catch (storageError) {
-      console.warn('Failed to save locale to localStorage:', storageError);
+      console.warn("Failed to save locale to localStorage:", storageError);
     }
   }
 }

@@ -3,8 +3,8 @@
  * Provides comprehensive mocking for the auth store to prevent test failures
  * due to unmocked store methods and computed properties.
  */
-import { vi, type MockedFunction } from 'vitest';
-import { ref, computed } from 'vue';
+import { vi, type MockedFunction } from "vitest";
+import { ref, computed } from "vue";
 import type {
   User,
   AuthTokens,
@@ -22,21 +22,21 @@ import type {
   PasskeyRegistrationRequest,
   TwoFactorRequest,
   UserSession,
-} from '@/types/auth';
+} from "@/types/auth";
 
 /**
  * Mock user data for testing
  */
 export const createMockUser = (overrides: Partial<User> = {}): User => ({
-  id: '1',
-  email: 'test@example.com',
-  firstName: 'John',
-  lastName: 'Doe',
-  userName: 'johndoe',
-  profilePicture: 'https://example.com/avatar.jpg',
-  createdAt: '2023-01-01T00:00:00Z',
+  id: "1",
+  email: "test@example.com",
+  firstName: "John",
+  lastName: "Doe",
+  userName: "johndoe",
+  profilePicture: "https://example.com/avatar.jpg",
+  createdAt: "2023-01-01T00:00:00Z",
   emailConfirmed: true,
-  emailVerifiedAt: '2023-01-01T00:00:00Z',
+  emailVerifiedAt: "2023-01-01T00:00:00Z",
   hasPassword: true,
   passkeysEnabled: false,
   connectedAccounts: [],
@@ -93,30 +93,34 @@ export function createAuthStoreMock(initialUser: User | null = null) {
     sessionInfo,
 
     // Actions - all properly mocked
-    initialize: vi.fn().mockResolvedValue(undefined) as MockedFunction<() => Promise<void>>,
+    initialize: vi.fn().mockResolvedValue(undefined) as MockedFunction<
+      () => Promise<void>
+    >,
 
     login: vi.fn().mockResolvedValue({
       success: true,
-      message: 'Login successful',
-      user: user.value
+      message: "Login successful",
+      user: user.value,
     }) as MockedFunction<(credentials: LoginRequest) => Promise<AuthResponse>>,
 
     register: vi.fn().mockResolvedValue({
       success: true,
-      message: 'Registration successful'
+      message: "Registration successful",
     }) as MockedFunction<(userData: RegisterRequest) => Promise<AuthResponse>>,
 
     loginWithOAuth: vi.fn().mockResolvedValue({
       success: true,
-      message: 'OAuth login successful',
-      user: user.value
+      message: "OAuth login successful",
+      user: user.value,
     }) as MockedFunction<(request: OAuthLoginRequest) => Promise<AuthResponse>>,
 
     loginWithPasskey: vi.fn().mockResolvedValue({
       success: true,
-      message: 'Passkey login successful',
-      user: user.value
-    }) as MockedFunction<(request: PasskeyLoginRequest) => Promise<AuthResponse>>,
+      message: "Passkey login successful",
+      user: user.value,
+    }) as MockedFunction<
+      (request: PasskeyLoginRequest) => Promise<AuthResponse>
+    >,
 
     logout: vi.fn().mockImplementation(() => {
       user.value = null;
@@ -126,34 +130,46 @@ export function createAuthStoreMock(initialUser: User | null = null) {
       return Promise.resolve();
     }) as MockedFunction<() => Promise<void>>,
 
-    refreshTokens: vi.fn().mockResolvedValue(true) as MockedFunction<() => Promise<boolean>>,
+    refreshTokens: vi.fn().mockResolvedValue(true) as MockedFunction<
+      () => Promise<boolean>
+    >,
 
     forgotPassword: vi.fn().mockResolvedValue({
       success: true,
-      message: 'Password reset email sent'
-    }) as MockedFunction<(request: ForgotPasswordRequest) => Promise<AuthResponse>>,
+      message: "Password reset email sent",
+    }) as MockedFunction<
+      (request: ForgotPasswordRequest) => Promise<AuthResponse>
+    >,
 
     resetPassword: vi.fn().mockResolvedValue({
       success: true,
-      message: 'Password reset successful'
-    }) as MockedFunction<(request: ResetPasswordRequest) => Promise<AuthResponse>>,
+      message: "Password reset successful",
+    }) as MockedFunction<
+      (request: ResetPasswordRequest) => Promise<AuthResponse>
+    >,
 
     changePassword: vi.fn().mockResolvedValue({
       success: true,
-      message: 'Password changed successfully'
-    }) as MockedFunction<(request: ChangePasswordRequest) => Promise<AuthResponse>>,
+      message: "Password changed successfully",
+    }) as MockedFunction<
+      (request: ChangePasswordRequest) => Promise<AuthResponse>
+    >,
 
-    updateProfile: vi.fn().mockImplementation((request: UpdateProfileRequest) => {
-      if (user.value) {
-        // Update user data optimistically
-        user.value = { ...user.value, ...request };
-      }
-      return Promise.resolve({
-        success: true,
-        message: 'Profile updated successfully',
-        user: user.value
-      });
-    }) as MockedFunction<(request: UpdateProfileRequest) => Promise<AuthResponse>>,
+    updateProfile: vi
+      .fn()
+      .mockImplementation((request: UpdateProfileRequest) => {
+        if (user.value) {
+          // Update user data optimistically
+          user.value = { ...user.value, ...request };
+        }
+        return Promise.resolve({
+          success: true,
+          message: "Profile updated successfully",
+          user: user.value,
+        });
+      }) as MockedFunction<
+      (request: UpdateProfileRequest) => Promise<AuthResponse>
+    >,
 
     registerPasskey: vi.fn().mockImplementation(() => {
       if (user.value) {
@@ -161,9 +177,11 @@ export function createAuthStoreMock(initialUser: User | null = null) {
       }
       return Promise.resolve({
         success: true,
-        message: 'Passkey registered successfully'
+        message: "Passkey registered successfully",
       });
-    }) as MockedFunction<(request: PasskeyRegistrationRequest) => Promise<AuthResponse>>,
+    }) as MockedFunction<
+      (request: PasskeyRegistrationRequest) => Promise<AuthResponse>
+    >,
 
     removePasskey: vi.fn().mockImplementation(() => {
       if (user.value) {
@@ -171,14 +189,14 @@ export function createAuthStoreMock(initialUser: User | null = null) {
       }
       return Promise.resolve({
         success: true,
-        message: 'Passkey removed successfully'
+        message: "Passkey removed successfully",
       });
     }) as MockedFunction<() => Promise<AuthResponse>>,
 
     verifyTwoFactor: vi.fn().mockResolvedValue({
       success: true,
-      message: 'Two-factor verification successful',
-      user: user.value
+      message: "Two-factor verification successful",
+      user: user.value,
     }) as MockedFunction<(request: TwoFactorRequest) => Promise<AuthResponse>>,
 
     confirmEmail: vi.fn().mockImplementation((token: string) => {
@@ -187,13 +205,13 @@ export function createAuthStoreMock(initialUser: User | null = null) {
       }
       return Promise.resolve({
         success: true,
-        message: 'Email confirmed successfully'
+        message: "Email confirmed successfully",
       });
     }) as MockedFunction<(token: string) => Promise<AuthResponse>>,
 
     resendEmailConfirmation: vi.fn().mockResolvedValue({
       success: true,
-      message: 'Confirmation email sent'
+      message: "Confirmation email sent",
     }) as MockedFunction<() => Promise<AuthResponse>>,
 
     clearError: vi.fn().mockImplementation(() => {
@@ -208,26 +226,32 @@ export function createAuthStoreMock(initialUser: User | null = null) {
       sessionExpired.value = expired;
     }) as MockedFunction<(expired: boolean) => void>,
 
-    setOnSessionExpiredCallback: vi.fn() as MockedFunction<(callback: () => void) => void>,
+    setOnSessionExpiredCallback: vi.fn() as MockedFunction<
+      (callback: () => void) => void
+    >,
 
     // Session management
-    getSessions: vi.fn().mockResolvedValue([]) as MockedFunction<() => Promise<UserSession[]>>,
+    getSessions: vi.fn().mockResolvedValue([]) as MockedFunction<
+      () => Promise<UserSession[]>
+    >,
 
     revokeSession: vi.fn().mockResolvedValue({
       success: true,
-      message: 'Session revoked successfully'
+      message: "Session revoked successfully",
     }) as MockedFunction<(sessionId: string) => Promise<AuthResponse>>,
 
     revokeAllSessions: vi.fn().mockImplementation(() => {
       user.value = null;
       return Promise.resolve({
         success: true,
-        message: 'All sessions revoked'
+        message: "All sessions revoked",
       });
     }) as MockedFunction<() => Promise<AuthResponse>>,
 
     // Internal helper
-    initializeUserData: vi.fn().mockResolvedValue(undefined) as MockedFunction<() => Promise<void>>,
+    initializeUserData: vi.fn().mockResolvedValue(undefined) as MockedFunction<
+      () => Promise<void>
+    >,
   };
 
   return mockStore;
@@ -236,7 +260,9 @@ export function createAuthStoreMock(initialUser: User | null = null) {
 /**
  * Create an authenticated auth store mock with a logged-in user
  */
-export function createAuthenticatedAuthStoreMock(userOverrides: Partial<User> = {}) {
+export function createAuthenticatedAuthStoreMock(
+  userOverrides: Partial<User> = {},
+) {
   const mockUser = createMockUser(userOverrides);
   return createAuthStoreMock(mockUser);
 }
@@ -251,28 +277,40 @@ export function createUnauthenticatedAuthStoreMock() {
 /**
  * Helper to update the user in an existing auth store mock
  */
-export function setMockUser(authStoreMock: ReturnType<typeof createAuthStoreMock>, user: User | null) {
+export function setMockUser(
+  authStoreMock: ReturnType<typeof createAuthStoreMock>,
+  user: User | null,
+) {
   authStoreMock.user.value = user;
 }
 
 /**
  * Helper to set loading state in an auth store mock
  */
-export function setMockLoading(authStoreMock: ReturnType<typeof createAuthStoreMock>, loading: boolean) {
+export function setMockLoading(
+  authStoreMock: ReturnType<typeof createAuthStoreMock>,
+  loading: boolean,
+) {
   authStoreMock.loading.value = loading;
 }
 
 /**
  * Helper to set error state in an auth store mock
  */
-export function setMockError(authStoreMock: ReturnType<typeof createAuthStoreMock>, error: AuthError | null) {
+export function setMockError(
+  authStoreMock: ReturnType<typeof createAuthStoreMock>,
+  error: AuthError | null,
+) {
   authStoreMock.error.value = error;
 }
 
 /**
  * Helper to simulate login in a mock auth store
  */
-export function simulateLogin(authStoreMock: ReturnType<typeof createAuthStoreMock>, user: User) {
+export function simulateLogin(
+  authStoreMock: ReturnType<typeof createAuthStoreMock>,
+  user: User,
+) {
   authStoreMock.user.value = user;
   authStoreMock.loading.value = false;
   authStoreMock.error.value = null;
@@ -283,7 +321,9 @@ export function simulateLogin(authStoreMock: ReturnType<typeof createAuthStoreMo
 /**
  * Helper to simulate logout in a mock auth store
  */
-export function simulateLogout(authStoreMock: ReturnType<typeof createAuthStoreMock>) {
+export function simulateLogout(
+  authStoreMock: ReturnType<typeof createAuthStoreMock>,
+) {
   authStoreMock.user.value = null;
   authStoreMock.loading.value = false;
   authStoreMock.error.value = null;
@@ -293,7 +333,9 @@ export function simulateLogout(authStoreMock: ReturnType<typeof createAuthStoreM
 /**
  * Mock the auth store module for vi.mock()
  */
-export function mockAuthStoreModule(authStoreMock?: ReturnType<typeof createAuthStoreMock>) {
+export function mockAuthStoreModule(
+  authStoreMock?: ReturnType<typeof createAuthStoreMock>,
+) {
   const mockStore = authStoreMock || createAuthStoreMock();
 
   return {
@@ -309,34 +351,38 @@ export const authTestScenarios = {
   /**
    * Authenticated user with all features enabled
    */
-  authenticatedUser: () => createAuthenticatedAuthStoreMock({
-    emailConfirmed: true,
-    hasPassword: true,
-    passkeysEnabled: true,
-  }),
+  authenticatedUser: () =>
+    createAuthenticatedAuthStoreMock({
+      emailConfirmed: true,
+      hasPassword: true,
+      passkeysEnabled: true,
+    }),
 
   /**
    * Authenticated user with unconfirmed email
    */
-  unconfirmedUser: () => createAuthenticatedAuthStoreMock({
-    emailConfirmed: false,
-    emailVerifiedAt: null,
-  }),
+  unconfirmedUser: () =>
+    createAuthenticatedAuthStoreMock({
+      emailConfirmed: false,
+      emailVerifiedAt: null,
+    }),
 
   /**
    * Social login user without password
    */
-  socialUser: () => createAuthenticatedAuthStoreMock({
-    hasPassword: false,
-    passkeysEnabled: false,
-  }),
+  socialUser: () =>
+    createAuthenticatedAuthStoreMock({
+      hasPassword: false,
+      passkeysEnabled: false,
+    }),
 
   /**
    * User with passkeys enabled
    */
-  passkeyUser: () => createAuthenticatedAuthStoreMock({
-    passkeysEnabled: true,
-  }),
+  passkeyUser: () =>
+    createAuthenticatedAuthStoreMock({
+      passkeysEnabled: true,
+    }),
 
   /**
    * Unauthenticated state
@@ -355,10 +401,10 @@ export const authTestScenarios = {
   /**
    * Error state
    */
-  error: (errorMessage = 'Authentication error') => {
+  error: (errorMessage = "Authentication error") => {
     const mock = createAuthStoreMock();
     setMockError(mock, {
-      code: 'AUTH_ERROR',
+      code: "AUTH_ERROR",
       message: errorMessage,
     });
     return mock;

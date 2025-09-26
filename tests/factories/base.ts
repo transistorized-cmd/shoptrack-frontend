@@ -2,7 +2,7 @@
  * Base test data factory utilities
  * Provides core factory patterns and helpers for generating test data
  */
-import { faker } from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
 /**
  * Base factory interface for type-safe factory creation
@@ -74,12 +74,12 @@ export const testDate = {
   /**
    * Today's date in YYYY-MM-DD format
    */
-  today: () => new Date().toISOString().split('T')[0],
+  today: () => new Date().toISOString().split("T")[0],
 
   /**
    * Specific date in ISO format
    */
-  fixed: (date = '2024-01-15T10:00:00Z') => date,
+  fixed: (date = "2024-01-15T10:00:00Z") => date,
 };
 
 /**
@@ -94,13 +94,13 @@ export const testEmail = {
   /**
    * Generate a test email with specific domain
    */
-  withDomain: (domain = 'example.com') =>
+  withDomain: (domain = "example.com") =>
     `${faker.internet.userName()}@${domain}`,
 
   /**
    * Fixed test email for consistent tests
    */
-  fixed: (email = 'test@example.com') => email,
+  fixed: (email = "test@example.com") => email,
 };
 
 /**
@@ -139,34 +139,34 @@ export const testMoney = {
  */
 export const testConstants = {
   // Common test strings
-  TEST_STRING: 'test-string',
-  TEST_NAME: 'Test Name',
-  TEST_DESCRIPTION: 'Test Description',
+  TEST_STRING: "test-string",
+  TEST_NAME: "Test Name",
+  TEST_DESCRIPTION: "Test Description",
 
   // File constants
-  TEST_FILENAME: 'test-file.jpg',
-  TEST_IMAGE_HASH: 'abc123def456',
+  TEST_FILENAME: "test-file.jpg",
+  TEST_IMAGE_HASH: "abc123def456",
 
   // Status values
   PROCESSING_STATUS: {
-    PENDING: 'pending' as const,
-    PROCESSING: 'processing' as const,
-    COMPLETED: 'completed' as const,
-    FAILED: 'failed' as const,
+    PENDING: "pending" as const,
+    PROCESSING: "processing" as const,
+    COMPLETED: "completed" as const,
+    FAILED: "failed" as const,
   },
 
   CONFIDENCE_LEVELS: {
-    LOW: 'low' as const,
-    MEDIUM: 'medium' as const,
-    HIGH: 'high' as const,
-    MANUAL: 'manual' as const,
+    LOW: "low" as const,
+    MEDIUM: "medium" as const,
+    HIGH: "high" as const,
+    MANUAL: "manual" as const,
   },
 
   // Provider types
   OAUTH_PROVIDERS: {
-    GOOGLE: 'google' as const,
-    APPLE: 'apple' as const,
-    MICROSOFT: 'microsoft' as const,
+    GOOGLE: "google" as const,
+    APPLE: "apple" as const,
+    MICROSOFT: "microsoft" as const,
   },
 } as const;
 
@@ -189,11 +189,13 @@ export function deepClone<T>(obj: T): T {
  */
 export function assertRequiredFields<T>(
   obj: T,
-  requiredFields: (keyof T)[]
+  requiredFields: (keyof T)[],
 ): void {
   for (const field of requiredFields) {
     if (obj[field] === undefined || obj[field] === null) {
-      throw new Error(`Required field '${String(field)}' is missing from test object`);
+      throw new Error(
+        `Required field '${String(field)}' is missing from test object`,
+      );
     }
   }
 }

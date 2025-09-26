@@ -510,7 +510,6 @@ describe("LanguageSwitcher Component", () => {
       }).not.toThrow();
     });
 
-
     it("should handle click events with null target", () => {
       wrapper = mount(LanguageSwitcher, {
         global: {

@@ -697,7 +697,9 @@ describe("EnhancedErrorBoundary Component", () => {
       await nextTick();
       await flushPromises();
 
-      expect(mockConsole.group).toHaveBeenCalledWith("🔴 Enhanced Error Report");
+      expect(mockConsole.group).toHaveBeenCalledWith(
+        "🔴 Enhanced Error Report",
+      );
       expect(mockConsole.error).toHaveBeenCalledWith(
         "Error details:",
         expect.objectContaining({

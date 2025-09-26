@@ -33,8 +33,8 @@ class CsrfTokenManager {
    */
   private getApiBaseURL(): string {
     // In development, use relative URLs to go through Vite proxy
-    if (import.meta.env.MODE === 'development') {
-      return '/api';
+    if (import.meta.env.MODE === "development") {
+      return "/api";
     }
 
     // Use full URL if provided

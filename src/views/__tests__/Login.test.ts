@@ -36,7 +36,11 @@ describe("Login Component", () => {
       params: {},
       name: "Login",
       hash: "",
-      fullPath: initialRoute + (Object.keys(initialQuery).length > 0 ? '?' + new URLSearchParams(initialQuery as any).toString() : ''),
+      fullPath:
+        initialRoute +
+        (Object.keys(initialQuery).length > 0
+          ? "?" + new URLSearchParams(initialQuery as any).toString()
+          : ""),
       matched: [],
       meta: {},
       redirectedFrom: undefined,
@@ -119,8 +123,6 @@ describe("Login Component", () => {
 
     createWrapper();
   });
-
-  
 
   describe("Component Lifecycle", () => {
     it("should clear errors on mount", () => {

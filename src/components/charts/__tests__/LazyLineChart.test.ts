@@ -14,7 +14,10 @@ const mockLineComponent = {
     const data = (this as any).data;
     if (data && data.labels) {
       setTimeout(() => {
-        (this as any).$emit("chart:render", { destroy: vi.fn(), update: vi.fn() });
+        (this as any).$emit("chart:render", {
+          destroy: vi.fn(),
+          update: vi.fn(),
+        });
       }, 0);
     }
   },
@@ -104,7 +107,9 @@ describe("LazyLineChart Component", () => {
       expect(mockInitializeChartJS).toHaveBeenCalled();
       expect((wrapper.vm as any).isLoading).toBe(false);
       expect((wrapper.vm as any).error).toBe(false);
-      expect((wrapper.vm as any).chartComponent).toStrictEqual(mockLineComponent);
+      expect((wrapper.vm as any).chartComponent).toStrictEqual(
+        mockLineComponent,
+      );
     });
 
     it("should render chart component after loading", async () => {
@@ -163,7 +168,9 @@ describe("LazyLineChart Component", () => {
   describe("Error Handling", () => {
     it("should show error state when vue-chartjs import fails", async () => {
       // Make chartjs initialization fail to simulate import error
-      mockInitializeChartJS.mockRejectedValue(new Error("Failed to import vue-chartjs"));
+      mockInitializeChartJS.mockRejectedValue(
+        new Error("Failed to import vue-chartjs"),
+      );
 
       const wrapper = mount(LazyLineChart, {
         props: { data: mockData },
@@ -222,7 +229,9 @@ describe("LazyLineChart Component", () => {
 
       expect((wrapper.vm as any).error).toBe(false);
       expect((wrapper.vm as any).isLoading).toBe(false);
-      expect((wrapper.vm as any).chartComponent).toStrictEqual(mockLineComponent);
+      expect((wrapper.vm as any).chartComponent).toStrictEqual(
+        mockLineComponent,
+      );
     });
 
     it("should log detailed error information", async () => {
@@ -475,7 +484,9 @@ describe("LazyLineChart Component", () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Should not cause multiple initializations or errors
-      expect((wrapper.vm as any).chartComponent).toStrictEqual(mockLineComponent);
+      expect((wrapper.vm as any).chartComponent).toStrictEqual(
+        mockLineComponent,
+      );
       expect(mockInitializeChartJS).toHaveBeenCalledTimes(1);
     });
 
@@ -494,7 +505,7 @@ describe("LazyLineChart Component", () => {
     it("should handle null/undefined data", () => {
       // Use valid mock data structure to prevent vue-chartjs errors
       const nullSafeData = { labels: [], datasets: [] };
-      
+
       expect(() => {
         mount(LazyLineChart, {
           props: { data: nullSafeData },

@@ -8,8 +8,21 @@
  * - Integration with the global memory monitoring service
  */
 
-import { ref, onMounted, onUnmounted, onBeforeUnmount, watch, computed, getCurrentInstance } from 'vue';
-import { memoryMonitoringService, type MemorySnapshot, type MemoryAlert, type MemoryLeak } from '@/services/memoryMonitoring.service';
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  onBeforeUnmount,
+  watch,
+  computed,
+  getCurrentInstance,
+} from "vue";
+import {
+  memoryMonitoringService,
+  type MemorySnapshot,
+  type MemoryAlert,
+  type MemoryLeak,
+} from "@/services/memoryMonitoring.service";
 
 export interface ComponentMemoryInfo {
   componentName: string;
@@ -38,7 +51,7 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
     trackReactiveData = true,
     alertThreshold = 50, // 50MB
     monitorInterval = 30000, // 30 seconds
-    enableAutomaticCleanup = true
+    enableAutomaticCleanup = true,
   } = options;
 
   // Reactive state
@@ -57,14 +70,15 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
 
   // Get current Vue component instance
   const instance = getCurrentInstance();
-  const componentName = instance?.type?.name || instance?.type?.__name || 'UnknownComponent';
+  const componentName =
+    instance?.type?.name || instance?.type?.__name || "UnknownComponent";
 
   /**
    * Initialize memory monitoring for the component
    */
   const initializeMonitoring = () => {
     if (!memoryMonitoringService) {
-      console.warn('Memory monitoring service not available');
+      console.warn("Memory monitoring service not available");
       return;
     }
 
@@ -88,7 +102,7 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
         currentMemory: componentMountMemory,
         memoryGrowth: 0,
         maxMemory: componentMountMemory,
-        isLeaking: false
+        isLeaking: false,
       };
     }
 
@@ -98,7 +112,9 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
     // Set up event listeners for alerts
     setupEventListeners();
 
-    console.log(`Memory monitoring initialized for component: ${componentName}`);
+    console.log(
+      `Memory monitoring initialized for component: ${componentName}`,
+    );
   };
 
   /**
@@ -151,7 +167,7 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
         currentMemory: current,
         memoryGrowth: growth,
         maxMemory: componentMaxMemory,
-        isLeaking: growth > alertThreshold
+        isLeaking: growth > alertThreshold,
       };
     }
   };
@@ -166,15 +182,17 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
     const timeAlive = (Date.now() - mountTime) / 1000 / 60; // minutes
 
     // Check for significant memory growth over time
-    if (memoryGrowth > alertThreshold && timeAlive > 2) { // After 2 minutes
+    if (memoryGrowth > alertThreshold && timeAlive > 2) {
+      // After 2 minutes
       const growthRate = memoryGrowth / timeAlive; // MB per minute
 
-      if (growthRate > 5) { // Growing more than 5MB per minute
+      if (growthRate > 5) {
+        // Growing more than 5MB per minute
         reportComponentLeak({
-          severity: growthRate > 15 ? 'critical' : 'high',
+          severity: growthRate > 15 ? "critical" : "high",
           description: `Component ${componentName} memory growing at ${growthRate.toFixed(2)} MB/min`,
           growth: memoryGrowth,
-          duration: timeAlive * 60
+          duration: timeAlive * 60,
         });
       }
     }
@@ -184,12 +202,15 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
    * Report a component-specific memory leak
    */
   const reportComponentLeak = (leakInfo: {
-    severity: 'low' | 'medium' | 'high' | 'critical';
+    severity: "low" | "medium" | "high" | "critical";
     description: string;
     growth: number;
     duration: number;
   }) => {
-    console.error(`Memory leak detected in component ${componentName}:`, leakInfo);
+    console.error(
+      `Memory leak detected in component ${componentName}:`,
+      leakInfo,
+    );
 
     // Mark component as leaking
     if (componentInfo.value) {
@@ -201,7 +222,7 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
     // 2. Trigger automatic cleanup
     // 3. Show user notification
 
-    if (enableAutomaticCleanup && leakInfo.severity === 'critical') {
+    if (enableAutomaticCleanup && leakInfo.severity === "critical") {
       performAutomaticCleanup();
     }
   };
@@ -220,7 +241,7 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
 
     // Emit cleanup event for component to handle
     if (instance) {
-      instance.emit('memory-cleanup-needed');
+      instance.emit("memory-cleanup-needed");
     }
   };
 
@@ -237,11 +258,11 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
    * Setup event listeners for memory alerts
    */
   const setupEventListeners = () => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const handleMemoryAlert = (event: CustomEvent) => {
       const alert = event.detail;
-      console.warn('Memory alert received:', alert);
+      console.warn("Memory alert received:", alert);
 
       // Add to local alerts
       alerts.value.unshift(alert);
@@ -250,10 +271,13 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
       }
     };
 
-    window.addEventListener('memory-alert', handleMemoryAlert as EventListener);
+    window.addEventListener("memory-alert", handleMemoryAlert as EventListener);
 
     eventListeners.push(() => {
-      window.removeEventListener('memory-alert', handleMemoryAlert as EventListener);
+      window.removeEventListener(
+        "memory-alert",
+        handleMemoryAlert as EventListener,
+      );
     });
   };
 
@@ -264,20 +288,22 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
     stopComponentMonitoring();
 
     // Remove event listeners
-    eventListeners.forEach(removeListener => removeListener());
+    eventListeners.forEach((removeListener) => removeListener());
     eventListeners = [];
 
     // Log component unmount memory
     if (componentInfo.value && trackComponent) {
-      const finalMemory = memoryMonitoringService.getMemoryStatus().currentMemory;
+      const finalMemory =
+        memoryMonitoringService.getMemoryStatus().currentMemory;
       const memoryReleased = componentInfo.value.maxMemory - finalMemory;
 
       console.log(`Component ${componentName} unmounted:`, {
-        memoryAtMount: componentInfo.value.mountMemory.toFixed(2) + 'MB',
-        maxMemoryUsed: componentInfo.value.maxMemory.toFixed(2) + 'MB',
-        memoryAtUnmount: finalMemory.toFixed(2) + 'MB',
-        memoryReleased: memoryReleased > 0 ? memoryReleased.toFixed(2) + 'MB' : 'None',
-        wasLeaking: componentInfo.value.isLeaking
+        memoryAtMount: componentInfo.value.mountMemory.toFixed(2) + "MB",
+        maxMemoryUsed: componentInfo.value.maxMemory.toFixed(2) + "MB",
+        memoryAtUnmount: finalMemory.toFixed(2) + "MB",
+        memoryReleased:
+          memoryReleased > 0 ? memoryReleased.toFixed(2) + "MB" : "None",
+        wasLeaking: componentInfo.value.isLeaking,
       });
     }
 
@@ -301,13 +327,13 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
       currentMemory: currentMemory.value,
       componentInfo: componentInfo.value,
       alerts: alerts.value,
-      leaks: leaks.value
+      leaks: leaks.value,
     };
   };
 
   // Computed values
   const memoryTrend = computed(() => {
-    if (memoryHistory.value.length < 2) return 'stable';
+    if (memoryHistory.value.length < 2) return "stable";
 
     const recent = memoryHistory.value.slice(-5);
     const first = recent[0];
@@ -315,15 +341,15 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
 
     const growth = (last.heapUsed - first.heapUsed) / 1024 / 1024; // MB
 
-    if (growth > 10) return 'increasing';
-    if (growth < -5) return 'decreasing';
-    return 'stable';
+    if (growth > 10) return "increasing";
+    if (growth < -5) return "decreasing";
+    return "stable";
   });
 
   const memoryStatus = computed(() => {
-    if (currentMemory.value > 200) return 'critical';
-    if (currentMemory.value > 100) return 'warning';
-    return 'normal';
+    if (currentMemory.value > 200) return "critical";
+    if (currentMemory.value > 100) return "warning";
+    return "normal";
   });
 
   const isComponentLeaking = computed(() => {
@@ -346,10 +372,13 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
     watch(
       () => currentMemory.value,
       (newMemory, oldMemory) => {
-        if (newMemory > oldMemory + 20) { // 20MB sudden increase
-          console.warn(`Sudden memory increase detected: ${(newMemory - oldMemory).toFixed(2)}MB`);
+        if (newMemory > oldMemory + 20) {
+          // 20MB sudden increase
+          console.warn(
+            `Sudden memory increase detected: ${(newMemory - oldMemory).toFixed(2)}MB`,
+          );
         }
-      }
+      },
     );
   }
 
@@ -376,7 +405,7 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
     // Service methods
     forceGC: () => memoryMonitoringService.forceGarbageCollection(),
     exportData: () => memoryMonitoringService.exportData(),
-    getGlobalStatus: () => memoryMonitoringService.getMemoryStatus()
+    getGlobalStatus: () => memoryMonitoringService.getMemoryStatus(),
   };
 }
 

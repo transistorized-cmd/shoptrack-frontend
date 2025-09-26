@@ -86,6 +86,6 @@ export const useCategoriesStore = defineStore("categories", () => {
     fetchCategories,
     fetchAllLocales,
     startAutoRefresh,
-    stopAutoRefresh
+    stopAutoRefresh,
   };
 });

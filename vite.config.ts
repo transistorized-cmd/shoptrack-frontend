@@ -9,7 +9,7 @@ import vueI18n from "@intlify/unplugin-vue-i18n/vite";
 export default defineConfig(({ mode }) => {
   // Load env vars (both .env and mode-specific like .env.development)
   const env = loadEnv(mode, process.cwd(), "");
-  const isProd = mode === 'production';
+  const isProd = mode === "production";
   // Enable DevTools in production for Chrome browsers only
   // This allows Chrome DevTools to work while preventing errors in Safari/Firefox
   const enableProdDevtools = true; // Will be conditionally enabled at runtime based on browser detection
@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
       template: {
         compilerOptions: {
           // Remove any Vue compiler-related options that might cause runtime compilation
-          isCustomElement: (tag) => tag.startsWith('ion-'),
+          isCustomElement: (tag) => tag.startsWith("ion-"),
         },
       },
     }),
@@ -35,15 +35,13 @@ export default defineConfig(({ mode }) => {
     escapeHtml: false, // Don't escape HTML in messages
     allowDynamic: !isProd, // CRITICAL: Only allow dynamic compilation in dev
     optimizeTranslationDirective: true, // Optimize v-t directive
-    defaultSFCLang: 'json', // Use JSON for SFC i18n blocks
+    defaultSFCLang: "json", // Use JSON for SFC i18n blocks
     globalSFCScope: true, // Enable global SFC scope
-    include: [
-      fileURLToPath(new URL('./src/i18n/locales/**', import.meta.url)),
-    ],
+    include: [fileURLToPath(new URL("./src/i18n/locales/**", import.meta.url))],
     // Force pre-compilation of all message resources
     dropMessageCompiler: isProd,
     // Additional production safety: ensure messages are pre-compiled
-    onlyLocales: isProd ? ['en', 'es'] : undefined,
+    onlyLocales: isProd ? ["en", "es"] : undefined,
     // Completely disable JIT compilation in production
     // jitCompilation: !isProd, // This option doesn't exist
     // Ensure no eval() usage in production
@@ -72,7 +70,7 @@ export default defineConfig(({ mode }) => {
       alias: {
         "@": fileURLToPath(new URL("./src", import.meta.url)),
         // Force Vue to use runtime-only build to avoid CSP issues
-        "vue": "vue/dist/vue.runtime.esm-bundler.js",
+        vue: "vue/dist/vue.runtime.esm-bundler.js",
         // Use vue-i18n runtime-only build only in production to satisfy CSP.
         // In development, keep the default build to avoid composer errors.
         "vue-i18n": isProd

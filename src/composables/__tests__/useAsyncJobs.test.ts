@@ -52,7 +52,7 @@ describe("useAsyncJobs Composable", () => {
     mockGetJobStatus.mockResolvedValue({
       id: "default",
       status: "processing",
-      filename: "default.pdf"
+      filename: "default.pdf",
     });
 
     wrapper = mount(TestComponent);

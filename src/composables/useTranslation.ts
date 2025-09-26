@@ -1,8 +1,8 @@
 // Universal translation composable that works in both development and production
 
-import { inject, computed, type ComputedRef } from 'vue';
-import { useI18n } from 'vue-i18n';
-import type { productionSafeI18n } from '@/i18n/productionSafe';
+import { inject, computed, type ComputedRef } from "vue";
+import { useI18n } from "vue-i18n";
+import type { productionSafeI18n } from "@/i18n/productionSafe";
 
 interface TranslationApi {
   t: (key: string, valuesOrDefault?: Record<string, any> | string) => string;
@@ -13,26 +13,26 @@ interface TranslationApi {
 export function useTranslation(): TranslationApi {
   if (import.meta.env.PROD) {
     // Production: Use injected production-safe i18n
-    const i18n = inject<typeof productionSafeI18n>('i18n');
+    const i18n = inject<typeof productionSafeI18n>("i18n");
 
     if (!i18n) {
-      console.error('[useTranslation] Production i18n not found in injection');
+      console.error("[useTranslation] Production i18n not found in injection");
       // Fallback implementation
       return {
         t: (key: string, valuesOrDefault?: Record<string, any> | string) => {
-          if (typeof valuesOrDefault === 'string') {
+          if (typeof valuesOrDefault === "string") {
             return valuesOrDefault; // Return fallback string
           }
           return key; // Return key as fallback
         },
-        locale: computed(() => 'en'),
-        setLocale: () => {}
+        locale: computed(() => "en"),
+        setLocale: () => {},
       };
     }
 
     return {
       t: (key: string, valuesOrDefault?: Record<string, any> | string) => {
-        if (typeof valuesOrDefault === 'string') {
+        if (typeof valuesOrDefault === "string") {
           // Second parameter is a fallback string
           const result = i18n.t(key);
           return result === key ? valuesOrDefault : result;
@@ -42,7 +42,7 @@ export function useTranslation(): TranslationApi {
         }
       },
       locale: computed(() => i18n.localeRef.value),
-      setLocale: (locale: string) => i18n.setLocale(locale as 'en' | 'es')
+      setLocale: (locale: string) => i18n.setLocale(locale as "en" | "es"),
     };
   } else {
     // Development: Use vue-i18n
@@ -50,12 +50,16 @@ export function useTranslation(): TranslationApi {
       const { t, locale } = useI18n();
       return {
         t: (key: string, valuesOrDefault?: Record<string, any> | string) => {
-          if (typeof valuesOrDefault === 'string') {
+          if (typeof valuesOrDefault === "string") {
             // Second parameter is a fallback string - vue-i18n supports this
             try {
               return t(key, valuesOrDefault);
             } catch (error) {
-              console.warn('[useTranslation] Translation failed, using fallback:', key, error);
+              console.warn(
+                "[useTranslation] Translation failed, using fallback:",
+                key,
+                error,
+              );
               return valuesOrDefault;
             }
           } else {
@@ -63,7 +67,11 @@ export function useTranslation(): TranslationApi {
             try {
               return t(key, valuesOrDefault || {});
             } catch (error) {
-              console.warn('[useTranslation] Translation failed, using key:', key, error);
+              console.warn(
+                "[useTranslation] Translation failed, using key:",
+                key,
+                error,
+              );
               return key;
             }
           }
@@ -71,20 +79,20 @@ export function useTranslation(): TranslationApi {
         locale: computed(() => locale.value),
         setLocale: (newLocale: string) => {
           locale.value = newLocale as any;
-        }
+        },
       };
     } catch (error) {
-      console.error('[useTranslation] Failed to use vue-i18n:', error);
+      console.error("[useTranslation] Failed to use vue-i18n:", error);
       // Fallback
       return {
         t: (key: string, valuesOrDefault?: Record<string, any> | string) => {
-          if (typeof valuesOrDefault === 'string') {
+          if (typeof valuesOrDefault === "string") {
             return valuesOrDefault; // Return fallback string
           }
           return key; // Return key as fallback
         },
-        locale: computed(() => 'en'),
-        setLocale: () => {}
+        locale: computed(() => "en"),
+        setLocale: () => {},
       };
     }
   }

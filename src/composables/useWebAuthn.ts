@@ -16,7 +16,7 @@ export function useWebAuthn() {
   const checkWebAuthnSupport = () => {
     try {
       return !!(
-        typeof window !== 'undefined' &&
+        typeof window !== "undefined" &&
         window.navigator &&
         window.navigator.credentials &&
         window.PublicKeyCredential &&
@@ -37,7 +37,7 @@ export function useWebAuthn() {
     isSupported.value = checkWebAuthnSupport();
 
     // Check platform authenticator availability only after mount
-    if (isSupported.value && typeof PublicKeyCredential !== 'undefined') {
+    if (isSupported.value && typeof PublicKeyCredential !== "undefined") {
       try {
         PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
           .then((available) => {
@@ -172,7 +172,10 @@ export function useWebAuthn() {
       // Validate rpId against current origin to prevent silent SecurityError
       // rpId must be the current effective domain or a registrable suffix of it
       if (options?.rpId) {
-        const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+        const currentHost =
+          typeof window !== "undefined"
+            ? window.location.hostname
+            : "localhost";
         const rpId = options.rpId.trim().toLowerCase();
 
         const isLocalhost = (h: string) =>
@@ -229,9 +232,11 @@ export function useWebAuthn() {
         error.value = "No passkey found for this account on this device";
       } else if (err.name === "SecurityError") {
         // Common when rpId does not match current origin (e.g., server returned localhost rpId on production)
-        const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'this site';
-        error.value =
-          `Passkey cannot be used on ${currentHost} due to a relying-party mismatch. Please try again later or contact support.`;
+        const currentHost =
+          typeof window !== "undefined"
+            ? window.location.hostname
+            : "this site";
+        error.value = `Passkey cannot be used on ${currentHost} due to a relying-party mismatch. Please try again later or contact support.`;
       } else if (err.name === "NotSupportedError") {
         error.value = "Passkeys are not supported on this device";
       } else {

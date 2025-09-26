@@ -40,7 +40,8 @@ describe("Login Component - Error Handling", () => {
               "auth.createAccount": "Create Account",
               "auth.forgotPassword": "Forgot Password?",
               "auth.signInWithPasskey": "Sign in with Passkey",
-              "auth.sessionExpired": "Your session has expired. Please sign in again.",
+              "auth.sessionExpired":
+                "Your session has expired. Please sign in again.",
               "common.error": "Error",
               "auth.email": "Email",
               "auth.password": "Password",

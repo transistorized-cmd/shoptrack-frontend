@@ -183,7 +183,9 @@ describe("Plugins Store", () => {
         new Error(errorMessage),
       );
 
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       await store.fetchAllPlugins();
 
@@ -202,7 +204,9 @@ describe("Plugins Store", () => {
     it("should handle non-Error exceptions", async () => {
       mockPluginsService.getAllPlugins.mockRejectedValue("String error");
 
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       await store.fetchAllPlugins();
 
@@ -269,7 +273,9 @@ describe("Plugins Store", () => {
       const error = new Error("Statistics fetch failed");
       mockPluginsService.getPluginStatistics.mockRejectedValue(error);
 
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       await store.fetchPluginStatistics();
 

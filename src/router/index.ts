@@ -130,7 +130,9 @@ router.beforeEach(async (to, from, next) => {
 
     const isAuthenticated = authStore.isAuthenticated;
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
-    const requiresGuest = to.matched.some((record) => record.meta.requiresGuest);
+    const requiresGuest = to.matched.some(
+      (record) => record.meta.requiresGuest,
+    );
 
     if (requiresAuth && !isAuthenticated) {
       // Redirect to login with return URL
@@ -148,7 +150,11 @@ router.beforeEach(async (to, from, next) => {
     console.error("Navigation guard error:", error);
 
     // For authentication-related routes, still allow navigation to prevent blocking
-    if (to.path.startsWith('/login') || to.path.startsWith('/register') || to.path.startsWith('/forgot-password')) {
+    if (
+      to.path.startsWith("/login") ||
+      to.path.startsWith("/register") ||
+      to.path.startsWith("/forgot-password")
+    ) {
       next();
       return;
     }

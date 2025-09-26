@@ -45,9 +45,15 @@ vi.mock("@/services/auth.service", () => ({
 // Mock the settings service
 vi.mock("@/services/settings.service", () => ({
   settingsService: {
-    getSettings: vi.fn().mockResolvedValue(mockSettingsServiceResponses.getSettings()),
-    updateSetting: vi.fn().mockResolvedValue(mockSettingsServiceResponses.updateSetting()),
-    updateSettings: vi.fn().mockResolvedValue(mockSettingsServiceResponses.updateSettings()),
+    getSettings: vi
+      .fn()
+      .mockResolvedValue(mockSettingsServiceResponses.getSettings()),
+    updateSetting: vi
+      .fn()
+      .mockResolvedValue(mockSettingsServiceResponses.updateSetting()),
+    updateSettings: vi
+      .fn()
+      .mockResolvedValue(mockSettingsServiceResponses.updateSettings()),
   },
 }));
 
@@ -137,7 +143,8 @@ describe("Auth Store (Refactored with Factories)", () => {
 
     it("should handle email confirmation required", async () => {
       // Use factory-generated email confirmation response
-      const emailConfirmationResponse = authResponseVariants.emailConfirmationRequired();
+      const emailConfirmationResponse =
+        authResponseVariants.emailConfirmationRequired();
       mockAuthService.login.mockResolvedValue(emailConfirmationResponse);
 
       const loginData = {
@@ -326,7 +333,9 @@ describe("Auth Store (Refactored with Factories)", () => {
       expect(authStore.isEmailConfirmed).toBe(mockUser.emailConfirmed);
       expect(authStore.hasPassword).toBe(mockUser.hasPassword);
       expect(authStore.passkeysEnabled).toBe(mockUser.passkeysEnabled);
-      expect(authStore.connectedAccounts).toEqual(mockUser.connectedAccounts || []);
+      expect(authStore.connectedAccounts).toEqual(
+        mockUser.connectedAccounts || [],
+      );
     });
 
     it("should correctly compute user state for premium user", () => {
@@ -335,8 +344,8 @@ describe("Auth Store (Refactored with Factories)", () => {
       authStore.setUser(premiumUser);
 
       expect(authStore.isAuthenticated).toBe(true);
-      expect(authStore.user?.subscriptionStatus).toBe('active');
-      expect(authStore.user?.subscriptionPlan).toBe('premium');
+      expect(authStore.user?.subscriptionStatus).toBe("active");
+      expect(authStore.user?.subscriptionPlan).toBe("premium");
     });
 
     it("should correctly compute user state for trial user", () => {
@@ -345,7 +354,7 @@ describe("Auth Store (Refactored with Factories)", () => {
       authStore.setUser(trialUser);
 
       expect(authStore.isAuthenticated).toBe(true);
-      expect(authStore.user?.subscriptionStatus).toBe('trial');
+      expect(authStore.user?.subscriptionStatus).toBe("trial");
       expect(authStore.user?.trialEndsAt).toBeTruthy();
     });
   });

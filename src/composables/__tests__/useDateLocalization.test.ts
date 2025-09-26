@@ -77,7 +77,9 @@ describe("useDateLocalization", () => {
     });
 
     it("should handle errors gracefully", () => {
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       // Mock Date constructor to throw error
       const originalDate = globalThis.Date;
@@ -157,7 +159,9 @@ describe("useDateLocalization", () => {
     });
 
     it("should handle errors gracefully", () => {
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       // Mock Date constructor to throw error
       const originalDate = globalThis.Date;
@@ -280,7 +284,9 @@ describe("useDateLocalization", () => {
 
   describe("Edge cases", () => {
     it("should handle null date inputs gracefully", () => {
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       const result = composable.formatDate(null as any);
 
@@ -291,7 +297,9 @@ describe("useDateLocalization", () => {
     });
 
     it("should handle undefined date inputs gracefully", () => {
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       const result = composable.formatDate(undefined as any);
 

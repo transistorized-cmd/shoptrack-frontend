@@ -159,28 +159,30 @@ const initializeApp = async () => {
   initializePlugins();
 
   // CSRF token management removed - using pure cookie authentication
-  console.info("Using cookie-based authentication - no CSRF token management needed");
+  console.info(
+    "Using cookie-based authentication - no CSRF token management needed",
+  );
 
   const app = createApp(App);
   const pinia = createPinia();
 
   // Browser detection for Chrome-specific features
   const isChromeBrowser = (): boolean => {
-    if (typeof window === 'undefined' || !window.navigator) return false;
+    if (typeof window === "undefined" || !window.navigator) return false;
 
     const userAgent = window.navigator.userAgent.toLowerCase();
-    const vendor = window.navigator.vendor?.toLowerCase() || '';
+    const vendor = window.navigator.vendor?.toLowerCase() || "";
 
     // Check for Chrome browser (including Edge Chromium but not Safari)
-    const isChrome = (
-      vendor.includes('google') ||
-      (userAgent.includes('chrome') && !userAgent.includes('safari')) ||
-      userAgent.includes('crios') // Chrome on iOS
-    );
+    const isChrome =
+      vendor.includes("google") ||
+      (userAgent.includes("chrome") && !userAgent.includes("safari")) ||
+      userAgent.includes("crios"); // Chrome on iOS
 
     // Exclude browsers that might falsely report as Chrome
-    const isNotSafari = !userAgent.includes('safari') || userAgent.includes('chrome');
-    const isNotFirefox = !userAgent.includes('firefox');
+    const isNotSafari =
+      !userAgent.includes("safari") || userAgent.includes("chrome");
+    const isNotFirefox = !userAgent.includes("firefox");
 
     return isChrome && isNotSafari && isNotFirefox;
   };
@@ -193,7 +195,7 @@ const initializeApp = async () => {
       // Enable DevTools for Chrome in production
       app.config.devtools = true;
 
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         // Enable production DevTools for Chrome
         (window as any).__VUE_PROD_DEVTOOLS__ = true;
 
@@ -222,25 +224,29 @@ const initializeApp = async () => {
               if (fns) {
                 fns.forEach((fn: Function) => fn(...args));
               }
-            }
+            },
           };
         }
 
-        console.info('[App] Vue DevTools enabled in production for Chrome browser');
+        console.info(
+          "[App] Vue DevTools enabled in production for Chrome browser",
+        );
       }
     } else {
       // Disable DevTools for non-Chrome browsers in production
       app.config.devtools = false;
 
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         (window as any).__VUE_PROD_DEVTOOLS__ = false;
-        console.info('[App] Vue DevTools disabled in production for non-Chrome browser');
+        console.info(
+          "[App] Vue DevTools disabled in production for non-Chrome browser",
+        );
       }
     }
   } else if (import.meta.env.DEV) {
     // Always enable DevTools in development
     app.config.devtools = true;
-    console.info('[App] Vue DevTools enabled in development mode');
+    console.info("[App] Vue DevTools enabled in development mode");
   }
 
   // Global error handlers
@@ -286,32 +292,44 @@ const initializeApp = async () => {
   try {
     if (import.meta.env.PROD) {
       // Production: Use CSP-safe implementation
-      console.info('[i18n] Initializing production-safe i18n...');
-      console.info('[i18n] productionSafeI18n available:', !!productionSafeI18n);
-      console.info('[i18n] productionSafeI18n.t available:', typeof productionSafeI18n.t);
-      console.info('[i18n] Current locale:', productionSafeI18n.getCurrentLocale());
+      console.info("[i18n] Initializing production-safe i18n...");
+      console.info(
+        "[i18n] productionSafeI18n available:",
+        !!productionSafeI18n,
+      );
+      console.info(
+        "[i18n] productionSafeI18n.t available:",
+        typeof productionSafeI18n.t,
+      );
+      console.info(
+        "[i18n] Current locale:",
+        productionSafeI18n.getCurrentLocale(),
+      );
 
       // Test a translation to ensure it's working
-      const testTranslation = productionSafeI18n.t('common.loading');
-      console.info('[i18n] Test translation (common.loading):', testTranslation);
+      const testTranslation = productionSafeI18n.t("common.loading");
+      console.info(
+        "[i18n] Test translation (common.loading):",
+        testTranslation,
+      );
 
       app.config.globalProperties.$t = productionSafeI18n.t;
-      app.provide('i18n', productionSafeI18n);
-      console.info('[i18n] ✅ Production-safe i18n configured successfully');
+      app.provide("i18n", productionSafeI18n);
+      console.info("[i18n] ✅ Production-safe i18n configured successfully");
     } else {
       // Development: Use full vue-i18n
       app.use(i18n);
-      console.info('[i18n] ✅ Vue-i18n configured successfully');
+      console.info("[i18n] ✅ Vue-i18n configured successfully");
     }
   } catch (error) {
-    console.error('[i18n] ❌ Failed to configure i18n:', error);
+    console.error("[i18n] ❌ Failed to configure i18n:", error);
     // Provide a fallback
     app.config.globalProperties.$t = (key: string) => key;
-    app.provide('i18n', {
+    app.provide("i18n", {
       t: (key: string) => key,
-      getCurrentLocale: () => 'en',
+      getCurrentLocale: () => "en",
       setLocale: () => {},
-      locale: 'en'
+      locale: "en",
     });
   }
 
@@ -320,13 +338,13 @@ const initializeApp = async () => {
   app.use(memoryMonitoringPlugin, {
     autoStart: true, // Automatically start monitoring when app mounts
     registerAllStores: true, // Register all Pinia stores for monitoring
-    showWidget: import.meta.env.MODE === 'development', // Show widget only in development
+    showWidget: import.meta.env.MODE === "development", // Show widget only in development
     config: {
       // Override default configuration if needed
       monitoring: {
-        interval: import.meta.env.MODE === 'development' ? 15000 : 60000, // More frequent in dev
-      }
-    }
+        interval: import.meta.env.MODE === "development" ? 15000 : 60000, // More frequent in dev
+      },
+    },
   });
 
   // Initialize authentication after pinia and router are set up
@@ -338,7 +356,7 @@ const initializeApp = async () => {
       console.info("Session expired - redirecting to login");
       router.push({
         path: "/login",
-        query: { redirect: router.currentRoute.value.fullPath }
+        query: { redirect: router.currentRoute.value.fullPath },
       });
     });
 
@@ -347,7 +365,9 @@ const initializeApp = async () => {
   } catch (error: any) {
     // Don't treat 401 errors as critical - they're expected when user is not logged in
     if (error?.response?.status === 401 || error?.status === 401) {
-      console.info("User not authenticated during app initialization - this is expected");
+      console.info(
+        "User not authenticated during app initialization - this is expected",
+      );
     } else {
       console.error("Failed to initialize authentication system:", error);
       // Only show user notification for non-authentication errors
@@ -363,13 +383,20 @@ const initializeApp = async () => {
     if (authStore.isAuthenticated) {
       // Preload categories
       const categoriesStore = useCategoriesStore();
-      await categoriesStore.fetchAllLocales(availableLocales.map((l) => l.code));
-      console.info("Categories preloaded for locales:", availableLocales.map((l) => l.code).join(", "));
+      await categoriesStore.fetchAllLocales(
+        availableLocales.map((l) => l.code),
+      );
+      console.info(
+        "Categories preloaded for locales:",
+        availableLocales.map((l) => l.code).join(", "),
+      );
 
       // Initialize user data (settings, language)
       await authStore.initializeUserData();
     } else {
-      console.info("Skipping categories and settings preload - user not authenticated");
+      console.info(
+        "Skipping categories and settings preload - user not authenticated",
+      );
     }
   } catch (error) {
     console.error("Failed to preload categories and settings:", error);
@@ -388,17 +415,18 @@ const initializeApp = async () => {
   const appElement = document.getElementById("app");
 
   if (!appElement) {
-    console.error('[Main] #app element not found! Cannot mount Vue app.');
+    console.error("[Main] #app element not found! Cannot mount Vue app.");
     return;
   }
 
   try {
     app.mount("#app");
-    console.info('[Main] Vue app mounted successfully');
+    console.info("[Main] Vue app mounted successfully");
   } catch (error) {
-    console.error('[Main] Failed to mount Vue app:', error);
+    console.error("[Main] Failed to mount Vue app:", error);
     // Create a fallback message
-    appElement.innerHTML = '<div style="padding: 20px; color: red;">Failed to load application. Check console for details.</div>';
+    appElement.innerHTML =
+      '<div style="padding: 20px; color: red;">Failed to load application. Check console for details.</div>';
   }
 };
 
@@ -427,8 +455,8 @@ const startApp = () => {
 };
 
 // Wait for DOM to be ready before starting the application
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', startApp);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startApp);
 } else {
   startApp();
 }

@@ -81,7 +81,7 @@ describe("SimpleLineChart Component", () => {
   const waitForChartCreation = async () => {
     await nextTick();
     // Wait a bit more for the dynamic import and chart creation
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
   };
 
   afterEach(() => {

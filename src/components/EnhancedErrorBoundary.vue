@@ -93,6 +93,7 @@
 <script setup lang="ts">
 import { ref, onErrorCaptured, onMounted, onUnmounted, nextTick } from "vue";
 import { useRouter } from "vue-router";
+import { getErrorTypeClass } from '@/utils/uiHelpers';
 
 interface Props {
   fallback?: string;
@@ -202,20 +203,7 @@ const getUserFriendlyMessage = (error: Error, type: string): string => {
   return props.fallback;
 };
 
-const getErrorTypeClass = (type: string): string => {
-  const baseClasses = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-  
-  switch (type) {
-    case 'Async Error':
-      return `${baseClasses} bg-orange-100 text-orange-800`;
-    case 'Component Error':
-      return `${baseClasses} bg-red-100 text-red-800`;
-    case 'Network Error':
-      return `${baseClasses} bg-blue-100 text-blue-800`;
-    default:
-      return `${baseClasses} bg-gray-100 text-gray-800`;
-  }
-};
+
 
 const retry = () => {
   if (retryCount.value >= props.maxRetries) {

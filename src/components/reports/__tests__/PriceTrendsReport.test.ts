@@ -27,11 +27,14 @@ const createTestI18n = (locale = "en") => {
         priceTrends: {
           title: "Price Trends",
           noData: "No price trend data available for the selected period",
-          tryDifferentFilters: "Try adjusting your filters or selecting a different time period."
+          tryDifferentFilters:
+            "Try adjusting your filters or selecting a different time period.",
         },
         priceTrendsReport: {
-          noDataForPeriod: "No price trend data available for the selected period",
-          multipleTransactionsNeeded: "Items need multiple purchase transactions to show trends",
+          noDataForPeriod:
+            "No price trend data available for the selected period",
+          multipleTransactionsNeeded:
+            "Items need multiple purchase transactions to show trends",
           averagePrice: "Average Price",
           minPrice: "Min Price",
           maxPrice: "Max Price",
@@ -41,8 +44,8 @@ const createTestI18n = (locale = "en") => {
           priceHistory: "Price History",
           transactionCount: "{count} transactions",
           chartDateLabel: "Date",
-          chartPriceLabel: "Price"
-        }
+          chartPriceLabel: "Price",
+        },
       },
       es: {},
     },

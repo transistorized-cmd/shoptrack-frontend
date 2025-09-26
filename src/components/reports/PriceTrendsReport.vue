@@ -156,6 +156,7 @@ import { useCategoriesStore } from "@/stores/categories";
 import { getCurrentLocale } from "@/i18n";
 import SimpleLineChart from "@/components/charts/SimpleLineChart.vue";
 import type { ChartOptions } from "chart.js";
+import { calculatePercentageChange, formatPercentageChange, getPriceChangeClass } from '@/utils/uiHelpers';
 
 defineProps<{
   data: any;
@@ -224,33 +225,7 @@ onUnmounted(() => {
 
 // formatDate is now provided by useDateLocalization composable
 
-const calculatePercentageChange = (
-  priceHistory: any[],
-  currentIndex: number,
-) => {
-  if (currentIndex === 0) {
-    return null; // First entry has no previous day to compare to
-  }
 
-  const previousPrice = priceHistory[currentIndex - 1].averagePrice;
-  const currentPrice = priceHistory[currentIndex].averagePrice;
-
-  if (!previousPrice || previousPrice === 0) return 0;
-
-  return ((currentPrice - previousPrice) / previousPrice) * 100;
-};
-
-const formatPercentageChange = (percentage: number | null) => {
-  if (percentage === null) return "-"; // Only for the first entry
-  if (percentage === 0) return "0.0%";
-  const sign = percentage > 0 ? "+" : "";
-  return `${sign}${percentage.toFixed(1)}%`;
-};
-
-const getPriceChangeClass = (percentage: number | null) => {
-  if (percentage === null || percentage === 0) return "text-gray-500 dark:text-gray-400";
-  return percentage > 0 ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400";
-};
 
 // Memoized chart configuration
 const chartOptions = computed<ChartOptions<"line">>(() => ({

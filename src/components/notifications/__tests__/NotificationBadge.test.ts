@@ -6,7 +6,9 @@ import NotificationBadge from "../NotificationBadge.vue";
 // Mock reactive values for the composable
 const mockUnreadCountValue = ref(0);
 const mockIsPollingValue = ref(false);
-const mockHasUnreadNotifications = computed(() => mockUnreadCountValue.value > 0);
+const mockHasUnreadNotifications = computed(
+  () => mockUnreadCountValue.value > 0,
+);
 const mockStartPolling = vi.fn();
 
 vi.mock("@/composables/useJobNotifications", () => ({
@@ -69,7 +71,7 @@ describe("NotificationBadge Component", () => {
 
   describe("Badge Display Logic", () => {
     it("should not show badge when no unread notifications", () => {
-      mockUnreadCountValue.value =(0);
+      mockUnreadCountValue.value = 0;
 
       wrapper = mount(NotificationBadge);
 
@@ -78,7 +80,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should show badge with count when unread notifications exist", () => {
-      mockUnreadCountValue.value =(5);
+      mockUnreadCountValue.value = 5;
 
       wrapper = mount(NotificationBadge);
 
@@ -88,7 +90,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should show 99+ for counts over maxCount", () => {
-      mockUnreadCountValue.value =(150);
+      mockUnreadCountValue.value = 150;
 
       wrapper = mount(NotificationBadge, {
         props: {
@@ -100,7 +102,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should respect custom maxCount prop", () => {
-      mockUnreadCountValue.value =(25);
+      mockUnreadCountValue.value = 25;
 
       wrapper = mount(NotificationBadge, {
         props: {
@@ -112,7 +114,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should show exact count when below maxCount", () => {
-      mockUnreadCountValue.value =(15);
+      mockUnreadCountValue.value = 15;
 
       wrapper = mount(NotificationBadge, {
         props: {
@@ -143,7 +145,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should not show dot when showDot is false", () => {
-      mockUnreadCountValue.value =(0);
+      mockUnreadCountValue.value = 0;
 
       wrapper = mount(NotificationBadge, {
         props: {
@@ -156,7 +158,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should not show dot when no unread notifications", () => {
-      mockUnreadCountValue.value =(0);
+      mockUnreadCountValue.value = 0;
 
       wrapper = mount(NotificationBadge, {
         props: {
@@ -169,7 +171,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should apply custom dot classes", () => {
-      mockUnreadCountValue.value =(0);
+      mockUnreadCountValue.value = 0;
 
       wrapper = mount(NotificationBadge, {
         props: {
@@ -188,7 +190,7 @@ describe("NotificationBadge Component", () => {
 
   describe("Custom Styling", () => {
     it("should apply custom badge classes", () => {
-      mockUnreadCountValue.value =(5);
+      mockUnreadCountValue.value = 5;
 
       wrapper = mount(NotificationBadge, {
         props: {
@@ -205,7 +207,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should have correct default badge positioning", () => {
-      mockUnreadCountValue.value =(3);
+      mockUnreadCountValue.value = 3;
 
       wrapper = mount(NotificationBadge);
 
@@ -221,7 +223,7 @@ describe("NotificationBadge Component", () => {
 
   describe("Animation Behavior", () => {
     it("should animate when animate prop is true and new notifications arrive", async () => {
-      mockUnreadCountValue.value =(1);
+      mockUnreadCountValue.value = 1;
 
       wrapper = mount(NotificationBadge, {
         props: {
@@ -230,7 +232,7 @@ describe("NotificationBadge Component", () => {
       });
 
       // Simulate unread count increase
-      mockUnreadCountValue.value =(2);
+      mockUnreadCountValue.value = 2;
 
       // Manually trigger the watcher logic
       wrapper.vm.hasNewNotifications = true;
@@ -245,7 +247,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should not animate when animate prop is false", async () => {
-      mockUnreadCountValue.value =(1);
+      mockUnreadCountValue.value = 1;
 
       wrapper = mount(NotificationBadge, {
         props: {
@@ -254,7 +256,7 @@ describe("NotificationBadge Component", () => {
       });
 
       // Simulate unread count increase
-      mockUnreadCountValue.value =(2);
+      mockUnreadCountValue.value = 2;
       await nextTick();
 
       // Animation should not be triggered
@@ -285,7 +287,7 @@ describe("NotificationBadge Component", () => {
 
   describe("Auto Start Polling", () => {
     it("should start polling when autoStart is true and not already polling", () => {
-      mockIsPollingValue.value =(false);
+      mockIsPollingValue.value = false;
 
       mount(NotificationBadge, {
         props: {
@@ -297,7 +299,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should not start polling when autoStart is false", () => {
-      mockIsPollingValue.value =(false);
+      mockIsPollingValue.value = false;
 
       mount(NotificationBadge, {
         props: {
@@ -309,7 +311,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should not start polling when already polling", () => {
-      mockIsPollingValue.value =(true);
+      mockIsPollingValue.value = true;
 
       mount(NotificationBadge, {
         props: {
@@ -354,22 +356,22 @@ describe("NotificationBadge Component", () => {
   describe("Computed Properties", () => {
     it("should correctly compute displayCount for various scenarios", () => {
       // Test normal count
-      mockUnreadCountValue.value =(5);
+      mockUnreadCountValue.value = 5;
       wrapper = mount(NotificationBadge, { props: { maxCount: 99 } });
       expect(wrapper.vm.displayCount).toBe("5");
 
       // Test max count exceeded
-      mockUnreadCountValue.value =(150);
+      mockUnreadCountValue.value = 150;
       wrapper = mount(NotificationBadge, { props: { maxCount: 99 } });
       expect(wrapper.vm.displayCount).toBe("99+");
 
       // Test zero count
-      mockUnreadCountValue.value =(0);
+      mockUnreadCountValue.value = 0;
       wrapper = mount(NotificationBadge);
       expect(wrapper.vm.displayCount).toBe("0");
 
       // Test custom max count
-      mockUnreadCountValue.value =(25);
+      mockUnreadCountValue.value = 25;
       wrapper = mount(NotificationBadge, { props: { maxCount: 20 } });
       expect(wrapper.vm.displayCount).toBe("20+");
     });
@@ -377,14 +379,14 @@ describe("NotificationBadge Component", () => {
 
   describe("Reactivity", () => {
     it("should react to changes in unreadCount", async () => {
-      mockUnreadCountValue.value =(1);
+      mockUnreadCountValue.value = 1;
 
       wrapper = mount(NotificationBadge);
 
       expect(wrapper.vm.displayCount).toBe("1");
 
       // Change the mock return value
-      mockUnreadCountValue.value =(5);
+      mockUnreadCountValue.value = 5;
 
       // Force component update
       await wrapper.vm.$forceUpdate();
@@ -397,7 +399,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should react to changes in hasUnreadNotifications", async () => {
-      mockUnreadCountValue.value =(0);
+      mockUnreadCountValue.value = 0;
 
       wrapper = mount(NotificationBadge);
 
@@ -406,7 +408,7 @@ describe("NotificationBadge Component", () => {
       expect(badge.exists()).toBe(false);
 
       // Change to having unread notifications
-      mockUnreadCountValue.value =(3);
+      mockUnreadCountValue.value = 3;
 
       await wrapper.vm.$forceUpdate();
       await nextTick();
@@ -418,7 +420,7 @@ describe("NotificationBadge Component", () => {
 
   describe("Edge Cases", () => {
     it("should handle very large numbers correctly", () => {
-      mockUnreadCountValue.value =(999999);
+      mockUnreadCountValue.value = 999999;
 
       wrapper = mount(NotificationBadge, {
         props: {
@@ -430,7 +432,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should handle negative numbers gracefully", () => {
-      mockUnreadCountValue.value =(-1);
+      mockUnreadCountValue.value = -1;
 
       wrapper = mount(NotificationBadge);
 
@@ -440,7 +442,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should handle zero maxCount", () => {
-      mockUnreadCountValue.value =(5);
+      mockUnreadCountValue.value = 5;
 
       wrapper = mount(NotificationBadge, {
         props: {
@@ -454,7 +456,7 @@ describe("NotificationBadge Component", () => {
 
   describe("Accessibility", () => {
     it("should have proper semantic structure", () => {
-      mockUnreadCountValue.value =(5);
+      mockUnreadCountValue.value = 5;
 
       wrapper = mount(NotificationBadge);
 
@@ -469,7 +471,7 @@ describe("NotificationBadge Component", () => {
     });
 
     it("should provide visual indication of notification state", () => {
-      mockUnreadCountValue.value =(3);
+      mockUnreadCountValue.value = 3;
 
       wrapper = mount(NotificationBadge);
 

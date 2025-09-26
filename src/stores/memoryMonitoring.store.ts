@@ -6,9 +6,15 @@
  * state for memory usage, alerts, and leak detection.
  */
 
-import { defineStore } from 'pinia';
-import { ref, computed, watch } from 'vue';
-import { memoryMonitoringService, type MemorySnapshot, type MemoryAlert, type MemoryLeak, type MemoryThresholds } from '@/services/memoryMonitoring.service';
+import { defineStore } from "pinia";
+import { ref, computed, watch } from "vue";
+import {
+  memoryMonitoringService,
+  type MemorySnapshot,
+  type MemoryAlert,
+  type MemoryLeak,
+  type MemoryThresholds,
+} from "@/services/memoryMonitoring.service";
 
 export interface StoreMemoryInfo {
   storeName: string;
@@ -32,7 +38,7 @@ export interface MemoryMonitoringState {
   monitoringStartTime: number;
 }
 
-export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
+export const useMemoryMonitoringStore = defineStore("memoryMonitoring", () => {
   // State
   const isEnabled = ref(false);
   const currentMemory = ref(0);
@@ -45,61 +51,63 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
     criticalThreshold: 250,
     leakDetectionWindow: 5,
     minimumGrowthRate: 10,
-    maxSnapshots: 100
+    maxSnapshots: 100,
   });
   const lastUpdate = ref(0);
   const monitoringStartTime = ref(0);
 
   // Internal state
   let updateInterval: number | null = null;
-  let storeWatchers: Map<string, () => void> = new Map();
-  let globalStoreRegistry: Map<string, any> = new Map();
+  const storeWatchers: Map<string, () => void> = new Map();
+  const globalStoreRegistry: Map<string, any> = new Map();
 
   // Computed values
   const memoryTrend = computed(() => {
-    if (memoryHistory.value.length < 2) return 'stable';
+    if (memoryHistory.value.length < 2) return "stable";
 
     const recent = memoryHistory.value.slice(-10);
     const first = recent[0];
     const last = recent[recent.length - 1];
 
-    if (!first || !last) return 'stable';
+    if (!first || !last) return "stable";
 
     const growth = (last.heapUsed - first.heapUsed) / 1024 / 1024; // MB
     const timeSpan = (last.timestamp - first.timestamp) / 1000 / 60; // minutes
 
     if (timeSpan > 0) {
       const growthRate = growth / timeSpan; // MB per minute
-      if (growthRate > 5) return 'rapidly-increasing';
-      if (growthRate > 2) return 'increasing';
-      if (growthRate < -2) return 'decreasing';
+      if (growthRate > 5) return "rapidly-increasing";
+      if (growthRate > 2) return "increasing";
+      if (growthRate < -2) return "decreasing";
     }
 
-    return 'stable';
+    return "stable";
   });
 
   const memoryStatus = computed(() => {
-    if (currentMemory.value > thresholds.value.criticalThreshold) return 'critical';
-    if (currentMemory.value > thresholds.value.warningThreshold) return 'warning';
-    return 'normal';
+    if (currentMemory.value > thresholds.value.criticalThreshold)
+      return "critical";
+    if (currentMemory.value > thresholds.value.warningThreshold)
+      return "warning";
+    return "normal";
   });
 
   const criticalAlerts = computed(() => {
-    return alerts.value.filter(alert => alert.type === 'critical');
+    return alerts.value.filter((alert) => alert.type === "critical");
   });
 
   const activeLeaks = computed(() => {
-    const oneHourAgo = Date.now() - (60 * 60 * 1000);
-    return leaks.value.filter(leak => leak.timestamp > oneHourAgo);
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    return leaks.value.filter((leak) => leak.timestamp > oneHourAgo);
   });
 
   const storeLeaks = computed(() => {
-    return leaks.value.filter(leak => leak.type === 'store');
+    return leaks.value.filter((leak) => leak.type === "store");
   });
 
   const totalStateSize = computed(() => {
     let total = 0;
-    storeInfo.value.forEach(info => {
+    storeInfo.value.forEach((info) => {
       total += info.stateSize;
     });
     return total;
@@ -112,9 +120,11 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
   });
 
   // Actions
-  const initializeMonitoring = async (customThresholds?: Partial<MemoryThresholds>) => {
+  const initializeMonitoring = async (
+    customThresholds?: Partial<MemoryThresholds>,
+  ) => {
     if (isEnabled.value) {
-      console.warn('Memory monitoring is already enabled');
+      console.warn("Memory monitoring is already enabled");
       return;
     }
 
@@ -136,9 +146,9 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
       // Setup event listeners
       setupEventListeners();
 
-      console.log('Memory monitoring store initialized');
+      console.log("Memory monitoring store initialized");
     } catch (error) {
-      console.error('Failed to initialize memory monitoring:', error);
+      console.error("Failed to initialize memory monitoring:", error);
       throw error;
     }
   };
@@ -173,7 +183,7 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
       // Check for store-specific memory issues
       checkStoreMemoryUsage();
     } catch (error) {
-      console.error('Failed to update memory metrics:', error);
+      console.error("Failed to update memory metrics:", error);
     }
   };
 
@@ -190,7 +200,7 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
       mutationCount: 0,
       lastAccessed: Date.now(),
       createdAt: Date.now(),
-      isActive: true
+      isActive: true,
     };
 
     storeInfo.value.set(storeName, storeMemoryInfo);
@@ -238,7 +248,7 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
           checkStoreMemoryIssues(storeName, info);
         }
       },
-      { deep: true }
+      { deep: true },
     );
 
     storeWatchers.set(storeName, unwatcher);
@@ -265,45 +275,50 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
     const sizeMB = info.stateSize / 1024 / 1024;
 
     // Check for large state size
-    if (sizeMB > 50) { // 50MB threshold
+    if (sizeMB > 50) {
+      // 50MB threshold
       reportStoreMemoryIssue(storeName, {
-        type: 'large_state',
-        severity: sizeMB > 100 ? 'critical' : 'high',
+        type: "large_state",
+        severity: sizeMB > 100 ? "critical" : "high",
         description: `Store ${storeName} has large state: ${sizeMB.toFixed(2)}MB`,
-        size: sizeMB
+        size: sizeMB,
       });
     }
 
     // Check for inactive stores with large memory usage
     const inactiveTime = (Date.now() - info.lastAccessed) / 1000 / 60; // minutes
-    if (inactiveTime > 30 && sizeMB > 10) { // Inactive for 30+ minutes with 10+ MB
+    if (inactiveTime > 30 && sizeMB > 10) {
+      // Inactive for 30+ minutes with 10+ MB
       reportStoreMemoryIssue(storeName, {
-        type: 'inactive_store',
-        severity: 'medium',
+        type: "inactive_store",
+        severity: "medium",
         description: `Store ${storeName} inactive for ${inactiveTime.toFixed(1)} minutes with ${sizeMB.toFixed(2)}MB state`,
-        size: sizeMB
+        size: sizeMB,
       });
     }
   };
 
-  const reportStoreMemoryIssue = (storeName: string, issue: {
-    type: string;
-    severity: 'low' | 'medium' | 'high' | 'critical';
-    description: string;
-    size: number;
-  }) => {
+  const reportStoreMemoryIssue = (
+    storeName: string,
+    issue: {
+      type: string;
+      severity: "low" | "medium" | "high" | "critical";
+      description: string;
+      size: number;
+    },
+  ) => {
     console.warn(`Store memory issue detected:`, issue);
 
     // Create a memory leak entry
     const leak: MemoryLeak = {
       id: `store_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      type: 'store',
+      type: "store",
       severity: issue.severity,
       description: issue.description,
       growth: issue.size,
       duration: 0,
       store: storeName,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     leaks.value.unshift(leak);
@@ -313,7 +328,7 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
   };
 
   const setupEventListeners = () => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const handleMemoryAlert = (event: CustomEvent) => {
       const alert = event.detail;
@@ -323,7 +338,7 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
       }
     };
 
-    window.addEventListener('memory-alert', handleMemoryAlert as EventListener);
+    window.addEventListener("memory-alert", handleMemoryAlert as EventListener);
   };
 
   const clearStore = (storeName: string) => {
@@ -358,11 +373,14 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
       .sort((a, b) => b[1].stateSize - a[1].stateSize);
 
     largStores.forEach(([storeName, info]) => {
-      console.log(`Optimizing large store: ${storeName} (${(info.stateSize / 1024 / 1024).toFixed(2)}MB)`);
+      console.log(
+        `Optimizing large store: ${storeName} (${(info.stateSize / 1024 / 1024).toFixed(2)}MB)`,
+      );
 
       // Try to clear the store if it's been inactive
       const inactiveTime = (Date.now() - info.lastAccessed) / 1000 / 60;
-      if (inactiveTime > 15) { // 15 minutes
+      if (inactiveTime > 15) {
+        // 15 minutes
         clearStore(storeName);
       }
     });
@@ -387,8 +405,8 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
         memoryTrend: memoryTrend.value,
         memoryStatus: memoryStatus.value,
         totalStateSize: totalStateSize.value,
-        activeStores: mostActiveStores.value
-      }
+        activeStores: mostActiveStores.value,
+      },
     };
   };
 
@@ -399,11 +417,11 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
     memoryMonitoringService.stopMonitoring();
 
     // Remove all store watchers
-    storeWatchers.forEach(unwatcher => unwatcher());
+    storeWatchers.forEach((unwatcher) => unwatcher());
     storeWatchers.clear();
 
     isEnabled.value = false;
-    console.log('Memory monitoring disabled');
+    console.log("Memory monitoring disabled");
   };
 
   // Utility function to estimate object size
@@ -452,7 +470,7 @@ export const useMemoryMonitoringStore = defineStore('memoryMonitoring', () => {
     // Service methods
     forceGC: () => memoryMonitoringService.forceGarbageCollection(),
     takeSnapshot: () => memoryMonitoringService.takeSnapshot(),
-    getServiceStatus: () => memoryMonitoringService.getMemoryStatus()
+    getServiceStatus: () => memoryMonitoringService.getMemoryStatus(),
   };
 });
 

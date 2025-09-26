@@ -4,7 +4,7 @@ import { vi } from "vitest";
 import { computed } from "vue";
 
 // Setup jest-axe for accessibility testing
-import { toHaveNoViolations } from 'jest-axe';
+import { toHaveNoViolations } from "jest-axe";
 expect.extend(toHaveNoViolations);
 
 // Mock IntersectionObserver
@@ -30,7 +30,10 @@ Object.defineProperty(window, "matchMedia", {
 });
 
 // Mock localStorage with reactive implementation
-import { setupReactiveLocalStorage, setupReactiveSessionStorage } from './utils/localStorage';
+import {
+  setupReactiveLocalStorage,
+  setupReactiveSessionStorage,
+} from "./utils/localStorage";
 
 setupReactiveLocalStorage();
 setupReactiveSessionStorage();
@@ -123,7 +126,8 @@ vi.mock("@/composables/useTranslation", () => ({
         "auth.createAccount": "Create Account",
         "auth.forgotPassword": "Forgot Password?",
         "auth.signInWithPasskey": "Sign in with Passkey",
-        "auth.sessionExpired": "Your session has expired. Please sign in again.",
+        "auth.sessionExpired":
+          "Your session has expired. Please sign in again.",
         "auth.rememberMe": "Remember me",
         "auth.continueWith": "Continue with",
         "auth.iAgreeToThe": "I agree to the",
@@ -138,12 +142,12 @@ vi.mock("@/composables/useTranslation", () => ({
         "errors.unauthorized": "Unauthorized",
       };
 
-      if (typeof valuesOrDefault === 'string') {
+      if (typeof valuesOrDefault === "string") {
         return translations[key] || valuesOrDefault;
       }
       return translations[key] || key;
     }),
-    locale: computed(() => 'en'),
+    locale: computed(() => "en"),
     setLocale: vi.fn(),
   }),
 }));
@@ -151,7 +155,9 @@ vi.mock("@/composables/useTranslation", () => ({
 // Mock auth store to prevent unmocked method calls
 vi.mock("@/stores/auth", () => {
   const { createUnauthenticatedAuthStoreMock, mockAuthStoreModule } =
-    vi.importActual<typeof import("../tests/utils/authStore")>("../tests/utils/authStore");
+    vi.importActual<typeof import("../tests/utils/authStore")>(
+      "../tests/utils/authStore",
+    );
 
   const defaultAuthStoreMock = createUnauthenticatedAuthStoreMock();
   return mockAuthStoreModule(defaultAuthStoreMock);

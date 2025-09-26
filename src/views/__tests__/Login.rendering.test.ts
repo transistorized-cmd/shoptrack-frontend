@@ -120,9 +120,9 @@ describe("Login Component - Rendering", () => {
   });
 
   it("should render passkey login button when supported", () => {
-    const passkeyButton = wrapper.findAll("button").find((btn: any) =>
-      btn.text().includes("Sign in with Passkey")
-    );
+    const passkeyButton = wrapper
+      .findAll("button")
+      .find((btn: any) => btn.text().includes("Sign in with Passkey"));
     expect(passkeyButton?.exists()).toBe(true);
     expect(passkeyButton?.text()).toContain("Sign in with Passkey");
   });

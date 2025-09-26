@@ -1,11 +1,14 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { nextTick } from 'vue';
-import { resetLocalStorageMock } from '../../../tests/utils/localStorage';
-import { createMockMatchMedia, triggerMediaQueryChange } from '../../../tests/utils/darkMode';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { nextTick } from "vue";
+import { resetLocalStorageMock } from "../../../tests/utils/localStorage";
+import {
+  createMockMatchMedia,
+  triggerMediaQueryChange,
+} from "../../../tests/utils/darkMode";
 
 // Mock Vue's onMounted to avoid lifecycle warnings in tests
-vi.mock('vue', async () => {
-  const actual = await vi.importActual('vue');
+vi.mock("vue", async () => {
+  const actual = await vi.importActual("vue");
   return {
     ...actual,
     onMounted: vi.fn((callback) => {
@@ -15,7 +18,7 @@ vi.mock('vue', async () => {
   };
 });
 
-describe('useDarkMode Composable', () => {
+describe("useDarkMode Composable", () => {
   let mockMediaQuery: {
     matches: boolean;
     addEventListener: ReturnType<typeof vi.fn>;
@@ -24,7 +27,7 @@ describe('useDarkMode Composable', () => {
 
   // Helper function to import fresh useDarkMode module
   const getUseDarkMode = async () => {
-    const { useDarkMode } = await import('@/composables/useDarkMode');
+    const { useDarkMode } = await import("@/composables/useDarkMode");
     return useDarkMode;
   };
 
@@ -33,7 +36,7 @@ describe('useDarkMode Composable', () => {
     resetLocalStorageMock();
 
     // Reset document classes
-    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.remove("dark");
 
     // Create fresh matchMedia mock
     mockMediaQuery = createMockMatchMedia(false);
@@ -45,19 +48,19 @@ describe('useDarkMode Composable', () => {
   afterEach(() => {
     vi.clearAllMocks();
     resetLocalStorageMock();
-    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.remove("dark");
   });
 
-  describe('Initialization', () => {
-    it('should initialize with system theme by default', async () => {
+  describe("Initialization", () => {
+    it("should initialize with system theme by default", async () => {
       const useDarkMode = await getUseDarkMode();
       const { theme, systemDarkMode } = useDarkMode();
 
-      expect(theme.value).toBe('system');
+      expect(theme.value).toBe("system");
       expect(systemDarkMode.value).toBe(false);
     });
 
-    it('should detect system dark mode preference', async () => {
+    it("should detect system dark mode preference", async () => {
       mockMediaQuery = createMockMatchMedia(true);
 
       const useDarkMode = await getUseDarkMode();
@@ -66,8 +69,8 @@ describe('useDarkMode Composable', () => {
       expect(systemDarkMode.value).toBe(true);
     });
 
-    it('should load saved theme from localStorage', async () => {
-      localStorage.setItem('shoptrack-theme', 'dark');
+    it("should load saved theme from localStorage", async () => {
+      localStorage.setItem("shoptrack-theme", "dark");
 
       const useDarkMode = await getUseDarkMode();
       const { theme } = useDarkMode();
@@ -75,11 +78,11 @@ describe('useDarkMode Composable', () => {
       // Wait for onMounted to execute
       await nextTick();
 
-      expect(theme.value).toBe('dark');
+      expect(theme.value).toBe("dark");
     });
 
-    it('should ignore invalid themes from localStorage', async () => {
-      localStorage.setItem('shoptrack-theme', 'invalid');
+    it("should ignore invalid themes from localStorage", async () => {
+      localStorage.setItem("shoptrack-theme", "invalid");
 
       const useDarkMode = await getUseDarkMode();
       const { theme } = useDarkMode();
@@ -87,11 +90,11 @@ describe('useDarkMode Composable', () => {
       // Wait for onMounted to execute
       await nextTick();
 
-      expect(theme.value).toBe('system');
+      expect(theme.value).toBe("system");
     });
 
-    it('should apply dark class to document on initialization', async () => {
-      localStorage.setItem('shoptrack-theme', 'dark');
+    it("should apply dark class to document on initialization", async () => {
+      localStorage.setItem("shoptrack-theme", "dark");
 
       const useDarkMode = await getUseDarkMode();
       useDarkMode();
@@ -99,41 +102,41 @@ describe('useDarkMode Composable', () => {
       // Wait for onMounted to execute
       await nextTick();
 
-      expect(document.documentElement.classList.contains('dark')).toBe(true);
+      expect(document.documentElement.classList.contains("dark")).toBe(true);
     });
   });
 
-  describe('Theme Setting', () => {
-    it('should set light mode correctly', async () => {
+  describe("Theme Setting", () => {
+    it("should set light mode correctly", async () => {
       const useDarkMode = await getUseDarkMode();
       const { setLightMode, theme, isDarkMode } = useDarkMode();
 
       setLightMode();
 
-      expect(theme.value).toBe('light');
+      expect(theme.value).toBe("light");
       expect(isDarkMode.value).toBe(false);
     });
 
-    it('should set dark mode correctly', async () => {
+    it("should set dark mode correctly", async () => {
       const useDarkMode = await getUseDarkMode();
       const { setDarkMode, theme, isDarkMode } = useDarkMode();
 
       setDarkMode();
 
-      expect(theme.value).toBe('dark');
+      expect(theme.value).toBe("dark");
       expect(isDarkMode.value).toBe(true);
     });
 
-    it('should set system mode correctly', async () => {
+    it("should set system mode correctly", async () => {
       const useDarkMode = await getUseDarkMode();
       const { setSystemMode, theme } = useDarkMode();
 
       setSystemMode();
 
-      expect(theme.value).toBe('system');
+      expect(theme.value).toBe("system");
     });
 
-    it('should save theme to localStorage when changed', async () => {
+    it("should save theme to localStorage when changed", async () => {
       const useDarkMode = await getUseDarkMode();
       const { setDarkMode } = useDarkMode();
 
@@ -141,12 +144,12 @@ describe('useDarkMode Composable', () => {
 
       await nextTick();
 
-      expect(localStorage.getItem('shoptrack-theme')).toBe('dark');
+      expect(localStorage.getItem("shoptrack-theme")).toBe("dark");
     });
   });
 
-  describe('Theme Application', () => {
-    it('should add dark class when in dark mode', async () => {
+  describe("Theme Application", () => {
+    it("should add dark class when in dark mode", async () => {
       const useDarkMode = await getUseDarkMode();
       const { setDarkMode } = useDarkMode();
 
@@ -154,12 +157,12 @@ describe('useDarkMode Composable', () => {
 
       await nextTick();
 
-      expect(document.documentElement.classList.contains('dark')).toBe(true);
+      expect(document.documentElement.classList.contains("dark")).toBe(true);
     });
 
-    it('should remove dark class when in light mode', async () => {
+    it("should remove dark class when in light mode", async () => {
       // First set dark mode
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark");
 
       const useDarkMode = await getUseDarkMode();
       const { setLightMode } = useDarkMode();
@@ -168,10 +171,10 @@ describe('useDarkMode Composable', () => {
 
       await nextTick();
 
-      expect(document.documentElement.classList.contains('dark')).toBe(false);
+      expect(document.documentElement.classList.contains("dark")).toBe(false);
     });
 
-    it('should apply system theme correctly', async () => {
+    it("should apply system theme correctly", async () => {
       mockMediaQuery = createMockMatchMedia(true);
 
       const useDarkMode = await getUseDarkMode();
@@ -182,22 +185,22 @@ describe('useDarkMode Composable', () => {
       await nextTick();
 
       expect(isDarkMode.value).toBe(true);
-      expect(document.documentElement.classList.contains('dark')).toBe(true);
+      expect(document.documentElement.classList.contains("dark")).toBe(true);
     });
   });
 
-  describe('System Theme Detection', () => {
-    it('should listen for system theme changes', async () => {
+  describe("System Theme Detection", () => {
+    it("should listen for system theme changes", async () => {
       const useDarkMode = await getUseDarkMode();
       useDarkMode();
 
       expect(mockMediaQuery.addEventListener).toHaveBeenCalledWith(
-        'change',
-        expect.any(Function)
+        "change",
+        expect.any(Function),
       );
     });
 
-    it('should update system dark mode when media query changes', async () => {
+    it("should update system dark mode when media query changes", async () => {
       const useDarkMode = await getUseDarkMode();
       const { systemDarkMode, isDarkMode, setSystemMode } = useDarkMode();
 
@@ -212,9 +215,9 @@ describe('useDarkMode Composable', () => {
       expect(isDarkMode.value).toBe(true);
     });
 
-    it('should handle absence of matchMedia gracefully', async () => {
+    it("should handle absence of matchMedia gracefully", async () => {
       // Mock the absence of matchMedia (e.g., SSR environment)
-      Object.defineProperty(window, 'matchMedia', {
+      Object.defineProperty(window, "matchMedia", {
         writable: true,
         value: undefined,
       });
@@ -226,8 +229,8 @@ describe('useDarkMode Composable', () => {
     });
   });
 
-  describe('Theme Toggle', () => {
-    it('should toggle from system to explicit dark when system is light', async () => {
+  describe("Theme Toggle", () => {
+    it("should toggle from system to explicit dark when system is light", async () => {
       mockMediaQuery = createMockMatchMedia(false); // System is light
 
       const useDarkMode = await getUseDarkMode();
@@ -236,10 +239,10 @@ describe('useDarkMode Composable', () => {
       setSystemMode();
       toggleMode();
 
-      expect(theme.value).toBe('dark');
+      expect(theme.value).toBe("dark");
     });
 
-    it('should toggle from system to explicit light when system is dark', async () => {
+    it("should toggle from system to explicit light when system is dark", async () => {
       mockMediaQuery = createMockMatchMedia(true); // System is dark
 
       const useDarkMode = await getUseDarkMode();
@@ -248,32 +251,32 @@ describe('useDarkMode Composable', () => {
       setSystemMode();
       toggleMode();
 
-      expect(theme.value).toBe('light');
+      expect(theme.value).toBe("light");
     });
 
-    it('should toggle from explicit dark to light', async () => {
+    it("should toggle from explicit dark to light", async () => {
       const useDarkMode = await getUseDarkMode();
       const { toggleMode, theme, setDarkMode } = useDarkMode();
 
       setDarkMode();
       toggleMode();
 
-      expect(theme.value).toBe('light');
+      expect(theme.value).toBe("light");
     });
 
-    it('should toggle from explicit light to dark', async () => {
+    it("should toggle from explicit light to dark", async () => {
       const useDarkMode = await getUseDarkMode();
       const { toggleMode, theme, setLightMode } = useDarkMode();
 
       setLightMode();
       toggleMode();
 
-      expect(theme.value).toBe('dark');
+      expect(theme.value).toBe("dark");
     });
   });
 
-  describe('Computed Properties', () => {
-    it('should compute isDarkMode correctly for dark theme', async () => {
+  describe("Computed Properties", () => {
+    it("should compute isDarkMode correctly for dark theme", async () => {
       const useDarkMode = await getUseDarkMode();
       const { setDarkMode, isDarkMode } = useDarkMode();
 
@@ -282,7 +285,7 @@ describe('useDarkMode Composable', () => {
       expect(isDarkMode.value).toBe(true);
     });
 
-    it('should compute isDarkMode correctly for light theme', async () => {
+    it("should compute isDarkMode correctly for light theme", async () => {
       const useDarkMode = await getUseDarkMode();
       const { setLightMode, isDarkMode } = useDarkMode();
 
@@ -291,7 +294,7 @@ describe('useDarkMode Composable', () => {
       expect(isDarkMode.value).toBe(false);
     });
 
-    it('should compute isDarkMode correctly for system theme with dark preference', async () => {
+    it("should compute isDarkMode correctly for system theme with dark preference", async () => {
       mockMediaQuery = createMockMatchMedia(true);
 
       const useDarkMode = await getUseDarkMode();
@@ -302,7 +305,7 @@ describe('useDarkMode Composable', () => {
       expect(isDarkMode.value).toBe(true);
     });
 
-    it('should compute isDarkMode correctly for system theme with light preference', async () => {
+    it("should compute isDarkMode correctly for system theme with light preference", async () => {
       mockMediaQuery = createMockMatchMedia(false);
 
       const useDarkMode = await getUseDarkMode();
@@ -313,57 +316,57 @@ describe('useDarkMode Composable', () => {
       expect(isDarkMode.value).toBe(false);
     });
 
-    it('should provide theme property that reflects current state', async () => {
+    it("should provide theme property that reflects current state", async () => {
       const useDarkMode = await getUseDarkMode();
       const { theme, setDarkMode, setLightMode } = useDarkMode();
 
       // Theme should reflect the current mode
       setLightMode();
-      expect(theme.value).toBe('light');
+      expect(theme.value).toBe("light");
 
       setDarkMode();
-      expect(theme.value).toBe('dark');
+      expect(theme.value).toBe("dark");
 
       // Theme changes only through proper methods, not direct assignment
       setLightMode();
-      expect(theme.value).toBe('light');
+      expect(theme.value).toBe("light");
     });
 
-    it('should provide systemDarkMode property reflecting system preference', async () => {
+    it("should provide systemDarkMode property reflecting system preference", async () => {
       const useDarkMode = await getUseDarkMode();
       const { systemDarkMode } = useDarkMode();
 
       // systemDarkMode reflects the media query state
-      expect(typeof systemDarkMode.value).toBe('boolean');
+      expect(typeof systemDarkMode.value).toBe("boolean");
 
       // Value depends on system preference (mocked in test)
-      const mockMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const mockMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       expect(systemDarkMode.value).toBe(mockMediaQuery.matches);
     });
   });
 
-  describe('Reactive Updates', () => {
-    it('should reactively update document class when theme changes', async () => {
+  describe("Reactive Updates", () => {
+    it("should reactively update document class when theme changes", async () => {
       const useDarkMode = await getUseDarkMode();
       const { setLightMode, setDarkMode } = useDarkMode();
 
       // Start with light
       setLightMode();
       await nextTick();
-      expect(document.documentElement.classList.contains('dark')).toBe(false);
+      expect(document.documentElement.classList.contains("dark")).toBe(false);
 
       // Switch to dark
       setDarkMode();
       await nextTick();
-      expect(document.documentElement.classList.contains('dark')).toBe(true);
+      expect(document.documentElement.classList.contains("dark")).toBe(true);
 
       // Switch back to light
       setLightMode();
       await nextTick();
-      expect(document.documentElement.classList.contains('dark')).toBe(false);
+      expect(document.documentElement.classList.contains("dark")).toBe(false);
     });
 
-    it('should reactively update when system preference changes', async () => {
+    it("should reactively update when system preference changes", async () => {
       const useDarkMode = await getUseDarkMode();
       const { setSystemMode, isDarkMode } = useDarkMode();
 
@@ -378,23 +381,23 @@ describe('useDarkMode Composable', () => {
       await nextTick();
 
       expect(isDarkMode.value).toBe(true);
-      expect(document.documentElement.classList.contains('dark')).toBe(true);
+      expect(document.documentElement.classList.contains("dark")).toBe(true);
     });
   });
 
-  describe('Multiple Instances', () => {
-    it('should share state between multiple composable instances', async () => {
+  describe("Multiple Instances", () => {
+    it("should share state between multiple composable instances", async () => {
       const useDarkMode = await getUseDarkMode();
       const instance1 = useDarkMode();
       const instance2 = useDarkMode();
 
       instance1.setDarkMode();
 
-      expect(instance2.theme.value).toBe('dark');
+      expect(instance2.theme.value).toBe("dark");
       expect(instance2.isDarkMode.value).toBe(true);
     });
 
-    it('should sync localStorage updates across instances', async () => {
+    it("should sync localStorage updates across instances", async () => {
       const useDarkMode = await getUseDarkMode();
       const instance1 = useDarkMode();
       const instance2 = useDarkMode();
@@ -403,13 +406,13 @@ describe('useDarkMode Composable', () => {
 
       await nextTick();
 
-      expect(localStorage.getItem('shoptrack-theme')).toBe('light');
-      expect(instance2.theme.value).toBe('light');
+      expect(localStorage.getItem("shoptrack-theme")).toBe("light");
+      expect(instance2.theme.value).toBe("light");
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle document being undefined (SSR)', async () => {
+  describe("Edge Cases", () => {
+    it("should handle document being undefined (SSR)", async () => {
       // Mock document being undefined
       const originalDocument = global.document;
       // @ts-ignore
@@ -424,27 +427,27 @@ describe('useDarkMode Composable', () => {
       global.document = originalDocument;
     });
 
-    it('should handle localStorage errors gracefully', async () => {
+    it("should handle localStorage errors gracefully", async () => {
       // Create a fresh localStorage mock that throws errors
       const errorStorage = {
         getItem: vi.fn().mockImplementation(() => {
-          throw new Error('Storage error');
+          throw new Error("Storage error");
         }),
         setItem: vi.fn().mockImplementation(() => {
-          throw new Error('Storage error');
+          throw new Error("Storage error");
         }),
         removeItem: vi.fn(),
         clear: vi.fn(),
         length: 0,
-        key: vi.fn()
+        key: vi.fn(),
       };
 
       // Temporarily replace localStorage
       const originalLocalStorage = global.localStorage;
-      Object.defineProperty(global, 'localStorage', {
+      Object.defineProperty(global, "localStorage", {
         value: errorStorage,
         writable: true,
-        configurable: true
+        configurable: true,
       });
 
       // Reset modules to pick up the new localStorage mock
@@ -457,25 +460,25 @@ describe('useDarkMode Composable', () => {
       expect(() => setDarkMode()).not.toThrow();
 
       // Restore original localStorage
-      Object.defineProperty(global, 'localStorage', {
+      Object.defineProperty(global, "localStorage", {
         value: originalLocalStorage,
         writable: true,
-        configurable: true
+        configurable: true,
       });
     });
 
-    it('should handle empty string in localStorage', async () => {
-      localStorage.setItem('shoptrack-theme', '');
+    it("should handle empty string in localStorage", async () => {
+      localStorage.setItem("shoptrack-theme", "");
 
       const useDarkMode = await getUseDarkMode();
       const { theme } = useDarkMode();
 
       await nextTick();
 
-      expect(theme.value).toBe('system'); // Should fallback to default
+      expect(theme.value).toBe("system"); // Should fallback to default
     });
 
-    it('should handle null values in localStorage gracefully', async () => {
+    it("should handle null values in localStorage gracefully", async () => {
       // Mock getItem to return null
       const originalGetItem = localStorage.getItem;
       localStorage.getItem = vi.fn().mockReturnValue(null);
@@ -485,15 +488,15 @@ describe('useDarkMode Composable', () => {
 
       await nextTick();
 
-      expect(theme.value).toBe('system'); // Should use default
+      expect(theme.value).toBe("system"); // Should use default
 
       // Restore getItem
       localStorage.getItem = originalGetItem;
     });
   });
 
-  describe('Theme Persistence', () => {
-    it('should persist theme selection across page reloads', async () => {
+  describe("Theme Persistence", () => {
+    it("should persist theme selection across page reloads", async () => {
       // First session
       const useDarkMode1 = await getUseDarkMode();
       const { setDarkMode } = useDarkMode1();
@@ -501,7 +504,7 @@ describe('useDarkMode Composable', () => {
 
       await nextTick();
 
-      expect(localStorage.getItem('shoptrack-theme')).toBe('dark');
+      expect(localStorage.getItem("shoptrack-theme")).toBe("dark");
 
       // Reset modules to simulate new page load
       vi.resetModules();
@@ -512,60 +515,64 @@ describe('useDarkMode Composable', () => {
 
       await nextTick();
 
-      expect(newTheme.value).toBe('dark');
+      expect(newTheme.value).toBe("dark");
     });
 
-    it('should update localStorage immediately when theme changes', async () => {
+    it("should update localStorage immediately when theme changes", async () => {
       const useDarkMode = await getUseDarkMode();
       const { setLightMode, setDarkMode, setSystemMode } = useDarkMode();
 
       setLightMode();
       await nextTick();
-      expect(localStorage.getItem('shoptrack-theme')).toBe('light');
+      expect(localStorage.getItem("shoptrack-theme")).toBe("light");
 
       setDarkMode();
       await nextTick();
-      expect(localStorage.getItem('shoptrack-theme')).toBe('dark');
+      expect(localStorage.getItem("shoptrack-theme")).toBe("dark");
 
       setSystemMode();
       await nextTick();
-      expect(localStorage.getItem('shoptrack-theme')).toBe('system');
+      expect(localStorage.getItem("shoptrack-theme")).toBe("system");
     });
   });
 
-  describe('CSS Class Management', () => {
-    it('should not add duplicate dark classes', async () => {
+  describe("CSS Class Management", () => {
+    it("should not add duplicate dark classes", async () => {
       const useDarkMode = await getUseDarkMode();
       const { setDarkMode } = useDarkMode();
 
       // Manually add dark class
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark");
 
       setDarkMode();
       await nextTick();
 
       // Should still only have one dark class
-      expect(document.documentElement.classList.toString()).toBe('dark');
+      expect(document.documentElement.classList.toString()).toBe("dark");
     });
 
-    it('should handle class list modifications from other sources', async () => {
+    it("should handle class list modifications from other sources", async () => {
       const useDarkMode = await getUseDarkMode();
       const { setDarkMode, setLightMode } = useDarkMode();
 
       // Add other classes
-      document.documentElement.classList.add('other-class', 'another-class');
+      document.documentElement.classList.add("other-class", "another-class");
 
       setDarkMode();
       await nextTick();
 
-      expect(document.documentElement.classList.contains('dark')).toBe(true);
-      expect(document.documentElement.classList.contains('other-class')).toBe(true);
+      expect(document.documentElement.classList.contains("dark")).toBe(true);
+      expect(document.documentElement.classList.contains("other-class")).toBe(
+        true,
+      );
 
       setLightMode();
       await nextTick();
 
-      expect(document.documentElement.classList.contains('dark')).toBe(false);
-      expect(document.documentElement.classList.contains('other-class')).toBe(true);
+      expect(document.documentElement.classList.contains("dark")).toBe(false);
+      expect(document.documentElement.classList.contains("other-class")).toBe(
+        true,
+      );
     });
   });
 });

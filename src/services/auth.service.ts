@@ -270,19 +270,19 @@ class AuthService {
   initializeAuth(): void {
     // Clean up any old JWT tokens from localStorage/sessionStorage (one-time cleanup)
     try {
-      localStorage.removeItem('token');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('shoptrack_token');
+      localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("shoptrack_token");
 
-      sessionStorage.removeItem('token');
-      sessionStorage.removeItem('accessToken');
-      sessionStorage.removeItem('refreshToken');
-      sessionStorage.removeItem('authToken');
-      sessionStorage.removeItem('shoptrack_token');
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("refreshToken");
+      sessionStorage.removeItem("authToken");
+      sessionStorage.removeItem("shoptrack_token");
     } catch (error) {
-      console.warn('Failed to clean up old JWT tokens:', error);
+      console.warn("Failed to clean up old JWT tokens:", error);
     }
 
     // HTTP-only cookies are automatically sent with requests

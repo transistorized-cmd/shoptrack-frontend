@@ -2,9 +2,9 @@
  * API response and HTTP-related test data factories
  * Provides factories for common API responses, errors, and HTTP patterns
  */
-import { faker } from '@faker-js/faker';
-import { createFactory, testId, testDate } from './base';
-import type { AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios';
+import { faker } from "@faker-js/faker";
+import { createFactory, testId, testDate } from "./base";
+import type { AxiosResponse, AxiosError, AxiosRequestConfig } from "axios";
 
 /**
  * Generic API response factory
@@ -25,7 +25,7 @@ export interface ApiResponse<T = any> {
 
 export const apiResponseFactory = createFactory<ApiResponse>(() => ({
   success: true,
-  message: 'Operation completed successfully',
+  message: "Operation completed successfully",
   data: null,
   errors: [],
   meta: {},
@@ -37,7 +37,7 @@ export const apiResponseFactory = createFactory<ApiResponse>(() => ({
  */
 export const apiErrorResponseFactory = createFactory<ApiResponse>(() => ({
   success: false,
-  message: 'Operation failed',
+  message: "Operation failed",
   data: null,
   errors: [faker.lorem.sentence()],
   timestamp: testDate.recent(),
@@ -49,10 +49,10 @@ export const apiErrorResponseFactory = createFactory<ApiResponse>(() => ({
 export const axiosResponseFactory = createFactory<AxiosResponse>(() => ({
   data: apiResponseFactory.build(),
   status: 200,
-  statusText: 'OK',
+  statusText: "OK",
   headers: {
-    'content-type': 'application/json',
-    'x-request-id': testId.uuid(),
+    "content-type": "application/json",
+    "x-request-id": testId.uuid(),
   },
   config: axiosRequestConfigFactory.build(),
   request: {},
@@ -61,29 +61,31 @@ export const axiosResponseFactory = createFactory<AxiosResponse>(() => ({
 /**
  * Axios request config factory
  */
-export const axiosRequestConfigFactory = createFactory<AxiosRequestConfig>(() => ({
-  method: 'get',
-  url: '/api/test',
-  baseURL: 'http://localhost:5298',
-  timeout: 8000,
-  headers: {
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
-  },
-  withCredentials: true,
-}));
+export const axiosRequestConfigFactory = createFactory<AxiosRequestConfig>(
+  () => ({
+    method: "get",
+    url: "/api/test",
+    baseURL: "http://localhost:5298",
+    timeout: 8000,
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    withCredentials: true,
+  }),
+);
 
 /**
  * Axios error factory
  */
 export const axiosErrorFactory = createFactory<Partial<AxiosError>>(() => ({
-  message: 'Request failed',
-  name: 'AxiosError',
-  code: 'ERR_BAD_REQUEST',
+  message: "Request failed",
+  name: "AxiosError",
+  code: "ERR_BAD_REQUEST",
   config: axiosRequestConfigFactory.build(),
   response: axiosResponseFactory.build({
     status: 400,
-    statusText: 'Bad Request',
+    statusText: "Bad Request",
     data: apiErrorResponseFactory.build(),
   }),
   isAxiosError: true,
@@ -153,11 +155,11 @@ export const validationErrorFactory = createFactory<ValidationError>(() => ({
   field: faker.database.column(),
   message: faker.lorem.sentence(),
   code: faker.helpers.arrayElement([
-    'required',
-    'invalid_format',
-    'too_long',
-    'too_short',
-    'invalid_value',
+    "required",
+    "invalid_format",
+    "too_long",
+    "too_short",
+    "invalid_value",
   ]),
   value: faker.lorem.word(),
 }));
@@ -169,75 +171,84 @@ export const apiResponseVariants = {
   /**
    * Successful response with data
    */
-  success: <T>(data: T) => apiResponseFactory.build({
-    success: true,
-    message: 'Success',
-    data,
-  }),
+  success: <T>(data: T) =>
+    apiResponseFactory.build({
+      success: true,
+      message: "Success",
+      data,
+    }),
 
   /**
    * Successful response without data
    */
-  successNoData: () => apiResponseFactory.build({
-    success: true,
-    message: 'Operation completed successfully',
-    data: null,
-  }),
+  successNoData: () =>
+    apiResponseFactory.build({
+      success: true,
+      message: "Operation completed successfully",
+      data: null,
+    }),
 
   /**
    * Not found error
    */
-  notFound: () => apiErrorResponseFactory.build({
-    success: false,
-    message: 'Resource not found',
-    errors: ['The requested resource was not found'],
-  }),
+  notFound: () =>
+    apiErrorResponseFactory.build({
+      success: false,
+      message: "Resource not found",
+      errors: ["The requested resource was not found"],
+    }),
 
   /**
    * Validation error
    */
-  validationError: (errors: ValidationError[] = [validationErrorFactory.build()]) =>
+  validationError: (
+    errors: ValidationError[] = [validationErrorFactory.build()],
+  ) =>
     apiErrorResponseFactory.build({
       success: false,
-      message: 'Validation failed',
-      errors: errors.map(e => `${e.field}: ${e.message}`),
+      message: "Validation failed",
+      errors: errors.map((e) => `${e.field}: ${e.message}`),
     }),
 
   /**
    * Unauthorized error
    */
-  unauthorized: () => apiErrorResponseFactory.build({
-    success: false,
-    message: 'Unauthorized',
-    errors: ['Authentication required'],
-  }),
+  unauthorized: () =>
+    apiErrorResponseFactory.build({
+      success: false,
+      message: "Unauthorized",
+      errors: ["Authentication required"],
+    }),
 
   /**
    * Forbidden error
    */
-  forbidden: () => apiErrorResponseFactory.build({
-    success: false,
-    message: 'Forbidden',
-    errors: ['Insufficient permissions'],
-  }),
+  forbidden: () =>
+    apiErrorResponseFactory.build({
+      success: false,
+      message: "Forbidden",
+      errors: ["Insufficient permissions"],
+    }),
 
   /**
    * Server error
    */
-  serverError: () => apiErrorResponseFactory.build({
-    success: false,
-    message: 'Internal server error',
-    errors: ['An unexpected error occurred'],
-  }),
+  serverError: () =>
+    apiErrorResponseFactory.build({
+      success: false,
+      message: "Internal server error",
+      errors: ["An unexpected error occurred"],
+    }),
 
   /**
    * Rate limit error
    */
-  rateLimited: () => apiErrorResponseFactory.build({
-    success: false,
-    message: 'Too many requests',
-    errors: ['Rate limit exceeded. Please try again later.'],
-  }),
+  rateLimited: () =>
+    apiErrorResponseFactory.build({
+      success: false,
+      message: "Too many requests",
+      errors: ["Rate limit exceeded. Please try again later."],
+    }),
 };
 
 /**
@@ -247,96 +258,106 @@ export const axiosResponseVariants = {
   /**
    * 200 OK response
    */
-  ok: <T>(data: T) => axiosResponseFactory.build({
-    status: 200,
-    statusText: 'OK',
-    data: apiResponseVariants.success(data),
-  }),
+  ok: <T>(data: T) =>
+    axiosResponseFactory.build({
+      status: 200,
+      statusText: "OK",
+      data: apiResponseVariants.success(data),
+    }),
 
   /**
    * 201 Created response
    */
-  created: <T>(data: T) => axiosResponseFactory.build({
-    status: 201,
-    statusText: 'Created',
-    data: apiResponseVariants.success(data),
-  }),
+  created: <T>(data: T) =>
+    axiosResponseFactory.build({
+      status: 201,
+      statusText: "Created",
+      data: apiResponseVariants.success(data),
+    }),
 
   /**
    * 204 No Content response
    */
-  noContent: () => axiosResponseFactory.build({
-    status: 204,
-    statusText: 'No Content',
-    data: null,
-  }),
+  noContent: () =>
+    axiosResponseFactory.build({
+      status: 204,
+      statusText: "No Content",
+      data: null,
+    }),
 
   /**
    * 400 Bad Request response
    */
-  badRequest: (errors?: ValidationError[]) => axiosResponseFactory.build({
-    status: 400,
-    statusText: 'Bad Request',
-    data: apiResponseVariants.validationError(errors),
-  }),
+  badRequest: (errors?: ValidationError[]) =>
+    axiosResponseFactory.build({
+      status: 400,
+      statusText: "Bad Request",
+      data: apiResponseVariants.validationError(errors),
+    }),
 
   /**
    * 401 Unauthorized response
    */
-  unauthorized: () => axiosResponseFactory.build({
-    status: 401,
-    statusText: 'Unauthorized',
-    data: apiResponseVariants.unauthorized(),
-  }),
+  unauthorized: () =>
+    axiosResponseFactory.build({
+      status: 401,
+      statusText: "Unauthorized",
+      data: apiResponseVariants.unauthorized(),
+    }),
 
   /**
    * 403 Forbidden response
    */
-  forbidden: () => axiosResponseFactory.build({
-    status: 403,
-    statusText: 'Forbidden',
-    data: apiResponseVariants.forbidden(),
-  }),
+  forbidden: () =>
+    axiosResponseFactory.build({
+      status: 403,
+      statusText: "Forbidden",
+      data: apiResponseVariants.forbidden(),
+    }),
 
   /**
    * 404 Not Found response
    */
-  notFound: () => axiosResponseFactory.build({
-    status: 404,
-    statusText: 'Not Found',
-    data: apiResponseVariants.notFound(),
-  }),
+  notFound: () =>
+    axiosResponseFactory.build({
+      status: 404,
+      statusText: "Not Found",
+      data: apiResponseVariants.notFound(),
+    }),
 
   /**
    * 419 CSRF Token Mismatch response
    */
-  csrfMismatch: () => axiosResponseFactory.build({
-    status: 419,
-    statusText: 'CSRF Token Mismatch',
-    data: apiErrorResponseFactory.build({
-      success: false,
-      message: 'CSRF token mismatch',
-      errors: ['Invalid CSRF token'],
+  csrfMismatch: () =>
+    axiosResponseFactory.build({
+      status: 419,
+      statusText: "CSRF Token Mismatch",
+      data: apiErrorResponseFactory.build({
+        success: false,
+        message: "CSRF token mismatch",
+        errors: ["Invalid CSRF token"],
+      }),
     }),
-  }),
 
   /**
    * 429 Rate Limited response
    */
-  rateLimited: () => axiosResponseFactory.build({
-    status: 429,
-    statusText: 'Too Many Requests',
-    data: apiResponseVariants.rateLimited(),
-  }),
+  rateLimited: () =>
+    axiosResponseFactory.build({
+      status: 429,
+      statusText: "Too Many Requests",
+      data: apiResponseVariants.rateLimited(),
+    }),
 
   /**
    * 500 Internal Server Error response
    */
-  serverError: () => axiosResponseFactory.build({
-    status: 500,
-    statusText: 'Internal Server Error',
-    data: apiResponseVariants.serverError(),
-  }),
+  serverError: () =>
+    axiosResponseFactory.build({
+      status: 500,
+      statusText: "Internal Server Error",
+      data: apiResponseVariants.serverError(),
+    }),
 };
 
 /**
@@ -346,65 +367,72 @@ export const axiosErrorVariants = {
   /**
    * Network error (no response)
    */
-  networkError: () => axiosErrorFactory.build({
-    message: 'Network Error',
-    code: 'ERR_NETWORK',
-    response: undefined,
-  }),
+  networkError: () =>
+    axiosErrorFactory.build({
+      message: "Network Error",
+      code: "ERR_NETWORK",
+      response: undefined,
+    }),
 
   /**
    * Timeout error
    */
-  timeout: () => axiosErrorFactory.build({
-    message: 'timeout of 8000ms exceeded',
-    code: 'ECONNABORTED',
-    response: undefined,
-  }),
+  timeout: () =>
+    axiosErrorFactory.build({
+      message: "timeout of 8000ms exceeded",
+      code: "ECONNABORTED",
+      response: undefined,
+    }),
 
   /**
    * 400 Bad Request error
    */
-  badRequest: (errors?: ValidationError[]) => axiosErrorFactory.build({
-    message: 'Request failed with status code 400',
-    code: 'ERR_BAD_REQUEST',
-    response: axiosResponseVariants.badRequest(errors),
-  }),
+  badRequest: (errors?: ValidationError[]) =>
+    axiosErrorFactory.build({
+      message: "Request failed with status code 400",
+      code: "ERR_BAD_REQUEST",
+      response: axiosResponseVariants.badRequest(errors),
+    }),
 
   /**
    * 401 Unauthorized error
    */
-  unauthorized: () => axiosErrorFactory.build({
-    message: 'Request failed with status code 401',
-    code: 'ERR_BAD_REQUEST',
-    response: axiosResponseVariants.unauthorized(),
-  }),
+  unauthorized: () =>
+    axiosErrorFactory.build({
+      message: "Request failed with status code 401",
+      code: "ERR_BAD_REQUEST",
+      response: axiosResponseVariants.unauthorized(),
+    }),
 
   /**
    * 403 Forbidden error
    */
-  forbidden: () => axiosErrorFactory.build({
-    message: 'Request failed with status code 403',
-    code: 'ERR_BAD_REQUEST',
-    response: axiosResponseVariants.forbidden(),
-  }),
+  forbidden: () =>
+    axiosErrorFactory.build({
+      message: "Request failed with status code 403",
+      code: "ERR_BAD_REQUEST",
+      response: axiosResponseVariants.forbidden(),
+    }),
 
   /**
    * 404 Not Found error
    */
-  notFound: () => axiosErrorFactory.build({
-    message: 'Request failed with status code 404',
-    code: 'ERR_BAD_REQUEST',
-    response: axiosResponseVariants.notFound(),
-  }),
+  notFound: () =>
+    axiosErrorFactory.build({
+      message: "Request failed with status code 404",
+      code: "ERR_BAD_REQUEST",
+      response: axiosResponseVariants.notFound(),
+    }),
 
   /**
    * 500 Server Error
    */
-  serverError: () => axiosErrorFactory.build({
-    message: 'Request failed with status code 500',
-    code: 'ERR_BAD_REQUEST',
-    response: axiosResponseVariants.serverError(),
-  }),
+  serverError: () =>
+    axiosErrorFactory.build({
+      message: "Request failed with status code 500",
+      code: "ERR_BAD_REQUEST",
+      response: axiosResponseVariants.serverError(),
+    }),
 };
 
 /**

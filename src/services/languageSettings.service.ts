@@ -28,7 +28,9 @@ export class LanguageSettingsService {
       //   );
       // }
 
-      console.info("Language settings initialization skipped - settings endpoint not implemented");
+      console.info(
+        "Language settings initialization skipped - settings endpoint not implemented",
+      );
     } catch (error) {
       console.warn(
         "Failed to load language from user settings, using current locale:",

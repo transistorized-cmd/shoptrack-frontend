@@ -18,4 +18,3 @@ export const categoriesService = {
     return res.data as CategoryDto[];
   },
 };
-

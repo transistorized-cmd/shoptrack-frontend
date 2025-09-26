@@ -1,5 +1,9 @@
 import { vi } from "vitest";
-import { createRouter, createMemoryHistory, type RouteLocationNormalizedLoaded } from "vue-router";
+import {
+  createRouter,
+  createMemoryHistory,
+  type RouteLocationNormalizedLoaded,
+} from "vue-router";
 
 export const createMockRouter = (initialRoute = "/") => {
   // Create a real router instance with memory history for testing
@@ -92,7 +96,7 @@ export const createMockRouter = (initialRoute = "/") => {
     }
 
     // For valid inputs, return a sensible default
-    const path = typeof to === "string" ? to : (to.path || "/");
+    const path = typeof to === "string" ? to : to.path || "/";
     return {
       href: path,
       fullPath: path,

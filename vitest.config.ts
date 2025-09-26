@@ -38,23 +38,21 @@ export default defineConfig({
     testNamePattern: process.env.TEST_NAME_PATTERN,
     // Allow environment-based test configuration
     env: {
-      TEST_CATEGORIES: process.env.TEST_CATEGORIES || '',
-      EXCLUDE_CATEGORIES: process.env.EXCLUDE_CATEGORIES || '',
-      TEST_SPEED_FILTER: process.env.TEST_SPEED_FILTER || '',
-      TEST_TYPE_FILTER: process.env.TEST_TYPE_FILTER || '',
+      TEST_CATEGORIES: process.env.TEST_CATEGORIES || "",
+      EXCLUDE_CATEGORIES: process.env.EXCLUDE_CATEGORIES || "",
+      TEST_SPEED_FILTER: process.env.TEST_SPEED_FILTER || "",
+      TEST_TYPE_FILTER: process.env.TEST_TYPE_FILTER || "",
     },
     // Reporters for category tracking
-    reporters: process.env.CI
-      ? ['default', 'json']
-      : ['default'],
+    reporters: process.env.CI ? ["default", "json"] : ["default"],
     outputFile: {
-      json: './test-results.json'
+      json: "./test-results.json",
     },
     // Pool configuration for performance categories
-    pool: process.env.TEST_POOL || 'threads',
+    pool: process.env.TEST_POOL || "threads",
     poolOptions: {
       threads: {
-        singleThread: process.env.TEST_SINGLE_THREAD === 'true',
+        singleThread: process.env.TEST_SINGLE_THREAD === "true",
       },
     },
   },

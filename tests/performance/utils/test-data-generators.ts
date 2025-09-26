@@ -1,5 +1,5 @@
-import { faker } from '@faker-js/faker';
-import type { Receipt, ReceiptItem } from '@/types/receipt';
+import { faker } from "@faker-js/faker";
+import type { Receipt, ReceiptItem } from "@/types/receipt";
 
 /**
  * Performance test data generators with realistic scenarios
@@ -7,7 +7,7 @@ import type { Receipt, ReceiptItem } from '@/types/receipt';
 
 export interface DataGeneratorOptions {
   count: number;
-  complexity?: 'simple' | 'medium' | 'complex';
+  complexity?: "simple" | "medium" | "complex";
   includeImages?: boolean;
   includeCategories?: boolean;
 }
@@ -22,10 +22,17 @@ export interface PerformanceTestData {
 /**
  * Generate realistic receipt items with varying complexity
  */
-export function generateReceiptItems(receiptId: number, options: DataGeneratorOptions): ReceiptItem[] {
+export function generateReceiptItems(
+  receiptId: number,
+  options: DataGeneratorOptions,
+): ReceiptItem[] {
   const items: ReceiptItem[] = [];
-  const itemCount = options.complexity === 'simple' ? 5 :
-                   options.complexity === 'medium' ? 15 : 30;
+  const itemCount =
+    options.complexity === "simple"
+      ? 5
+      : options.complexity === "medium"
+        ? 15
+        : 30;
 
   for (let i = 0; i < itemCount; i++) {
     const item: ReceiptItem = {
@@ -33,14 +40,34 @@ export function generateReceiptItems(receiptId: number, options: DataGeneratorOp
       receiptId,
       itemName: faker.commerce.productName(),
       quantity: faker.number.int({ min: 1, max: 5 }),
-      weightOriginal: faker.helpers.arrayElement(['250g', '1kg', '500ml', '2l', '100g']),
-      weightNormalizedKg: faker.number.float({ min: 0.1, max: 5, fractionDigits: 3 }),
-      unit: faker.helpers.arrayElement(['kg', 'l', 'pcs', 'g', 'ml']),
-      pricePerUnit: faker.number.float({ min: 0.5, max: 50, fractionDigits: 2 }),
+      weightOriginal: faker.helpers.arrayElement([
+        "250g",
+        "1kg",
+        "500ml",
+        "2l",
+        "100g",
+      ]),
+      weightNormalizedKg: faker.number.float({
+        min: 0.1,
+        max: 5,
+        fractionDigits: 3,
+      }),
+      unit: faker.helpers.arrayElement(["kg", "l", "pcs", "g", "ml"]),
+      pricePerUnit: faker.number.float({
+        min: 0.5,
+        max: 50,
+        fractionDigits: 2,
+      }),
       totalPrice: faker.number.float({ min: 1, max: 100, fractionDigits: 2 }),
       categoryRaw: faker.commerce.department(),
-      notes: options.complexity === 'complex' ? faker.lorem.sentence() : undefined,
-      confidence: faker.helpers.arrayElement(['low', 'medium', 'high', 'manual']),
+      notes:
+        options.complexity === "complex" ? faker.lorem.sentence() : undefined,
+      confidence: faker.helpers.arrayElement([
+        "low",
+        "medium",
+        "high",
+        "manual",
+      ]),
       createdAt: faker.date.recent().toISOString(),
       updatedAt: faker.date.recent().toISOString(),
     };
@@ -49,7 +76,7 @@ export function generateReceiptItems(receiptId: number, options: DataGeneratorOp
       item.category = {
         id: faker.number.int({ min: 1, max: 100 }),
         name: faker.commerce.department(),
-        locale: 'en-US',
+        locale: "en-US",
       };
     }
 
@@ -72,11 +99,16 @@ export function generateReceipts(options: DataGeneratorOptions): Receipt[] {
     const receipt: Receipt = {
       id: receiptId,
       filename: faker.system.fileName({ extensionCount: 1 }),
-      receiptDate: faker.date.recent().toISOString().split('T')[0],
+      receiptDate: faker.date.recent().toISOString().split("T")[0],
       imageHash: faker.string.alphanumeric(32),
       receiptNumber: faker.string.alphanumeric(10),
       storeName: faker.company.name(),
-      processingStatus: faker.helpers.arrayElement(['pending', 'processing', 'completed', 'failed']),
+      processingStatus: faker.helpers.arrayElement([
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+      ]),
       totalItemsDetected: items.length,
       successfullyParsed: Math.floor(items.length * 0.9),
       items,
@@ -84,7 +116,7 @@ export function generateReceipts(options: DataGeneratorOptions): Receipt[] {
       updatedAt: faker.date.recent().toISOString(),
     };
 
-    if (options.complexity === 'complex') {
+    if (options.complexity === "complex") {
       receipt.claudeResponseJson = {
         analysis: faker.lorem.paragraphs(3),
         confidence: faker.number.float({ min: 0.7, max: 1, fractionDigits: 2 }),
@@ -93,7 +125,12 @@ export function generateReceipts(options: DataGeneratorOptions): Receipt[] {
           modelVersion: faker.system.semver(),
         },
       };
-      receipt.imageQualityAssessment = faker.helpers.arrayElement(['excellent', 'good', 'fair', 'poor']);
+      receipt.imageQualityAssessment = faker.helpers.arrayElement([
+        "excellent",
+        "good",
+        "fair",
+        "poor",
+      ]);
     }
 
     if (options.includeImages) {
@@ -111,9 +148,11 @@ export function generateReceipts(options: DataGeneratorOptions): Receipt[] {
 /**
  * Generate performance test data with memory footprint calculation
  */
-export function generatePerformanceTestData(options: DataGeneratorOptions): PerformanceTestData {
+export function generatePerformanceTestData(
+  options: DataGeneratorOptions,
+): PerformanceTestData {
   const receipts = generateReceipts(options);
-  const items = receipts.flatMap(r => r.items || []);
+  const items = receipts.flatMap((r) => r.items || []);
 
   // Rough memory footprint calculation (in bytes)
   const receiptSize = receipts.length * 2000; // ~2KB per receipt
@@ -131,12 +170,23 @@ export function generatePerformanceTestData(options: DataGeneratorOptions): Perf
 /**
  * Generate large dataset for stress testing
  */
-export function generateLargeDataset(size: 'small' | 'medium' | 'large' | 'xl'): PerformanceTestData {
+export function generateLargeDataset(
+  size: "small" | "medium" | "large" | "xl",
+): PerformanceTestData {
   const configs = {
-    small: { count: 100, complexity: 'simple' as const },
-    medium: { count: 500, complexity: 'medium' as const },
-    large: { count: 1000, complexity: 'medium' as const, includeCategories: true },
-    xl: { count: 2500, complexity: 'complex' as const, includeCategories: true, includeImages: true },
+    small: { count: 100, complexity: "simple" as const },
+    medium: { count: 500, complexity: "medium" as const },
+    large: {
+      count: 1000,
+      complexity: "medium" as const,
+      includeCategories: true,
+    },
+    xl: {
+      count: 2500,
+      complexity: "complex" as const,
+      includeCategories: true,
+      includeImages: true,
+    },
   };
 
   return generatePerformanceTestData(configs[size]);
@@ -147,30 +197,30 @@ export function generateLargeDataset(size: 'small' | 'medium' | 'large' | 'xl'):
  */
 export function generateScenarioData(scenario: string): PerformanceTestData {
   switch (scenario) {
-    case 'virtual-scrolling':
+    case "virtual-scrolling":
       return generatePerformanceTestData({
         count: 10000,
-        complexity: 'simple',
-        includeCategories: false
+        complexity: "simple",
+        includeCategories: false,
       });
 
-    case 'memory-intensive':
+    case "memory-intensive":
       return generatePerformanceTestData({
         count: 1000,
-        complexity: 'complex',
+        complexity: "complex",
         includeImages: true,
-        includeCategories: true
+        includeCategories: true,
       });
 
-    case 'frequent-updates':
+    case "frequent-updates":
       return generatePerformanceTestData({
         count: 200,
-        complexity: 'medium',
-        includeCategories: true
+        complexity: "medium",
+        includeCategories: true,
       });
 
     default:
-      return generateLargeDataset('medium');
+      return generateLargeDataset("medium");
   }
 }
 
@@ -188,13 +238,21 @@ export function createDataBatches<T>(data: T[], batchSize: number): T[][] {
 /**
  * Generate concurrent operation scenarios
  */
-export function generateConcurrentScenarios(baseData: Receipt[], operations: number) {
+export function generateConcurrentScenarios(
+  baseData: Receipt[],
+  operations: number,
+) {
   const scenarios = [];
 
   for (let i = 0; i < operations; i++) {
     scenarios.push({
       id: i,
-      operation: faker.helpers.arrayElement(['create', 'update', 'delete', 'fetch']),
+      operation: faker.helpers.arrayElement([
+        "create",
+        "update",
+        "delete",
+        "fetch",
+      ]),
       data: faker.helpers.arrayElement(baseData),
       delay: faker.number.int({ min: 10, max: 100 }),
     });

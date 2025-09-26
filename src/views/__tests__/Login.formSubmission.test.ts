@@ -36,7 +36,11 @@ describe("Login Component - Form Submission", () => {
       params: {},
       name: "Login",
       hash: "",
-      fullPath: initialRoute + (Object.keys(initialQuery).length > 0 ? '?' + new URLSearchParams(initialQuery as any).toString() : ''),
+      fullPath:
+        initialRoute +
+        (Object.keys(initialQuery).length > 0
+          ? "?" + new URLSearchParams(initialQuery as any).toString()
+          : ""),
       matched: [],
       meta: {},
       redirectedFrom: undefined,
@@ -56,7 +60,8 @@ describe("Login Component - Form Submission", () => {
               "auth.createAccount": "Create Account",
               "auth.forgotPassword": "Forgot Password?",
               "auth.signInWithPasskey": "Sign in with Passkey",
-              "auth.sessionExpired": "Your session has expired. Please sign in again.",
+              "auth.sessionExpired":
+                "Your session has expired. Please sign in again.",
               "common.error": "Error",
               "auth.email": "Email",
               "auth.password": "Password",
@@ -121,18 +126,21 @@ describe("Login Component - Form Submission", () => {
   });
 
   describe("Form Submission", () => {
-
     it("should call login on form submission", async () => {
       // Verify the form inputs are filled
       const emailInput = wrapper.find("#email");
       const passwordInput = wrapper.find("#password");
-      expect((emailInput.element as HTMLInputElement).value).toBe("test@example.com");
-      expect((passwordInput.element as HTMLInputElement).value).toBe("password123");
+      expect((emailInput.element as HTMLInputElement).value).toBe(
+        "test@example.com",
+      );
+      expect((passwordInput.element as HTMLInputElement).value).toBe(
+        "password123",
+      );
 
       const form = wrapper.find("form");
       await form.trigger("submit");
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(mockAuthStore.login).toHaveBeenCalledWith({
         email: "test@example.com",
@@ -150,7 +158,7 @@ describe("Login Component - Form Submission", () => {
       const form = wrapper.find("form");
       await form.trigger("submit");
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(mockAuthStore.login).toHaveBeenCalledWith({
         email: "test@example.com",
@@ -183,17 +191,15 @@ describe("Login Component - Form Submission", () => {
       const form = wrapper.find("form");
       await form.trigger("submit");
 
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       expect(mockRouter.push).toHaveBeenCalledWith("/");
     });
 
-    
-
     describe("with redirect query", () => {
       beforeEach(async () => {
         createWrapper("/login", { redirect: "/dashboard" });
-        
+
         // Set up form inputs after wrapper is created with redirect query
         const emailInput = wrapper.find("#email");
         const passwordInput = wrapper.find("#password");
@@ -207,7 +213,7 @@ describe("Login Component - Form Submission", () => {
         const form = wrapper.find("form");
         await form.trigger("submit");
 
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
         expect(mockRouter.push).toHaveBeenCalledWith("/dashboard");
       });
@@ -224,7 +230,7 @@ describe("Login Component - Form Submission", () => {
       const form = wrapper.find("form");
       await form.trigger("submit");
 
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       expect(mockRouter.push).toHaveBeenCalledWith("/");
     });

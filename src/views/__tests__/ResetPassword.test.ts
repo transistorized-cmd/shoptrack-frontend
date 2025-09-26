@@ -8,7 +8,7 @@ import { useAuthStore } from "@/stores/auth";
 // Mock dependencies
 vi.mock("@/stores/auth");
 vi.mock("vue-i18n", async (importOriginal) => {
-  const actual = await importOriginal() as any;
+  const actual = (await importOriginal()) as any;
   return {
     ...actual,
     useI18n: () => ({
@@ -23,15 +23,18 @@ describe("ResetPassword Component", () => {
   let mockRouter: any;
 
   const createWrapper = (
-    query: { token?: string; email?: string } = { token: "valid-token", email: "test@example.com" },
+    query: { token?: string; email?: string } = {
+      token: "valid-token",
+      email: "test@example.com",
+    },
   ) => {
     const { mockRouter: router } = createMockRouter("/reset-password");
     mockRouter = router;
 
     // Mock the current route with query parameters
     const queryParams = new URLSearchParams();
-    if (query.token) queryParams.set('token', query.token);
-    if (query.email) queryParams.set('email', query.email);
+    if (query.token) queryParams.set("token", query.token);
+    if (query.email) queryParams.set("email", query.email);
     const queryString = queryParams.toString();
 
     mockRouter.currentRoute.value = {
@@ -40,7 +43,7 @@ describe("ResetPassword Component", () => {
       params: {},
       name: "ResetPassword",
       hash: "",
-      fullPath: `/reset-password${queryString ? '?' + queryString : ''}`,
+      fullPath: `/reset-password${queryString ? "?" + queryString : ""}`,
       matched: [],
       meta: {},
       redirectedFrom: undefined,
@@ -430,7 +433,7 @@ describe("ResetPassword Component", () => {
     it("should display reset password errors", async () => {
       // Set the error directly on the reactive authStore
       mockAuthStore.error = { message: "Token has expired" };
-      
+
       // Re-create wrapper to ensure error state is picked up
       createWrapper();
       await nextTick();
@@ -447,7 +450,7 @@ describe("ResetPassword Component", () => {
           token: ["Invalid token"],
         },
       };
-      
+
       // Re-create wrapper to ensure error state is picked up
       createWrapper();
       await nextTick();
@@ -538,7 +541,7 @@ describe("ResetPassword Component", () => {
 
     it("should handle missing URL parameters securely", async () => {
       createWrapper({ token: undefined, email: undefined });
-      
+
       // Wait for onMounted hook to execute
       await nextTick();
 

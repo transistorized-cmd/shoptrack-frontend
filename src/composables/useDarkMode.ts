@@ -64,7 +64,7 @@ export function useDarkMode() {
       }
     } catch (error) {
       // Silently handle localStorage errors
-      console.warn('Failed to read theme from localStorage:', error);
+      console.warn("Failed to read theme from localStorage:", error);
     }
     // Apply initial theme
     applyTheme(isDarkMode.value);
@@ -76,7 +76,7 @@ export function useDarkMode() {
       localStorage.setItem(STORAGE_KEY, newTheme);
     } catch (error) {
       // Silently handle localStorage errors
-      console.warn('Failed to save theme to localStorage:', error);
+      console.warn("Failed to save theme to localStorage:", error);
     }
   });
 

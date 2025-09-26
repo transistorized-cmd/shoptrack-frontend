@@ -4,20 +4,20 @@
  */
 
 // Base utilities
-export * from './base';
-import { seedFaker } from './base';
+export * from "./base";
+import { seedFaker } from "./base";
 
 // Auth factories
-export * from './auth';
+export * from "./auth";
 
 // Receipt factories
-export * from './receipts';
+export * from "./receipts";
 
 // API factories
-export * from './api';
+export * from "./api";
 
 // Plugin factories
-export * from './plugins';
+export * from "./plugins";
 
 /**
  * Convenience factory collections for common use cases
@@ -29,7 +29,7 @@ import {
   authResponseVariants,
   mockAuthServiceResponses,
   mockSettingsServiceResponses,
-} from './auth';
+} from "./auth";
 
 import {
   receiptFactory,
@@ -37,7 +37,7 @@ import {
   receiptItemFactory,
   receiptItemVariants,
   mockReceiptsServiceResponses,
-} from './receipts';
+} from "./receipts";
 
 import {
   apiResponseFactory,
@@ -45,7 +45,7 @@ import {
   axiosResponseVariants,
   axiosErrorVariants,
   mockApiCalls,
-} from './api';
+} from "./api";
 
 import {
   pluginFactory,
@@ -53,7 +53,7 @@ import {
   jobVariants,
   notificationVariants,
   mockPluginServiceResponses,
-} from './plugins';
+} from "./plugins";
 
 /**
  * Quick access to commonly used factories
@@ -133,7 +133,10 @@ export function createTestReceipt(overrides?: {
   itemOverrides?: Partial<Parameters<typeof receiptItemFactory.build>[0]>;
 }) {
   const itemCount = overrides?.itemCount ?? 3;
-  const items = receiptItemFactory.buildList(itemCount, overrides?.itemOverrides);
+  const items = receiptItemFactory.buildList(
+    itemCount,
+    overrides?.itemOverrides,
+  );
 
   const receipt = receiptFactory.build({
     totalItemsDetected: items.length,
@@ -143,7 +146,7 @@ export function createTestReceipt(overrides?: {
   });
 
   // Update item receiptIds to match
-  items.forEach(item => {
+  items.forEach((item) => {
     item.receiptId = receipt.id;
   });
 
@@ -177,8 +180,9 @@ export const testScenarios = {
    */
   userWithReceipts: (receiptCount = 5) => {
     const { user, authResponse } = createTestUser();
-    const receipts = Array.from({ length: receiptCount }, () =>
-      createTestReceipt().receipt
+    const receipts = Array.from(
+      { length: receiptCount },
+      () => createTestReceipt().receipt,
     );
     return { user, authResponse, receipts };
   },

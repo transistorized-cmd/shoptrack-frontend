@@ -108,7 +108,7 @@ export const defaultPerformanceConfig: PerformanceTestConfig = {
     saveMetrics: true,
     alertOnRegression: true,
     regressionThreshold: 20, // 20% performance regression triggers alert
-    baselineFile: 'tests/performance/baselines.json',
+    baselineFile: "tests/performance/baselines.json",
   },
 };
 
@@ -161,9 +161,9 @@ export const developmentConfig: PerformanceTestConfig = {
  * Get performance config based on environment
  */
 export function getPerformanceConfig(): PerformanceTestConfig {
-  const env = process.env.NODE_ENV || 'test';
-  const isDevelopment = process.env.VITEST_DEV === 'true';
-  const isCI = process.env.CI === 'true';
+  const env = process.env.NODE_ENV || "test";
+  const isDevelopment = process.env.VITEST_DEV === "true";
+  const isCI = process.env.CI === "true";
 
   if (isDevelopment) {
     return developmentConfig;
@@ -180,40 +180,30 @@ export function getPerformanceConfig(): PerformanceTestConfig {
  * Environment-specific test patterns
  */
 export const testPatterns = {
-  development: [
-    '**/performance/**/*.test.ts',
-  ],
+  development: ["**/performance/**/*.test.ts"],
   ci: [
-    '**/performance/components/*.test.ts',
-    '**/performance/stores/*.test.ts',
-    '**/performance/api/*.test.ts',
+    "**/performance/components/*.test.ts",
+    "**/performance/stores/*.test.ts",
+    "**/performance/api/*.test.ts",
   ],
-  full: [
-    '**/performance/**/*.test.ts',
-  ],
+  full: ["**/performance/**/*.test.ts"],
 };
 
 /**
  * Performance test categories for selective running
  */
 export const testCategories = {
-  rendering: [
-    'tests/performance/components/rendering.performance.test.ts',
-  ],
-  store: [
-    'tests/performance/stores/mutations.performance.test.ts',
-  ],
-  api: [
-    'tests/performance/api/optimization.performance.test.ts',
-  ],
+  rendering: ["tests/performance/components/rendering.performance.test.ts"],
+  store: ["tests/performance/stores/mutations.performance.test.ts"],
+  api: ["tests/performance/api/optimization.performance.test.ts"],
   memory: [
     // Tests that focus specifically on memory leaks
-    'tests/performance/components/rendering.performance.test.ts',
-    'tests/performance/stores/mutations.performance.test.ts',
+    "tests/performance/components/rendering.performance.test.ts",
+    "tests/performance/stores/mutations.performance.test.ts",
   ],
   concurrency: [
     // Tests that focus on concurrent operations
-    'tests/performance/api/optimization.performance.test.ts',
+    "tests/performance/api/optimization.performance.test.ts",
   ],
 };
 
@@ -235,13 +225,15 @@ export interface PerformanceBaseline {
 /**
  * Helper to load baseline metrics
  */
-export async function loadBaseline(baselineFile?: string): Promise<PerformanceBaseline | null> {
+export async function loadBaseline(
+  baselineFile?: string,
+): Promise<PerformanceBaseline | null> {
   const file = baselineFile || defaultPerformanceConfig.monitoring.baselineFile;
   if (!file) return null;
 
   try {
-    const fs = await import('fs/promises');
-    const data = await fs.readFile(file, 'utf-8');
+    const fs = await import("fs/promises");
+    const data = await fs.readFile(file, "utf-8");
     return JSON.parse(data);
   } catch (error) {
     console.warn(`Could not load baseline from ${file}:`, error.message);
@@ -253,21 +245,21 @@ export async function loadBaseline(baselineFile?: string): Promise<PerformanceBa
  * Helper to save baseline metrics
  */
 export async function saveBaseline(
-  metrics: PerformanceBaseline['metrics'],
-  baselineFile?: string
+  metrics: PerformanceBaseline["metrics"],
+  baselineFile?: string,
 ): Promise<void> {
   const file = baselineFile || defaultPerformanceConfig.monitoring.baselineFile;
   if (!file) return;
 
   const baseline: PerformanceBaseline = {
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'test',
+    environment: process.env.NODE_ENV || "test",
     metrics,
   };
 
   try {
-    const fs = await import('fs/promises');
-    const path = await import('path');
+    const fs = await import("fs/promises");
+    const path = await import("path");
 
     // Ensure directory exists
     await fs.mkdir(path.dirname(file), { recursive: true });

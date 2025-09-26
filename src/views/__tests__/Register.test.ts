@@ -10,7 +10,7 @@ import { useOAuth } from "@/composables/useOAuth";
 vi.mock("@/stores/auth");
 vi.mock("@/composables/useOAuth");
 vi.mock("vue-i18n", async (importOriginal) => {
-  const actual = await importOriginal() as any;
+  const actual = (await importOriginal()) as any;
   return {
     ...actual,
     useI18n: () => ({
@@ -320,9 +320,9 @@ describe("Register Component", () => {
       await nextTick();
 
       expect(wrapper.text()).toContain("Account Created Successfully");
-      const continueButton = wrapper.findAll("button").find((btn: any) =>
-        btn.text().includes("Continue to Sign In")
-      );
+      const continueButton = wrapper
+        .findAll("button")
+        .find((btn: any) => btn.text().includes("Continue to Sign In"));
       expect(continueButton?.exists()).toBe(true);
       expect(continueButton?.text()).toContain("Continue to Sign In");
     });
@@ -342,9 +342,9 @@ describe("Register Component", () => {
       expect(wrapper.text()).toContain(
         "Please check your email and click the confirmation link",
       );
-      const resendButton = wrapper.findAll("button").find((btn: any) =>
-        btn.text().includes("Resend confirmation email")
-      );
+      const resendButton = wrapper
+        .findAll("button")
+        .find((btn: any) => btn.text().includes("Resend confirmation email"));
       expect(resendButton?.exists()).toBe(true);
       expect(resendButton?.text()).toContain("Resend confirmation email");
     });
@@ -457,9 +457,9 @@ describe("Register Component", () => {
     });
 
     it("should navigate to login on continue button click", async () => {
-      const continueButton = wrapper.findAll("button").find((btn: any) =>
-        btn.text().includes("Continue to Sign In")
-      );
+      const continueButton = wrapper
+        .findAll("button")
+        .find((btn: any) => btn.text().includes("Continue to Sign In"));
       await continueButton?.trigger("click");
       await nextTick();
 

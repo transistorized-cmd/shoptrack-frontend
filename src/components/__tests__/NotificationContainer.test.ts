@@ -392,7 +392,7 @@ describe("NotificationContainer Component", () => {
       await flushPromises();
 
       // Wait for transition animation to complete (300ms + buffer)
-      await new Promise(resolve => setTimeout(resolve, 350));
+      await new Promise((resolve) => setTimeout(resolve, 350));
 
       expect(wrapper.findAll(".bg-white.shadow-lg").length).toBe(1);
     });

@@ -206,11 +206,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslation } from '@/composables/useTranslation';
 import { subscriptionService } from '@/services/subscription.service';
-import type { UserSubscription, PlanFeature, FeatureUsage } from '@/types/subscription';
+import { getStatusBadgeClass, getUsageBarClass } from '@/utils/uiHelpers';
+import type { UserSubscription, FeatureUsage } from '@/types/subscription';
 
-const { t } = useI18n();
+const { t } = useTranslation();
 
 // Reactive state
 const currentSubscription = ref<UserSubscription | null>(null);
@@ -232,24 +233,6 @@ const booleanFeatures = computed(() => {
 // Methods
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString();
-};
-
-const getStatusBadgeClass = (status: string) => {
-  const classes = {
-    active: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-    trial: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
-    expired: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
-    free: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-  };
-  return classes[status as keyof typeof classes] || classes.free;
-};
-
-const getUsageBarClass = (usage: number, limit: number) => {
-  const percentage = (usage / limit) * 100;
-  if (percentage >= 90) return 'bg-red-500';
-  if (percentage >= 75) return 'bg-yellow-500';
-  return 'bg-green-500';
 };
 
 const loadSubscriptionData = async () => {

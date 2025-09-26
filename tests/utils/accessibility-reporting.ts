@@ -3,51 +3,51 @@
  * Provides detailed reporting, violation tracking, and test categorization for accessibility testing
  */
 
-import { TestCategory } from './categories';
-import { AccessibilityTestResult, ViolationSeverity } from './accessibility';
+import { TestCategory } from "./categories";
+import { AccessibilityTestResult, ViolationSeverity } from "./accessibility";
 
 // Extended accessibility test categories
 export enum AccessibilityTestCategory {
   // Core WCAG Categories
-  PERCEIVABLE = 'perceivable',
-  OPERABLE = 'operable',
-  UNDERSTANDABLE = 'understandable',
-  ROBUST = 'robust',
+  PERCEIVABLE = "perceivable",
+  OPERABLE = "operable",
+  UNDERSTANDABLE = "understandable",
+  ROBUST = "robust",
 
   // Detailed Categories
-  COLOR_CONTRAST = 'color-contrast',
-  KEYBOARD_NAVIGATION = 'keyboard-navigation',
-  SCREEN_READER = 'screen-reader',
-  FOCUS_MANAGEMENT = 'focus-management',
-  FORM_LABELS = 'form-labels',
-  ARIA_IMPLEMENTATION = 'aria-implementation',
-  SEMANTIC_HTML = 'semantic-html',
-  LANDMARKS = 'landmarks',
-  HEADINGS = 'headings',
-  IMAGES = 'images',
-  TABLES = 'tables',
-  LISTS = 'lists',
-  LINKS = 'links',
-  BUTTONS = 'buttons',
-  FORMS = 'forms',
-  MODALS = 'modals',
-  MENUS = 'menus',
-  CAROUSELS = 'carousels',
-  TOOLTIPS = 'tooltips',
+  COLOR_CONTRAST = "color-contrast",
+  KEYBOARD_NAVIGATION = "keyboard-navigation",
+  SCREEN_READER = "screen-reader",
+  FOCUS_MANAGEMENT = "focus-management",
+  FORM_LABELS = "form-labels",
+  ARIA_IMPLEMENTATION = "aria-implementation",
+  SEMANTIC_HTML = "semantic-html",
+  LANDMARKS = "landmarks",
+  HEADINGS = "headings",
+  IMAGES = "images",
+  TABLES = "tables",
+  LISTS = "lists",
+  LINKS = "links",
+  BUTTONS = "buttons",
+  FORMS = "forms",
+  MODALS = "modals",
+  MENUS = "menus",
+  CAROUSELS = "carousels",
+  TOOLTIPS = "tooltips",
 
   // User Experience Categories
-  ERROR_HANDLING = 'error-handling',
-  LOADING_STATES = 'loading-states',
-  PROGRESS_INDICATION = 'progress-indication',
-  DYNAMIC_CONTENT = 'dynamic-content',
-  LIVE_REGIONS = 'live-regions',
+  ERROR_HANDLING = "error-handling",
+  LOADING_STATES = "loading-states",
+  PROGRESS_INDICATION = "progress-indication",
+  DYNAMIC_CONTENT = "dynamic-content",
+  LIVE_REGIONS = "live-regions",
 
   // Testing Categories
-  AUTOMATED = 'automated',
-  MANUAL = 'manual',
-  INTEGRATION = 'integration',
-  REGRESSION = 'regression',
-  PERFORMANCE = 'performance'
+  AUTOMATED = "automated",
+  MANUAL = "manual",
+  INTEGRATION = "integration",
+  REGRESSION = "regression",
+  PERFORMANCE = "performance",
 }
 
 // Violation impact mapping
@@ -55,26 +55,26 @@ export const ViolationImpactMap = {
   minor: ViolationSeverity.MINOR,
   moderate: ViolationSeverity.MODERATE,
   serious: ViolationSeverity.SERIOUS,
-  critical: ViolationSeverity.CRITICAL
+  critical: ViolationSeverity.CRITICAL,
 } as const;
 
 // WCAG Success Criteria mapping
 export const WCAGCriteriaMap = {
-  'color-contrast': '1.4.3',
-  'color-contrast-enhanced': '1.4.6',
-  'keyboard': '2.1.1',
-  'keyboard-trap': '2.1.2',
-  'focus-order-semantics': '2.4.3',
-  'link-name': '2.4.4',
-  'heading-order': '2.4.6',
-  'focus-visible': '2.4.7',
-  'aria-valid-attr': '4.1.2',
-  'aria-valid-attr-value': '4.1.2',
-  'button-name': '4.1.2',
-  'form-field-multiple-labels': '3.3.2',
-  'label': '3.3.2',
-  'landmark-unique': '1.3.6',
-  'region': '1.3.6'
+  "color-contrast": "1.4.3",
+  "color-contrast-enhanced": "1.4.6",
+  keyboard: "2.1.1",
+  "keyboard-trap": "2.1.2",
+  "focus-order-semantics": "2.4.3",
+  "link-name": "2.4.4",
+  "heading-order": "2.4.6",
+  "focus-visible": "2.4.7",
+  "aria-valid-attr": "4.1.2",
+  "aria-valid-attr-value": "4.1.2",
+  "button-name": "4.1.2",
+  "form-field-multiple-labels": "3.3.2",
+  label: "3.3.2",
+  "landmark-unique": "1.3.6",
+  region: "1.3.6",
 } as const;
 
 // Accessibility test report interface
@@ -114,7 +114,7 @@ export interface ViolationExample {
 
 export interface AccessibilityRecommendation {
   category: AccessibilityTestCategory;
-  priority: 'high' | 'medium' | 'low';
+  priority: "high" | "medium" | "low";
   title: string;
   description: string;
   impact: string;
@@ -152,9 +152,12 @@ export class AccessibilityReporter {
 
     // Calculate summary statistics
     const totalTests = testResults.length;
-    const passedTests = testResults.filter(r => r.passed).length;
+    const passedTests = testResults.filter((r) => r.passed).length;
     const failedTests = totalTests - passedTests;
-    const totalViolations = testResults.reduce((sum, r) => sum + r.violations.length, 0);
+    const totalViolations = testResults.reduce(
+      (sum, r) => sum + r.violations.length,
+      0,
+    );
     const successRate = totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
 
     // Analyze violations
@@ -173,7 +176,7 @@ export class AccessibilityReporter {
         failedTests,
         totalViolations,
         successRate,
-        timestamp
+        timestamp,
       },
       violationsByImpact,
       violationsByRule,
@@ -181,7 +184,7 @@ export class AccessibilityReporter {
       violationsByWCAG,
       testResults,
       recommendations,
-      trends: this.trends
+      trends: this.trends,
     };
   }
 
@@ -227,7 +230,7 @@ export class AccessibilityReporter {
 
     <div class="summary">
         <div class="stat-card">
-            <div class="stat-value ${report.summary.successRate >= 90 ? 'success' : report.summary.successRate >= 70 ? 'warning' : 'danger'}">
+            <div class="stat-value ${report.summary.successRate >= 90 ? "success" : report.summary.successRate >= 70 ? "warning" : "danger"}">
                 ${report.summary.successRate.toFixed(1)}%
             </div>
             <div>Success Rate</div>
@@ -262,7 +265,9 @@ export class AccessibilityReporter {
 
     <div class="section">
         <h2>💡 Recommendations</h2>
-        ${report.recommendations.map(rec => `
+        ${report.recommendations
+          .map(
+            (rec) => `
             <div class="recommendation">
                 <h4>${rec.title}</h4>
                 <p><strong>Priority:</strong> ${rec.priority.toUpperCase()}</p>
@@ -270,7 +275,9 @@ export class AccessibilityReporter {
                 <p>${rec.description}</p>
                 <p><strong>Solution:</strong> ${rec.solution}</p>
             </div>
-        `).join('')}
+        `,
+          )
+          .join("")}
     </div>
 
     <div class="section">
@@ -286,17 +293,21 @@ export class AccessibilityReporter {
                 </tr>
             </thead>
             <tbody>
-                ${report.testResults.map(result => `
+                ${report.testResults
+                  .map(
+                    (result) => `
                     <tr>
                         <td>${result.componentName}</td>
                         <td>${result.testName}</td>
-                        <td class="${result.passed ? 'success' : 'danger'}">
-                            ${result.passed ? '✅ Passed' : '❌ Failed'}
+                        <td class="${result.passed ? "success" : "danger"}">
+                            ${result.passed ? "✅ Passed" : "❌ Failed"}
                         </td>
                         <td>${result.violations.length}</td>
                         <td>${result.profile}</td>
                     </tr>
-                `).join('')}
+                `,
+                  )
+                  .join("")}
             </tbody>
         </table>
     </div>
@@ -323,17 +334,24 @@ export class AccessibilityReporter {
   exportToCSV(results?: AccessibilityTestResult[]): string {
     const testResults = results || this.testHistory;
 
-    const headers = ['Component', 'Test Name', 'Status', 'Violations', 'Profile', 'Timestamp'];
-    const rows = testResults.map(result => [
+    const headers = [
+      "Component",
+      "Test Name",
+      "Status",
+      "Violations",
+      "Profile",
+      "Timestamp",
+    ];
+    const rows = testResults.map((result) => [
       result.componentName,
       result.testName,
-      result.passed ? 'Passed' : 'Failed',
+      result.passed ? "Passed" : "Failed",
       result.violations.length.toString(),
       result.profile,
-      new Date(result.timestamp).toISOString()
+      new Date(result.timestamp).toISOString(),
     ]);
 
-    return [headers, ...rows].map(row => row.join(',')).join('\n');
+    return [headers, ...rows].map((row) => row.join(",")).join("\n");
   }
 
   /**
@@ -351,21 +369,26 @@ export class AccessibilityReporter {
     const testResults = results || this.testHistory;
     if (testResults.length === 0) return 0;
 
-    const passedTests = testResults.filter(r => r.passed).length;
+    const passedTests = testResults.filter((r) => r.passed).length;
     return (passedTests / testResults.length) * 100;
   }
 
-  private analyzeViolationsByImpact(results: AccessibilityTestResult[]): Record<ViolationSeverity, number> {
+  private analyzeViolationsByImpact(
+    results: AccessibilityTestResult[],
+  ): Record<ViolationSeverity, number> {
     const violations: Record<ViolationSeverity, number> = {
       [ViolationSeverity.MINOR]: 0,
       [ViolationSeverity.MODERATE]: 0,
       [ViolationSeverity.SERIOUS]: 0,
-      [ViolationSeverity.CRITICAL]: 0
+      [ViolationSeverity.CRITICAL]: 0,
     };
 
-    results.forEach(result => {
-      result.violations.forEach(violation => {
-        const severity = ViolationImpactMap[violation.impact as keyof typeof ViolationImpactMap] || ViolationSeverity.MODERATE;
+    results.forEach((result) => {
+      result.violations.forEach((violation) => {
+        const severity =
+          ViolationImpactMap[
+            violation.impact as keyof typeof ViolationImpactMap
+          ] || ViolationSeverity.MODERATE;
         violations[severity]++;
       });
     });
@@ -373,19 +396,26 @@ export class AccessibilityReporter {
     return violations;
   }
 
-  private analyzeViolationsByRule(results: AccessibilityTestResult[]): Record<string, ViolationInfo> {
+  private analyzeViolationsByRule(
+    results: AccessibilityTestResult[],
+  ): Record<string, ViolationInfo> {
     const violations: Record<string, ViolationInfo> = {};
 
-    results.forEach(result => {
-      result.violations.forEach(violation => {
+    results.forEach((result) => {
+      result.violations.forEach((violation) => {
         if (!violations[violation.id]) {
           violations[violation.id] = {
             count: 0,
-            impact: ViolationImpactMap[violation.impact as keyof typeof ViolationImpactMap] || ViolationSeverity.MODERATE,
-            wcagCriteria: WCAGCriteriaMap[violation.id as keyof typeof WCAGCriteriaMap] || 'Unknown',
+            impact:
+              ViolationImpactMap[
+                violation.impact as keyof typeof ViolationImpactMap
+              ] || ViolationSeverity.MODERATE,
+            wcagCriteria:
+              WCAGCriteriaMap[violation.id as keyof typeof WCAGCriteriaMap] ||
+              "Unknown",
             description: violation.description,
             helpUrl: violation.helpUrl,
-            examples: []
+            examples: [],
           };
         }
 
@@ -395,9 +425,9 @@ export class AccessibilityReporter {
         violation.nodes.forEach((node: any) => {
           violations[violation.id].examples.push({
             component: result.componentName,
-            element: node.target.join(', '),
+            element: node.target.join(", "),
             html: node.html,
-            message: node.failureSummary || violation.description
+            message: node.failureSummary || violation.description,
           });
         });
       });
@@ -406,16 +436,21 @@ export class AccessibilityReporter {
     return violations;
   }
 
-  private analyzeViolationsByCategory(results: AccessibilityTestResult[]): Record<AccessibilityTestCategory, number> {
-    const violations: Record<AccessibilityTestCategory, number> = {} as Record<AccessibilityTestCategory, number>;
+  private analyzeViolationsByCategory(
+    results: AccessibilityTestResult[],
+  ): Record<AccessibilityTestCategory, number> {
+    const violations: Record<AccessibilityTestCategory, number> = {} as Record<
+      AccessibilityTestCategory,
+      number
+    >;
 
     // Initialize all categories
-    Object.values(AccessibilityTestCategory).forEach(category => {
+    Object.values(AccessibilityTestCategory).forEach((category) => {
       violations[category] = 0;
     });
 
-    results.forEach(result => {
-      result.violations.forEach(violation => {
+    results.forEach((result) => {
+      result.violations.forEach((violation) => {
         // Map violation rules to categories
         const category = this.mapViolationToCategory(violation.id);
         if (category) {
@@ -427,12 +462,15 @@ export class AccessibilityReporter {
     return violations;
   }
 
-  private analyzeViolationsByWCAG(results: AccessibilityTestResult[]): Record<string, number> {
+  private analyzeViolationsByWCAG(
+    results: AccessibilityTestResult[],
+  ): Record<string, number> {
     const violations: Record<string, number> = {};
 
-    results.forEach(result => {
-      result.violations.forEach(violation => {
-        const wcagCriteria = WCAGCriteriaMap[violation.id as keyof typeof WCAGCriteriaMap];
+    results.forEach((result) => {
+      result.violations.forEach((violation) => {
+        const wcagCriteria =
+          WCAGCriteriaMap[violation.id as keyof typeof WCAGCriteriaMap];
         if (wcagCriteria) {
           violations[wcagCriteria] = (violations[wcagCriteria] || 0) + 1;
         }
@@ -442,32 +480,36 @@ export class AccessibilityReporter {
     return violations;
   }
 
-  private mapViolationToCategory(ruleId: string): AccessibilityTestCategory | null {
+  private mapViolationToCategory(
+    ruleId: string,
+  ): AccessibilityTestCategory | null {
     const ruleToCategory: Record<string, AccessibilityTestCategory> = {
-      'color-contrast': AccessibilityTestCategory.COLOR_CONTRAST,
-      'color-contrast-enhanced': AccessibilityTestCategory.COLOR_CONTRAST,
-      'keyboard': AccessibilityTestCategory.KEYBOARD_NAVIGATION,
-      'keyboard-trap': AccessibilityTestCategory.KEYBOARD_NAVIGATION,
-      'focus-order-semantics': AccessibilityTestCategory.FOCUS_MANAGEMENT,
-      'aria-valid-attr': AccessibilityTestCategory.ARIA_IMPLEMENTATION,
-      'aria-valid-attr-value': AccessibilityTestCategory.ARIA_IMPLEMENTATION,
-      'button-name': AccessibilityTestCategory.BUTTONS,
-      'form-field-multiple-labels': AccessibilityTestCategory.FORM_LABELS,
-      'label': AccessibilityTestCategory.FORM_LABELS,
-      'link-name': AccessibilityTestCategory.LINKS,
-      'heading-order': AccessibilityTestCategory.HEADINGS,
-      'landmark-unique': AccessibilityTestCategory.LANDMARKS,
-      'region': AccessibilityTestCategory.LANDMARKS,
-      'list': AccessibilityTestCategory.LISTS,
-      'listitem': AccessibilityTestCategory.LISTS,
-      'table-fake-caption': AccessibilityTestCategory.TABLES,
-      'image-alt': AccessibilityTestCategory.IMAGES
+      "color-contrast": AccessibilityTestCategory.COLOR_CONTRAST,
+      "color-contrast-enhanced": AccessibilityTestCategory.COLOR_CONTRAST,
+      keyboard: AccessibilityTestCategory.KEYBOARD_NAVIGATION,
+      "keyboard-trap": AccessibilityTestCategory.KEYBOARD_NAVIGATION,
+      "focus-order-semantics": AccessibilityTestCategory.FOCUS_MANAGEMENT,
+      "aria-valid-attr": AccessibilityTestCategory.ARIA_IMPLEMENTATION,
+      "aria-valid-attr-value": AccessibilityTestCategory.ARIA_IMPLEMENTATION,
+      "button-name": AccessibilityTestCategory.BUTTONS,
+      "form-field-multiple-labels": AccessibilityTestCategory.FORM_LABELS,
+      label: AccessibilityTestCategory.FORM_LABELS,
+      "link-name": AccessibilityTestCategory.LINKS,
+      "heading-order": AccessibilityTestCategory.HEADINGS,
+      "landmark-unique": AccessibilityTestCategory.LANDMARKS,
+      region: AccessibilityTestCategory.LANDMARKS,
+      list: AccessibilityTestCategory.LISTS,
+      listitem: AccessibilityTestCategory.LISTS,
+      "table-fake-caption": AccessibilityTestCategory.TABLES,
+      "image-alt": AccessibilityTestCategory.IMAGES,
     };
 
     return ruleToCategory[ruleId] || null;
   }
 
-  private generateRecommendations(violationsByRule: Record<string, ViolationInfo>): AccessibilityRecommendation[] {
+  private generateRecommendations(
+    violationsByRule: Record<string, ViolationInfo>,
+  ): AccessibilityRecommendation[] {
     const recommendations: AccessibilityRecommendation[] = [];
 
     Object.entries(violationsByRule).forEach(([ruleId, info]) => {
@@ -483,85 +525,105 @@ export class AccessibilityReporter {
     });
   }
 
-  private getRecommendationForRule(ruleId: string, info: ViolationInfo): AccessibilityRecommendation | null {
-    const recommendations: Record<string, Omit<AccessibilityRecommendation, 'category'>> = {
-      'color-contrast': {
-        priority: 'high',
-        title: 'Improve Color Contrast',
-        description: 'Text does not have sufficient contrast against its background color.',
-        impact: 'Users with visual impairments may not be able to read content.',
-        solution: 'Use colors with a contrast ratio of at least 4.5:1 for normal text and 3:1 for large text.',
+  private getRecommendationForRule(
+    ruleId: string,
+    info: ViolationInfo,
+  ): AccessibilityRecommendation | null {
+    const recommendations: Record<
+      string,
+      Omit<AccessibilityRecommendation, "category">
+    > = {
+      "color-contrast": {
+        priority: "high",
+        title: "Improve Color Contrast",
+        description:
+          "Text does not have sufficient contrast against its background color.",
+        impact:
+          "Users with visual impairments may not be able to read content.",
+        solution:
+          "Use colors with a contrast ratio of at least 4.5:1 for normal text and 3:1 for large text.",
         resources: [
-          'https://webaim.org/resources/contrastchecker/',
-          'https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html'
-        ]
+          "https://webaim.org/resources/contrastchecker/",
+          "https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html",
+        ],
       },
-      'keyboard': {
-        priority: 'high',
-        title: 'Fix Keyboard Navigation',
-        description: 'Interactive elements are not accessible via keyboard navigation.',
-        impact: 'Users who rely on keyboard navigation cannot access functionality.',
-        solution: 'Ensure all interactive elements can be reached and activated using only the keyboard.',
+      keyboard: {
+        priority: "high",
+        title: "Fix Keyboard Navigation",
+        description:
+          "Interactive elements are not accessible via keyboard navigation.",
+        impact:
+          "Users who rely on keyboard navigation cannot access functionality.",
+        solution:
+          "Ensure all interactive elements can be reached and activated using only the keyboard.",
         resources: [
-          'https://webaim.org/techniques/keyboard/',
-          'https://www.w3.org/WAI/WCAG21/Understanding/keyboard.html'
-        ]
+          "https://webaim.org/techniques/keyboard/",
+          "https://www.w3.org/WAI/WCAG21/Understanding/keyboard.html",
+        ],
       },
-      'aria-valid-attr': {
-        priority: 'medium',
-        title: 'Fix ARIA Attributes',
-        description: 'ARIA attributes are not valid or properly implemented.',
-        impact: 'Screen readers may not properly interpret content structure and functionality.',
-        solution: 'Use valid ARIA attributes according to the ARIA specification.',
+      "aria-valid-attr": {
+        priority: "medium",
+        title: "Fix ARIA Attributes",
+        description: "ARIA attributes are not valid or properly implemented.",
+        impact:
+          "Screen readers may not properly interpret content structure and functionality.",
+        solution:
+          "Use valid ARIA attributes according to the ARIA specification.",
         resources: [
-          'https://www.w3.org/WAI/ARIA/apg/',
-          'https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA'
-        ]
+          "https://www.w3.org/WAI/ARIA/apg/",
+          "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA",
+        ],
       },
-      'button-name': {
-        priority: 'high',
-        title: 'Add Button Labels',
-        description: 'Buttons do not have accessible names.',
-        impact: 'Screen reader users cannot understand the purpose of buttons.',
-        solution: 'Provide accessible names using text content, aria-label, or aria-labelledby.',
+      "button-name": {
+        priority: "high",
+        title: "Add Button Labels",
+        description: "Buttons do not have accessible names.",
+        impact: "Screen reader users cannot understand the purpose of buttons.",
+        solution:
+          "Provide accessible names using text content, aria-label, or aria-labelledby.",
         resources: [
-          'https://webaim.org/techniques/forms/controls#button',
-          'https://www.w3.org/WAI/WCAG21/Understanding/name-role-value.html'
-        ]
-      }
+          "https://webaim.org/techniques/forms/controls#button",
+          "https://www.w3.org/WAI/WCAG21/Understanding/name-role-value.html",
+        ],
+      },
     };
 
     const baseRecommendation = recommendations[ruleId];
     if (!baseRecommendation) return null;
 
-    const category = this.mapViolationToCategory(ruleId) || AccessibilityTestCategory.AUTOMATED;
+    const category =
+      this.mapViolationToCategory(ruleId) ||
+      AccessibilityTestCategory.AUTOMATED;
 
     return {
       ...baseRecommendation,
-      category
+      category,
     };
   }
 
   private updateTrends(): void {
-    const today = new Date().toISOString().split('T')[0];
-    const todayResults = this.testHistory.filter(r =>
-      new Date(r.timestamp).toISOString().split('T')[0] === today
+    const today = new Date().toISOString().split("T")[0];
+    const todayResults = this.testHistory.filter(
+      (r) => new Date(r.timestamp).toISOString().split("T")[0] === today,
     );
 
     if (todayResults.length > 0) {
       const totalTests = todayResults.length;
-      const passedTests = todayResults.filter(r => r.passed).length;
-      const violationCount = todayResults.reduce((sum, r) => sum + r.violations.length, 0);
+      const passedTests = todayResults.filter((r) => r.passed).length;
+      const violationCount = todayResults.reduce(
+        (sum, r) => sum + r.violations.length,
+        0,
+      );
       const successRate = (passedTests / totalTests) * 100;
 
       // Update or add today's trend
-      const existingTrendIndex = this.trends.findIndex(t => t.date === today);
+      const existingTrendIndex = this.trends.findIndex((t) => t.date === today);
       const trendData = {
         date: today,
         totalTests,
         passedTests,
         violationCount,
-        successRate
+        successRate,
       };
 
       if (existingTrendIndex >= 0) {
@@ -575,14 +637,20 @@ export class AccessibilityReporter {
     }
   }
 
-  private generateViolationsByImpactHTML(violationsByImpact: Record<ViolationSeverity, number>): string {
-    const total = Object.values(violationsByImpact).reduce((sum, count) => sum + count, 0);
+  private generateViolationsByImpactHTML(
+    violationsByImpact: Record<ViolationSeverity, number>,
+  ): string {
+    const total = Object.values(violationsByImpact).reduce(
+      (sum, count) => sum + count,
+      0,
+    );
 
     return `
       <div class="violations-by-impact">
-        ${Object.entries(violationsByImpact).map(([severity, count]) => {
-          const percentage = total > 0 ? (count / total) * 100 : 0;
-          return `
+        ${Object.entries(violationsByImpact)
+          .map(([severity, count]) => {
+            const percentage = total > 0 ? (count / total) * 100 : 0;
+            return `
             <div class="impact-item">
               <div class="impact-header">
                 <span class="impact-label">${severity.toUpperCase()}</span>
@@ -593,12 +661,15 @@ export class AccessibilityReporter {
               </div>
             </div>
           `;
-        }).join('')}
+          })
+          .join("")}
       </div>
     `;
   }
 
-  private generateViolationsByRuleHTML(violationsByRule: Record<string, ViolationInfo>): string {
+  private generateViolationsByRuleHTML(
+    violationsByRule: Record<string, ViolationInfo>,
+  ): string {
     return `
       <table>
         <thead>
@@ -611,7 +682,9 @@ export class AccessibilityReporter {
           </tr>
         </thead>
         <tbody>
-          ${Object.entries(violationsByRule).map(([rule, info]) => `
+          ${Object.entries(violationsByRule)
+            .map(
+              ([rule, info]) => `
             <tr>
               <td><code>${rule}</code></td>
               <td>${info.count}</td>
@@ -619,7 +692,9 @@ export class AccessibilityReporter {
               <td>${info.wcagCriteria}</td>
               <td>${info.description}</td>
             </tr>
-          `).join('')}
+          `,
+            )
+            .join("")}
         </tbody>
       </table>
     `;
@@ -633,24 +708,28 @@ export const accessibilityReporter = new AccessibilityReporter();
 export function categorizeAccessibilityTest(
   testName: string,
   component: string,
-  violations: any[]
+  violations: any[],
 ): AccessibilityTestCategory[] {
-  const categories: AccessibilityTestCategory[] = [AccessibilityTestCategory.AUTOMATED];
+  const categories: AccessibilityTestCategory[] = [
+    AccessibilityTestCategory.AUTOMATED,
+  ];
 
   // Add categories based on component type
-  if (component.toLowerCase().includes('form')) {
+  if (component.toLowerCase().includes("form")) {
     categories.push(AccessibilityTestCategory.FORMS);
   }
-  if (component.toLowerCase().includes('modal')) {
+  if (component.toLowerCase().includes("modal")) {
     categories.push(AccessibilityTestCategory.MODALS);
   }
-  if (component.toLowerCase().includes('nav')) {
+  if (component.toLowerCase().includes("nav")) {
     categories.push(AccessibilityTestCategory.MENUS);
   }
 
   // Add categories based on violations
-  violations.forEach(violation => {
-    const category = accessibilityReporter['mapViolationToCategory'](violation.id);
+  violations.forEach((violation) => {
+    const category = accessibilityReporter["mapViolationToCategory"](
+      violation.id,
+    );
     if (category && !categories.includes(category)) {
       categories.push(category);
     }
@@ -662,9 +741,25 @@ export function categorizeAccessibilityTest(
 // Export utilities for test configuration
 export const AccessibilityTestProfiles = {
   BASIC: [TestCategory.ACCESSIBILITY, TestCategory.UNIT, TestCategory.FAST],
-  COMPREHENSIVE: [TestCategory.ACCESSIBILITY, TestCategory.INTEGRATION, TestCategory.MEDIUM],
-  STRICT: [TestCategory.ACCESSIBILITY, TestCategory.CRITICAL, TestCategory.SLOW],
+  COMPREHENSIVE: [
+    TestCategory.ACCESSIBILITY,
+    TestCategory.INTEGRATION,
+    TestCategory.MEDIUM,
+  ],
+  STRICT: [
+    TestCategory.ACCESSIBILITY,
+    TestCategory.CRITICAL,
+    TestCategory.SLOW,
+  ],
   FORMS: [TestCategory.ACCESSIBILITY, TestCategory.FORMS, TestCategory.FAST],
-  NAVIGATION: [TestCategory.ACCESSIBILITY, TestCategory.NAVIGATION, TestCategory.MEDIUM],
-  PERFORMANCE: [TestCategory.ACCESSIBILITY, TestCategory.PERFORMANCE, TestCategory.SLOW]
+  NAVIGATION: [
+    TestCategory.ACCESSIBILITY,
+    TestCategory.NAVIGATION,
+    TestCategory.MEDIUM,
+  ],
+  PERFORMANCE: [
+    TestCategory.ACCESSIBILITY,
+    TestCategory.PERFORMANCE,
+    TestCategory.SLOW,
+  ],
 };

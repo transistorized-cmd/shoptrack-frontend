@@ -2,14 +2,23 @@
  * Vue Test Utils mounting helpers
  * Provides utilities for both shallow and full mounting with common configurations
  */
-import { mount, shallowMount, VueWrapper, MountingOptions } from '@vue/test-utils';
-import { createI18n } from 'vue-i18n';
-import { createPinia, setActivePinia } from 'pinia';
-import { Component, defineComponent, ref } from 'vue';
-import { vi } from 'vitest';
-import { createMockRouter } from './router';
-import { createAuthStoreMock, createAuthenticatedAuthStoreMock, createUnauthenticatedAuthStoreMock } from './authStore';
-import type { User } from '@/types/auth';
+import {
+  mount,
+  shallowMount,
+  VueWrapper,
+  MountingOptions,
+} from "@vue/test-utils";
+import { createI18n } from "vue-i18n";
+import { createPinia, setActivePinia } from "pinia";
+import { Component, defineComponent, ref } from "vue";
+import { vi } from "vitest";
+import { createMockRouter } from "./router";
+import {
+  createAuthStoreMock,
+  createAuthenticatedAuthStoreMock,
+  createUnauthenticatedAuthStoreMock,
+} from "./authStore";
+import type { User } from "@/types/auth";
 
 /**
  * Default mounting options for consistent test setup
@@ -72,7 +81,7 @@ export interface TestMountingOptions<T = any> extends MountingOptions<T> {
 /**
  * Create reactive test locale for mocking useTranslation
  */
-export function createTestLocale(initialLocale = 'en') {
+export function createTestLocale(initialLocale = "en") {
   const locale = ref(initialLocale);
   const setLocale = vi.fn((newLocale: string) => {
     locale.value = newLocale;
@@ -84,94 +93,97 @@ export function createTestLocale(initialLocale = 'en') {
 /**
  * Create test i18n instance with common translations
  */
-export function createTestI18n(locale = 'en', additionalMessages: Record<string, any> = {}) {
+export function createTestI18n(
+  locale = "en",
+  additionalMessages: Record<string, any> = {},
+) {
   const baseMessages = {
     en: {
       common: {
-        loading: 'Loading...',
-        error: 'Error',
-        cancel: 'Cancel',
-        save: 'Save',
-        delete: 'Delete',
-        edit: 'Edit',
-        view: 'View',
-        close: 'Close',
+        loading: "Loading...",
+        error: "Error",
+        cancel: "Cancel",
+        save: "Save",
+        delete: "Delete",
+        edit: "Edit",
+        view: "View",
+        close: "Close",
       },
       search: {
-        placeholder: 'Search...',
-        noResults: 'No results found',
+        placeholder: "Search...",
+        noResults: "No results found",
         groups: {
-          receipts: 'Receipts',
-          items: 'Items',
-          categories: 'Categories',
+          receipts: "Receipts",
+          items: "Items",
+          categories: "Categories",
         },
         types: {
-          receipt: 'Receipt',
-          item: 'Item',
-          category: 'Category',
+          receipt: "Receipt",
+          item: "Item",
+          category: "Category",
         },
       },
       receipts: {
-        title: 'Receipts',
-        upload: 'Upload Receipt',
-        processing: 'Processing...',
-        failed: 'Processing Failed',
-        completed: 'Processing Complete',
-        noReceipts: 'No receipts found',
+        title: "Receipts",
+        upload: "Upload Receipt",
+        processing: "Processing...",
+        failed: "Processing Failed",
+        completed: "Processing Complete",
+        noReceipts: "No receipts found",
       },
       notifications: {
-        title: 'Notifications',
-        markAllRead: 'Mark all as read',
-        noNotifications: 'No notifications',
+        title: "Notifications",
+        markAllRead: "Mark all as read",
+        noNotifications: "No notifications",
       },
-      ...additionalMessages[locale] || {},
+      ...(additionalMessages[locale] || {}),
     },
     es: {
       common: {
-        loading: 'Cargando...',
-        error: 'Error',
-        cancel: 'Cancelar',
-        save: 'Guardar',
-        delete: 'Eliminar',
-        edit: 'Editar',
-        view: 'Ver',
-        close: 'Cerrar',
+        loading: "Cargando...",
+        error: "Error",
+        cancel: "Cancelar",
+        save: "Guardar",
+        delete: "Eliminar",
+        edit: "Editar",
+        view: "Ver",
+        close: "Cerrar",
       },
       search: {
-        placeholder: 'Buscar...',
-        noResults: 'No se encontraron resultados',
+        placeholder: "Buscar...",
+        noResults: "No se encontraron resultados",
         groups: {
-          receipts: 'Recibos',
-          items: 'Artículos',
-          categories: 'Categorías',
+          receipts: "Recibos",
+          items: "Artículos",
+          categories: "Categorías",
         },
         types: {
-          receipt: 'Recibo',
-          item: 'Artículo',
-          category: 'Categoría',
+          receipt: "Recibo",
+          item: "Artículo",
+          category: "Categoría",
         },
       },
       receipts: {
-        title: 'Recibos',
-        upload: 'Subir Recibo',
-        processing: 'Procesando...',
-        failed: 'Procesamiento Fallido',
-        completed: 'Procesamiento Completo',
-        noReceipts: 'No se encontraron recibos',
+        title: "Recibos",
+        upload: "Subir Recibo",
+        processing: "Procesando...",
+        failed: "Procesamiento Fallido",
+        completed: "Procesamiento Completo",
+        noReceipts: "No se encontraron recibos",
       },
       notifications: {
-        title: 'Notificaciones',
-        markAllRead: 'Marcar todo como leído',
-        noNotifications: 'Sin notificaciones',
+        title: "Notificaciones",
+        markAllRead: "Marcar todo como leído",
+        noNotifications: "Sin notificaciones",
       },
-      ...additionalMessages['es'] || {},
+      ...(additionalMessages["es"] || {}),
     },
   };
 
   return createI18n({
     legacy: false,
     locale,
-    fallbackLocale: 'en',
+    fallbackLocale: "en",
     messages: baseMessages,
   });
 }
@@ -182,114 +194,114 @@ export function createTestI18n(locale = 'en', additionalMessages: Record<string,
 export const commonStubs = {
   // Router components
   RouterLink: {
-    name: 'RouterLink',
-    template: '<a><slot /></a>',
-    props: ['to'],
+    name: "RouterLink",
+    template: "<a><slot /></a>",
+    props: ["to"],
   },
   RouterView: {
-    name: 'RouterView',
+    name: "RouterView",
     template: '<div data-testid="router-view"><slot /></div>',
   },
 
   // Icon components
   ChevronDownIcon: {
-    name: 'ChevronDownIcon',
+    name: "ChevronDownIcon",
     template: '<svg data-testid="chevron-down-icon" />',
   },
   ChevronUpIcon: {
-    name: 'ChevronUpIcon',
+    name: "ChevronUpIcon",
     template: '<svg data-testid="chevron-up-icon" />',
   },
   BellIcon: {
-    name: 'BellIcon',
+    name: "BellIcon",
     template: '<svg data-testid="bell-icon" />',
   },
   SunIcon: {
-    name: 'SunIcon',
+    name: "SunIcon",
     template: '<svg data-testid="sun-icon" />',
   },
   MoonIcon: {
-    name: 'MoonIcon',
+    name: "MoonIcon",
     template: '<svg data-testid="moon-icon" />',
   },
   ComputerDesktopIcon: {
-    name: 'ComputerDesktopIcon',
+    name: "ComputerDesktopIcon",
     template: '<svg data-testid="computer-desktop-icon" />',
   },
   MagnifyingGlassIcon: {
-    name: 'MagnifyingGlassIcon',
+    name: "MagnifyingGlassIcon",
     template: '<svg data-testid="magnifying-glass-icon" />',
   },
   XMarkIcon: {
-    name: 'XMarkIcon',
+    name: "XMarkIcon",
     template: '<svg data-testid="x-mark-icon" />',
   },
 
   // Chart components
   Line: {
-    name: 'Line',
+    name: "Line",
     template: '<div data-testid="line-chart" />',
-    props: ['data', 'options'],
+    props: ["data", "options"],
   },
 
   // Complex components often stubbed
   SearchInput: {
-    name: 'SearchInput',
+    name: "SearchInput",
     template: '<input data-testid="search-input" />',
-    props: ['modelValue'],
-    emits: ['update:modelValue'],
+    props: ["modelValue"],
+    emits: ["update:modelValue"],
   },
   SearchResultsDropdown: {
-    name: 'SearchResultsDropdown',
+    name: "SearchResultsDropdown",
     template: '<div data-testid="search-results-dropdown" />',
-    props: ['results', 'visible'],
+    props: ["results", "visible"],
   },
   NotificationMenu: {
-    name: 'NotificationMenu',
+    name: "NotificationMenu",
     template: '<div data-testid="notification-menu" />',
-    props: ['visible'],
+    props: ["visible"],
   },
   ThemeToggle: {
-    name: 'ThemeToggle',
+    name: "ThemeToggle",
     template: '<button data-testid="theme-toggle" />',
-    props: ['simple'],
+    props: ["simple"],
   },
   LanguageSwitcher: {
-    name: 'LanguageSwitcher',
+    name: "LanguageSwitcher",
     template: '<select data-testid="language-switcher" />',
   },
   QuickUpload: {
-    name: 'QuickUpload',
+    name: "QuickUpload",
     template: '<div data-testid="quick-upload" />',
   },
   ReceiptCard: {
-    name: 'ReceiptCard',
+    name: "ReceiptCard",
     template: '<div data-testid="receipt-card" />',
-    props: ['receipt'],
-    emits: ['delete', 'edit'],
+    props: ["receipt"],
+    emits: ["delete", "edit"],
   },
   ReceiptDetailModal: {
-    name: 'ReceiptDetailModal',
+    name: "ReceiptDetailModal",
     template: '<div data-testid="receipt-detail-modal" />',
-    props: ['visible', 'receipt'],
-    emits: ['close'],
+    props: ["visible", "receipt"],
+    emits: ["close"],
   },
   LocalizedDateInput: {
-    name: 'LocalizedDateInput',
+    name: "LocalizedDateInput",
     template: '<input data-testid="localized-date-input" />',
-    props: ['modelValue', 'id'],
-    emits: ['update:modelValue', 'change'],
+    props: ["modelValue", "id"],
+    emits: ["update:modelValue", "change"],
   },
   NotificationContainer: {
-    name: 'NotificationContainer',
+    name: "NotificationContainer",
     template: '<div data-testid="notification-container" />',
   },
   ErrorBoundary: {
-    name: 'ErrorBoundary',
+    name: "ErrorBoundary",
     template: '<div data-testid="error-boundary"><slot /></div>',
   },
   EnhancedErrorBoundary: {
-    name: 'EnhancedErrorBoundary',
+    name: "EnhancedErrorBoundary",
     template: '<div data-testid="enhanced-error-boundary"><slot /></div>',
   },
 } as const;
@@ -297,12 +309,14 @@ export const commonStubs = {
 /**
  * Get default mounting options with common plugins
  */
-function getDefaultMountingOptions<T>(options: TestMountingOptions<T> = {}): MountingOptions<T> {
+function getDefaultMountingOptions<T>(
+  options: TestMountingOptions<T> = {},
+): MountingOptions<T> {
   const {
     withI18n = true,
     withPinia = true,
     withRouter = true,
-    locale = 'en',
+    locale = "en",
     i18nMessages = {},
     componentStubs = {},
     authStore,
@@ -363,7 +377,7 @@ function getDefaultMountingOptions<T>(options: TestMountingOptions<T> = {}): Mou
  */
 export function mountComponent<T extends Component>(
   component: T,
-  options: TestMountingOptions<T> = {}
+  options: TestMountingOptions<T> = {},
 ): VueWrapper {
   return mount(component, getDefaultMountingOptions(options));
 }
@@ -374,7 +388,7 @@ export function mountComponent<T extends Component>(
  */
 export function shallowMountComponent<T extends Component>(
   component: T,
-  options: TestMountingOptions<T> = {}
+  options: TestMountingOptions<T> = {},
 ): VueWrapper {
   const mountingOptions = getDefaultMountingOptions({
     // Automatically stub all child components for shallow mounting
@@ -394,7 +408,7 @@ export function shallowMountComponent<T extends Component>(
 export function mountForProps<T extends Component>(
   component: T,
   props: Record<string, any> = {},
-  options: TestMountingOptions<T> = {}
+  options: TestMountingOptions<T> = {},
 ): VueWrapper {
   return shallowMountComponent(component, {
     props,
@@ -408,7 +422,7 @@ export function mountForProps<T extends Component>(
 export function mountWithSlots<T extends Component>(
   component: T,
   slots: Record<string, string | Component> = {},
-  options: TestMountingOptions<T> = {}
+  options: TestMountingOptions<T> = {},
 ): VueWrapper {
   return shallowMountComponent(component, {
     slots,
@@ -421,7 +435,7 @@ export function mountWithSlots<T extends Component>(
  */
 export function mountForEvents<T extends Component>(
   component: T,
-  options: TestMountingOptions<T> = {}
+  options: TestMountingOptions<T> = {},
 ): VueWrapper {
   return shallowMountComponent(component, options);
 }
@@ -431,7 +445,7 @@ export function mountForEvents<T extends Component>(
  */
 export function mountView<T extends Component>(
   component: T,
-  options: TestMountingOptions<T> = {}
+  options: TestMountingOptions<T> = {},
 ): VueWrapper {
   return mountComponent(component, {
     withRouter: true,
@@ -447,7 +461,7 @@ export function mountView<T extends Component>(
  */
 export function shallowMountView<T extends Component>(
   component: T,
-  options: TestMountingOptions<T> = {}
+  options: TestMountingOptions<T> = {},
 ): VueWrapper {
   return shallowMountComponent(component, {
     withRouter: true,
@@ -463,7 +477,7 @@ export function shallowMountView<T extends Component>(
 export function mountWithAuthenticatedUser<T extends Component>(
   component: T,
   userOverrides: Partial<User> = {},
-  options: TestMountingOptions<T> = {}
+  options: TestMountingOptions<T> = {},
 ): VueWrapper {
   return mountComponent(component, {
     authStore: {
@@ -479,7 +493,7 @@ export function mountWithAuthenticatedUser<T extends Component>(
  */
 export function mountWithUnauthenticatedUser<T extends Component>(
   component: T,
-  options: TestMountingOptions<T> = {}
+  options: TestMountingOptions<T> = {},
 ): VueWrapper {
   return mountComponent(component, {
     authStore: {
@@ -495,7 +509,7 @@ export function mountWithUnauthenticatedUser<T extends Component>(
 export function mountViewWithAuth<T extends Component>(
   component: T,
   userOverrides: Partial<User> = {},
-  options: TestMountingOptions<T> = {}
+  options: TestMountingOptions<T> = {},
 ): VueWrapper {
   return mountWithAuthenticatedUser(component, userOverrides, {
     withRouter: true,
@@ -511,7 +525,8 @@ export function mountViewWithAuth<T extends Component>(
 export function createTestComponent(setup: () => any) {
   return defineComponent({
     setup,
-    template: '<div data-testid="test-component">{{ JSON.stringify($data) }}</div>',
+    template:
+      '<div data-testid="test-component">{{ JSON.stringify($data) }}</div>',
   });
 }
 
@@ -520,7 +535,7 @@ export function createTestComponent(setup: () => any) {
  */
 export function mountComposable<T>(
   composableSetup: () => T,
-  options: TestMountingOptions = {}
+  options: TestMountingOptions = {},
 ): { wrapper: VueWrapper; result: T } {
   let result: T;
 
@@ -553,12 +568,12 @@ export const testPatterns = {
   shouldAcceptProps: (
     component: Component,
     props: Record<string, any>,
-    expectedContent?: string | RegExp
+    expectedContent?: string | RegExp,
   ) => {
     const wrapper = mountForProps(component, props);
     expect(wrapper.exists()).toBe(true);
     if (expectedContent) {
-      if (typeof expectedContent === 'string') {
+      if (typeof expectedContent === "string") {
         expect(wrapper.text()).toContain(expectedContent);
       } else {
         expect(wrapper.text()).toMatch(expectedContent);
@@ -574,7 +589,7 @@ export const testPatterns = {
     component: Component,
     triggerAction: (wrapper: VueWrapper) => void | Promise<void>,
     expectedEvent: string,
-    expectedPayload?: any
+    expectedPayload?: any,
   ) => {
     const wrapper = mountForEvents(component);
     await triggerAction(wrapper);
@@ -595,11 +610,11 @@ export const testPatterns = {
   shouldRenderSlots: (
     component: Component,
     slots: Record<string, string | Component>,
-    expectedContent: string | RegExp
+    expectedContent: string | RegExp,
   ) => {
     const wrapper = mountWithSlots(component, slots);
 
-    if (typeof expectedContent === 'string') {
+    if (typeof expectedContent === "string") {
       expect(wrapper.text()).toContain(expectedContent);
     } else {
       expect(wrapper.text()).toMatch(expectedContent);

@@ -28,7 +28,7 @@ export interface PlanFeature {
   featureCode: string;
   featureName: string;
   featureDescription?: string;
-  featureType: 'limit' | 'boolean' | 'access';
+  featureType: "limit" | "boolean" | "access";
   unitType?: string;
   createdAt: string;
   updatedAt: string;
@@ -38,8 +38,8 @@ export interface UserSubscription {
   id: number;
   userId: number;
   subscriptionPlanId: number;
-  status: 'active' | 'cancelled' | 'expired' | 'trial' | 'past_due';
-  billingInterval: 'monthly' | 'yearly';
+  status: "active" | "cancelled" | "expired" | "trial" | "past_due";
+  billingInterval: "monthly" | "yearly";
   amount: number;
   currency: string;
   startDate: string;
@@ -60,7 +60,7 @@ export interface UserSubscription {
 
 export interface CreateUserSubscriptionRequest {
   subscriptionPlanId: number;
-  billingInterval: 'monthly' | 'yearly';
+  billingInterval: "monthly" | "yearly";
   paymentMethodId?: number;
   startTrial?: boolean;
   promoCode?: string;

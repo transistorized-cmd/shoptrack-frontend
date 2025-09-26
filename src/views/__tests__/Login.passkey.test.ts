@@ -36,7 +36,11 @@ describe("Login Component - Passkey Authentication", () => {
       params: {},
       name: "Login",
       hash: "",
-      fullPath: initialRoute + (Object.keys(initialQuery).length > 0 ? '?' + new URLSearchParams(initialQuery as any).toString() : ''),
+      fullPath:
+        initialRoute +
+        (Object.keys(initialQuery).length > 0
+          ? "?" + new URLSearchParams(initialQuery as any).toString()
+          : ""),
       matched: [],
       meta: {},
       redirectedFrom: undefined,
@@ -57,7 +61,8 @@ describe("Login Component - Passkey Authentication", () => {
               "auth.createAccount": "Create Account",
               "auth.forgotPassword": "Forgot Password?",
               "auth.signInWithPasskey": "Sign in with Passkey",
-              "auth.sessionExpired": "Your session has expired. Please sign in again.",
+              "auth.sessionExpired":
+                "Your session has expired. Please sign in again.",
               "common.error": "Error",
               "auth.email": "Email",
               "auth.password": "Password",
@@ -157,13 +162,13 @@ describe("Login Component - Passkey Authentication", () => {
       await nextTick();
 
       const buttons = wrapper.findAll("button");
-      
+
       // Find passkey button by checking for passkey-related text
       const passkeyButton = buttons.find((btn: any) => {
         const text = btn.text();
         return text.includes("Passkey") || text.includes("passkey");
       });
-      
+
       if (passkeyButton) {
         expect(passkeyButton.attributes("disabled")).toBeDefined();
       } else {

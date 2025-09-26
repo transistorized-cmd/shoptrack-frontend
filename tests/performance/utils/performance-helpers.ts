@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
 /**
  * Performance testing utilities and helpers
@@ -29,7 +29,11 @@ export interface BenchmarkOptions {
  * Get current memory usage (approximation for browser environment)
  */
 export function getCurrentMemoryUsage(): number {
-  if (typeof window !== 'undefined' && 'performance' in window && 'memory' in window.performance) {
+  if (
+    typeof window !== "undefined" &&
+    "performance" in window &&
+    "memory" in window.performance
+  ) {
     return (window.performance as any).memory.usedJSHeapSize;
   }
   // Fallback for test environment
@@ -40,7 +44,7 @@ export function getCurrentMemoryUsage(): number {
  * Force garbage collection (if available)
  */
 export function forceGarbageCollection(): void {
-  if (typeof window !== 'undefined' && 'gc' in window) {
+  if (typeof window !== "undefined" && "gc" in window) {
     (window as any).gc();
   }
   // In Node.js test environment
@@ -54,9 +58,14 @@ export function forceGarbageCollection(): void {
  */
 export async function measurePerformance<T>(
   fn: () => T | Promise<T>,
-  options: BenchmarkOptions = {}
+  options: BenchmarkOptions = {},
 ): Promise<{ result: T; metrics: PerformanceMetrics }> {
-  const { iterations = 1, warmup = 0, gc = false, memoryTracking = true } = options;
+  const {
+    iterations = 1,
+    warmup = 0,
+    gc = false,
+    memoryTracking = true,
+  } = options;
 
   // Warmup runs
   for (let i = 0; i < warmup; i++) {
@@ -117,7 +126,7 @@ export async function measurePerformance<T>(
  */
 export async function measureRenderPerformance(
   renderFn: () => void | Promise<void>,
-  options: BenchmarkOptions = {}
+  options: BenchmarkOptions = {},
 ): Promise<PerformanceMetrics> {
   const startTime = performance.now();
   const memoryBefore = getCurrentMemoryUsage();
@@ -148,7 +157,7 @@ export class PerformanceBenchmark {
   async run<T>(
     name: string,
     fn: () => T | Promise<T>,
-    options: BenchmarkOptions = {}
+    options: BenchmarkOptions = {},
   ): Promise<T> {
     const { result, metrics } = await measurePerformance(fn, options);
 
@@ -187,7 +196,7 @@ export class PerformanceBenchmark {
         operations: 0,
         opsPerSecond: 0,
         renderTime: 0,
-      }
+      },
     );
 
     const count = results.length;
@@ -217,9 +226,12 @@ export class PerformanceBenchmark {
       summary[name] = {
         runs: results.length,
         averages: avgMetrics,
-        fastest: Math.min(...results.map(r => r.duration)),
-        slowest: Math.max(...results.map(r => r.duration)),
-        totalMemoryLeaked: results.reduce((sum, r) => sum + r.memoryUsage.leaked, 0),
+        fastest: Math.min(...results.map((r) => r.duration)),
+        slowest: Math.max(...results.map((r) => r.duration)),
+        totalMemoryLeaked: results.reduce(
+          (sum, r) => sum + r.memoryUsage.leaked,
+          0,
+        ),
       };
     }
 
@@ -247,7 +259,7 @@ export function createMockPerformanceTimer() {
  * Simulate network latency for API tests
  */
 export function simulateNetworkLatency(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -255,7 +267,7 @@ export function simulateNetworkLatency(ms: number): Promise<void> {
  */
 export function createDebouncedFunction<T extends (...args: any[]) => any>(
   fn: T,
-  delay: number
+  delay: number,
 ): T & { flush: () => void; cancel: () => void } {
   let timeoutId: NodeJS.Timeout | null = null;
   let lastArgs: Parameters<T>;

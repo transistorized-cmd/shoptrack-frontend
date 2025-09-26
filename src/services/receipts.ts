@@ -11,7 +11,9 @@ import type { ProcessingResult } from "@/types/plugin";
 export const receiptsService = {
   async getReceipts(params?: ReceiptQuery): Promise<PagedResult<Receipt>> {
     const locale = getCurrentLocale();
-    const response = await api.get("/receipts", { params: { locale, ...(params || {}) } });
+    const response = await api.get("/receipts", {
+      params: { locale, ...(params || {}) },
+    });
     return response.data;
   },
 
@@ -134,7 +136,9 @@ export const receiptsService = {
     itemData: Partial<ReceiptItem>,
   ): Promise<ReceiptItem> {
     const locale = getCurrentLocale();
-    const response = await api.put(`/receipts/items/${itemId}`, itemData, { params: { locale } });
+    const response = await api.put(`/receipts/items/${itemId}`, itemData, {
+      params: { locale },
+    });
     return response.data;
   },
 };

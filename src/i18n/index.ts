@@ -84,7 +84,7 @@ export default i18n;
 // Helper function to change locale
 export function setLocale(locale: LocaleCode) {
   // Use proper typing for locale assignment
-  if (i18n.global.locale && 'value' in i18n.global.locale) {
+  if (i18n.global.locale && "value" in i18n.global.locale) {
     (i18n.global.locale as any).value = locale;
   } else {
     // Fallback for different vue-i18n versions
@@ -92,12 +92,12 @@ export function setLocale(locale: LocaleCode) {
   }
 
   // Persist locale choice
-  if (typeof localStorage !== 'undefined') {
+  if (typeof localStorage !== "undefined") {
     localStorage.setItem("shoptrack-locale", locale);
   }
 
   // Update document language attribute with browser-compatible language tag
-  if (typeof document !== 'undefined') {
+  if (typeof document !== "undefined") {
     document.documentElement.lang = getLanguageTag(locale);
   }
 }
@@ -105,7 +105,7 @@ export function setLocale(locale: LocaleCode) {
 // Helper function to get current locale
 export function getCurrentLocale(): LocaleCode {
   // Use proper typing for locale access
-  if (i18n.global.locale && 'value' in i18n.global.locale) {
+  if (i18n.global.locale && "value" in i18n.global.locale) {
     return (i18n.global.locale as any).value as LocaleCode;
   } else {
     // Fallback for different vue-i18n versions

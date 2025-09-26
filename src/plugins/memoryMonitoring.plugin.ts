@@ -6,11 +6,11 @@
  * and provides global access to memory monitoring functionality.
  */
 
-import type { App } from 'vue';
-import { memoryMonitoringService } from '@/services/memoryMonitoring.service';
-import { useMemoryMonitoringStore } from '@/stores/memoryMonitoring.store';
-import { getFinalConfig } from '@/config/memoryMonitoring.config';
-import type { MemoryMonitoringConfig } from '@/config/memoryMonitoring.config';
+import type { App } from "vue";
+import { memoryMonitoringService } from "@/services/memoryMonitoring.service";
+import { useMemoryMonitoringStore } from "@/stores/memoryMonitoring.store";
+import { getFinalConfig } from "@/config/memoryMonitoring.config";
+import type { MemoryMonitoringConfig } from "@/config/memoryMonitoring.config";
 
 export interface MemoryMonitoringPluginOptions {
   config?: Partial<MemoryMonitoringConfig>;
@@ -28,7 +28,7 @@ export const memoryMonitoringPlugin = {
       config: configOverrides = {},
       autoStart = true,
       registerAllStores = true,
-      showWidget
+      showWidget,
     } = options;
 
     // Get final configuration with overrides
@@ -44,7 +44,7 @@ export const memoryMonitoringPlugin = {
 
     // Skip initialization if disabled
     if (!config.enabled) {
-      console.log('Memory monitoring disabled');
+      console.log("Memory monitoring disabled");
       return;
     }
 
@@ -52,17 +52,17 @@ export const memoryMonitoringPlugin = {
     const memoryStore = useMemoryMonitoringStore();
 
     // Provide memory monitoring globally
-    app.provide('memoryMonitoring', {
+    app.provide("memoryMonitoring", {
       service: memoryMonitoringService,
       store: memoryStore,
-      config
+      config,
     });
 
     // Add global properties
     app.config.globalProperties.$memoryMonitoring = {
       service: memoryMonitoringService,
       store: memoryStore,
-      config
+      config,
     };
 
     // Auto-start monitoring if enabled
@@ -74,7 +74,7 @@ export const memoryMonitoringPlugin = {
           if (this.$root === this && !memoryStore.isEnabled) {
             try {
               await memoryStore.initializeMonitoring(config.thresholds);
-              console.log('Memory monitoring initialized successfully');
+              console.log("Memory monitoring initialized successfully");
 
               // Register all Pinia stores if requested
               if (registerAllStores) {
@@ -83,12 +83,11 @@ export const memoryMonitoringPlugin = {
 
               // Setup automatic store registration for future stores
               setupAutomaticStoreRegistration(app, memoryStore);
-
             } catch (error) {
-              console.error('Failed to initialize memory monitoring:', error);
+              console.error("Failed to initialize memory monitoring:", error);
             }
           }
-        }
+        },
       });
     }
 
@@ -98,12 +97,14 @@ export const memoryMonitoringPlugin = {
     }
 
     // Development helpers
-    if (import.meta.env.MODE === 'development') {
+    if (import.meta.env.MODE === "development") {
       addDevelopmentHelpers(app, memoryStore, config);
     }
 
-    console.log('Memory monitoring plugin installed', { config: config.environment });
-  }
+    console.log("Memory monitoring plugin installed", {
+      config: config.environment,
+    });
+  },
 };
 
 /**
@@ -114,7 +115,9 @@ function registerPiniaStores(app: App, memoryStore: any) {
     // Get Pinia instance from the app
     const pinia = app.config.globalProperties.$pinia;
     if (!pinia) {
-      console.warn('Pinia not found, cannot register stores for memory monitoring');
+      console.warn(
+        "Pinia not found, cannot register stores for memory monitoring",
+      );
       return;
     }
 
@@ -130,7 +133,7 @@ function registerPiniaStores(app: App, memoryStore: any) {
 
     console.log(`Registered ${storeCount} Pinia stores for memory monitoring`);
   } catch (error) {
-    console.error('Failed to register Pinia stores:', error);
+    console.error("Failed to register Pinia stores:", error);
   }
 }
 
@@ -144,7 +147,7 @@ function setupAutomaticStoreRegistration(app: App, memoryStore: any) {
 
     // Intercept store creation
     const originalUseStore = pinia.use;
-    pinia.use = function(plugin: any) {
+    pinia.use = function (plugin: any) {
       // Call original use function
       const result = originalUseStore.call(this, plugin);
 
@@ -163,7 +166,7 @@ function setupAutomaticStoreRegistration(app: App, memoryStore: any) {
       return result;
     };
   } catch (error) {
-    console.error('Failed to setup automatic store registration:', error);
+    console.error("Failed to setup automatic store registration:", error);
   }
 }
 
@@ -173,54 +176,63 @@ function setupAutomaticStoreRegistration(app: App, memoryStore: any) {
 function addMemoryWidget(app: App, config: MemoryMonitoringConfig) {
   try {
     // Create widget container
-    const widgetContainer = document.createElement('div');
-    widgetContainer.id = 'memory-monitoring-widget-container';
-    widgetContainer.style.position = 'fixed';
-    widgetContainer.style.zIndex = '9999';
+    const widgetContainer = document.createElement("div");
+    widgetContainer.id = "memory-monitoring-widget-container";
+    widgetContainer.style.position = "fixed";
+    widgetContainer.style.zIndex = "9999";
 
     // Position the widget
     const position = config.ui.widgetPosition;
-    if (position.includes('top')) {
-      widgetContainer.style.top = '20px';
+    if (position.includes("top")) {
+      widgetContainer.style.top = "20px";
     } else {
-      widgetContainer.style.bottom = '20px';
+      widgetContainer.style.bottom = "20px";
     }
 
-    if (position.includes('right')) {
-      widgetContainer.style.right = '20px';
+    if (position.includes("right")) {
+      widgetContainer.style.right = "20px";
     } else {
-      widgetContainer.style.left = '20px';
+      widgetContainer.style.left = "20px";
     }
 
     // Add to DOM when app is mounted
     app.mixin({
       mounted() {
-        if (this.$root === this && !document.getElementById('memory-monitoring-widget-container')) {
+        if (
+          this.$root === this &&
+          !document.getElementById("memory-monitoring-widget-container")
+        ) {
           document.body.appendChild(widgetContainer);
 
           // Dynamically import and mount the widget component
-          import('@/components/monitoring/MemoryMonitoringWidget.vue').then((module) => {
-            const MemoryWidget = module.default;
-            const widgetApp = app.mount(widgetContainer);
-            // Note: This is a simplified approach. In a real implementation,
-            // you might want to use a more sophisticated mounting strategy.
-          }).catch((error) => {
-            console.error('Failed to load memory monitoring widget:', error);
-          });
+          import("@/components/monitoring/MemoryMonitoringWidget.vue")
+            .then((module) => {
+              const MemoryWidget = module.default;
+              const widgetApp = app.mount(widgetContainer);
+              // Note: This is a simplified approach. In a real implementation,
+              // you might want to use a more sophisticated mounting strategy.
+            })
+            .catch((error) => {
+              console.error("Failed to load memory monitoring widget:", error);
+            });
         }
-      }
+      },
     });
   } catch (error) {
-    console.error('Failed to add memory widget:', error);
+    console.error("Failed to add memory widget:", error);
   }
 }
 
 /**
  * Add development helpers and debugging tools
  */
-function addDevelopmentHelpers(app: App, memoryStore: any, config: MemoryMonitoringConfig) {
+function addDevelopmentHelpers(
+  app: App,
+  memoryStore: any,
+  config: MemoryMonitoringConfig,
+) {
   // Add global window helpers for debugging
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     (window as any).memoryMonitoring = {
       service: memoryMonitoringService,
       store: memoryStore,
@@ -250,42 +262,45 @@ function addDevelopmentHelpers(app: App, memoryStore: any, config: MemoryMonitor
         const leakyArray: any[] = [];
         const interval = setInterval(() => {
           for (let i = 0; i < 1000; i++) {
-            leakyArray.push(new Array(1000).fill('memory leak test'));
+            leakyArray.push(new Array(1000).fill("memory leak test"));
           }
         }, 100);
 
         setTimeout(() => clearInterval(interval), 5000);
-        console.warn('Simulated memory leak for 5 seconds');
+        console.warn("Simulated memory leak for 5 seconds");
       },
 
       enableDebugMode: () => {
         memoryStore.updateThresholds({
           warningThreshold: 20,
           criticalThreshold: 50,
-          minimumGrowthRate: 2
+          minimumGrowthRate: 2,
         });
-        console.log('Debug mode enabled - lowered thresholds for testing');
-      }
+        console.log("Debug mode enabled - lowered thresholds for testing");
+      },
     };
 
-    console.log('Memory monitoring development helpers available on window.memoryMonitoring');
+    console.log(
+      "Memory monitoring development helpers available on window.memoryMonitoring",
+    );
   }
 
   // Add Vue devtools integration ONLY in development mode
   // Browser detection for Chrome-specific features
   const isChromeBrowser = (): boolean => {
-    if (typeof window === 'undefined' || !window.navigator) return false;
+    if (typeof window === "undefined" || !window.navigator) return false;
     const userAgent = window.navigator.userAgent.toLowerCase();
-    const vendor = window.navigator.vendor?.toLowerCase() || '';
+    const vendor = window.navigator.vendor?.toLowerCase() || "";
     return (
-      vendor.includes('google') ||
-      (userAgent.includes('chrome') && !userAgent.includes('safari')) ||
-      userAgent.includes('crios')
+      vendor.includes("google") ||
+      (userAgent.includes("chrome") && !userAgent.includes("safari")) ||
+      userAgent.includes("crios")
     );
   };
 
   // Only integrate with DevTools if they're available (dev mode or Chrome in prod)
-  const shouldIntegrateDevTools = import.meta.env.DEV || (import.meta.env.PROD && isChromeBrowser());
+  const shouldIntegrateDevTools =
+    import.meta.env.DEV || (import.meta.env.PROD && isChromeBrowser());
 
   if (shouldIntegrateDevTools && app.config.devtools) {
     try {
@@ -295,10 +310,10 @@ function addDevelopmentHelpers(app: App, memoryStore: any, config: MemoryMonitor
         getMemoryHistory: () => memoryStore.memoryHistory,
         getAlerts: () => memoryStore.alerts,
         getLeaks: () => memoryStore.leaks,
-        getStoreInfo: () => memoryStore.storeInfo
+        getStoreInfo: () => memoryStore.storeInfo,
       };
     } catch (error) {
-      console.warn('Failed to register with Vue devtools:', error);
+      console.warn("Failed to register with Vue devtools:", error);
     }
   }
 }
@@ -307,16 +322,18 @@ function addDevelopmentHelpers(app: App, memoryStore: any, config: MemoryMonitor
  * Composable to inject memory monitoring from anywhere in the app
  */
 export function useGlobalMemoryMonitoring() {
-  const inject = require('vue').inject;
+  const inject = require("vue").inject;
 
-  const memoryMonitoring = inject('memoryMonitoring', null);
+  const memoryMonitoring = inject("memoryMonitoring", null);
 
   if (!memoryMonitoring) {
-    console.warn('Memory monitoring not found. Make sure the plugin is installed.');
+    console.warn(
+      "Memory monitoring not found. Make sure the plugin is installed.",
+    );
     return {
       service: null,
       store: null,
-      config: null
+      config: null,
     };
   }
 
@@ -327,21 +344,23 @@ export function useGlobalMemoryMonitoring() {
  * Helper to manually initialize memory monitoring
  */
 export async function initializeMemoryMonitoring(
-  config?: Partial<MemoryMonitoringConfig>
+  config?: Partial<MemoryMonitoringConfig>,
 ): Promise<void> {
-  const finalConfig = config ? { ...getFinalConfig(), ...config } : getFinalConfig();
+  const finalConfig = config
+    ? { ...getFinalConfig(), ...config }
+    : getFinalConfig();
 
   if (!finalConfig.enabled) {
-    console.log('Memory monitoring disabled');
+    console.log("Memory monitoring disabled");
     return;
   }
 
   try {
     const memoryStore = useMemoryMonitoringStore();
     await memoryStore.initializeMonitoring(finalConfig.thresholds);
-    console.log('Memory monitoring initialized manually');
+    console.log("Memory monitoring initialized manually");
   } catch (error) {
-    console.error('Failed to initialize memory monitoring:', error);
+    console.error("Failed to initialize memory monitoring:", error);
     throw error;
   }
 }
@@ -350,12 +369,12 @@ export async function initializeMemoryMonitoring(
  * Helper to create memory monitoring plugin with specific configuration
  */
 export function createMemoryMonitoringPlugin(
-  options: MemoryMonitoringPluginOptions = {}
+  options: MemoryMonitoringPluginOptions = {},
 ) {
   return {
     install(app: App) {
       memoryMonitoringPlugin.install(app, options);
-    }
+    },
   };
 }
 

@@ -10,24 +10,32 @@ export const TIMEOUT_CONFIG = Object.freeze({
 
 // Helper function to build API base URL from environment variables
 export const getApiBaseUrl = (): string => {
-  console.log('getApiBaseUrl called - MODE:', import.meta.env.MODE, 'VITE_API_URL:', import.meta.env.VITE_API_URL);
+  console.log(
+    "getApiBaseUrl called - MODE:",
+    import.meta.env.MODE,
+    "VITE_API_URL:",
+    import.meta.env.VITE_API_URL,
+  );
 
   // In development, use relative URLs to go through Vite proxy
-  if (import.meta.env.MODE === 'development') {
-    console.log('Development mode detected, returning /api');
-    return '/api';
+  if (import.meta.env.MODE === "development") {
+    console.log("Development mode detected, returning /api");
+    return "/api";
   }
 
   // Use full URL if provided
   if (import.meta.env.VITE_API_URL) {
-    console.log('Using VITE_API_URL:', import.meta.env.VITE_API_URL);
+    console.log("Using VITE_API_URL:", import.meta.env.VITE_API_URL);
     return import.meta.env.VITE_API_URL;
   }
 
   // For production deployment, detect if we're on platform.shoptrack.app
-  if (typeof window !== 'undefined' && window.location.hostname === 'platform.shoptrack.app') {
-    console.log('Platform hostname detected');
-    return 'https://api.shoptrack.app/api';
+  if (
+    typeof window !== "undefined" &&
+    window.location.hostname === "platform.shoptrack.app"
+  ) {
+    console.log("Platform hostname detected");
+    return "https://api.shoptrack.app/api";
   }
 
   // Build URL from components for production
@@ -38,11 +46,11 @@ export const getApiBaseUrl = (): string => {
   // Only include port if it's specified and not standard (80/443)
   if (port && port !== "80" && port !== "443") {
     const url = `${protocol}://${host}:${port}/api`;
-    console.log('Built URL with port:', url);
+    console.log("Built URL with port:", url);
     return url;
   } else {
     const url = `${protocol}://${host}/api`;
-    console.log('Built URL without port:', url);
+    console.log("Built URL without port:", url);
     return url;
   }
 };
@@ -50,13 +58,13 @@ export const getApiBaseUrl = (): string => {
 // Helper function to get timeout for different operation types
 export const getTimeoutForOperation = (operationType: string): number => {
   switch (operationType) {
-    case 'fast':
+    case "fast":
       return TIMEOUT_CONFIG.FAST;
-    case 'claude-upload':
+    case "claude-upload":
       return TIMEOUT_CONFIG.CLAUDE_UPLOAD;
-    case 'standard-upload':
+    case "standard-upload":
       return TIMEOUT_CONFIG.STANDARD_UPLOAD;
-    case 'default':
+    case "default":
     default:
       return TIMEOUT_CONFIG.DEFAULT;
   }
@@ -118,7 +126,8 @@ api.interceptors.response.use(
         console.warn("Unauthorized request detected");
       }
 
-      const shouldTriggerLogout = !isExpectedAuthCheck &&
+      const shouldTriggerLogout =
+        !isExpectedAuthCheck &&
         error.config?.headers?.["X-Skip-Auth-Logout"] !== "true"; // Allow manual override
 
       if (shouldTriggerLogout) {
@@ -143,7 +152,9 @@ api.interceptors.response.use(
 
     if (error.response?.status === 403) {
       // For cookie authentication, 403 typically means insufficient permissions (not auth failure)
-      console.warn("Access denied (403) - insufficient permissions for this resource");
+      console.warn(
+        "Access denied (403) - insufficient permissions for this resource",
+      );
     } else if (error.response?.status === 500) {
       // Handle server error
       console.error("Server error occurred");
@@ -241,13 +252,22 @@ export const createRequestWithoutAutoLogout = (baseRequest: any) => {
     // Handle GET/DELETE methods (url, config)
     if (config === undefined) {
       // Check if dataOrConfig looks like axios config (has headers/timeout/etc) or is undefined/null
-      const isConfig = !dataOrConfig ||
-                      (typeof dataOrConfig === 'object' &&
-                       !Array.isArray(dataOrConfig) &&
-                       (dataOrConfig.headers !== undefined ||
-                        dataOrConfig.timeout !== undefined ||
-                        dataOrConfig.params !== undefined ||
-                        Object.keys(dataOrConfig).some(key => ['headers', 'timeout', 'params', 'responseType', 'maxRedirects'].includes(key))));
+      const isConfig =
+        !dataOrConfig ||
+        (typeof dataOrConfig === "object" &&
+          !Array.isArray(dataOrConfig) &&
+          (dataOrConfig.headers !== undefined ||
+            dataOrConfig.timeout !== undefined ||
+            dataOrConfig.params !== undefined ||
+            Object.keys(dataOrConfig).some((key) =>
+              [
+                "headers",
+                "timeout",
+                "params",
+                "responseType",
+                "maxRedirects",
+              ].includes(key),
+            )));
 
       if (isConfig) {
         // GET/DELETE: (url, config)

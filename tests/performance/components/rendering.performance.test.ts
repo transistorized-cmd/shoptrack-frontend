@@ -1,24 +1,24 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mount, shallowMount, VueWrapper } from '@vue/test-utils';
-import { nextTick } from 'vue';
-import { createPinia, setActivePinia } from 'pinia';
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { mount, shallowMount, VueWrapper } from "@vue/test-utils";
+import { nextTick } from "vue";
+import { createPinia, setActivePinia } from "pinia";
 import {
   measurePerformance,
   measureRenderPerformance,
   PerformanceBenchmark,
   MemoryLeakDetector,
   forceGarbageCollection,
-} from '../utils/performance-helpers';
+} from "../utils/performance-helpers";
 import {
   generateLargeDataset,
   generateScenarioData,
   createDataBatches,
-} from '../utils/test-data-generators';
+} from "../utils/test-data-generators";
 
 // Mock components for testing since we don't have access to actual components
 const MockReceiptCard = {
-  name: 'MockReceiptCard',
-  props: ['receipt'],
+  name: "MockReceiptCard",
+  props: ["receipt"],
   template: `
     <div class="receipt-card">
       <h3>{{ receipt.storeName }}</h3>
@@ -34,8 +34,8 @@ const MockReceiptCard = {
 };
 
 const MockReceiptList = {
-  name: 'MockReceiptList',
-  props: ['receipts', 'virtualScrolling'],
+  name: "MockReceiptList",
+  props: ["receipts", "virtualScrolling"],
   template: `
     <div class="receipt-list" :class="{ 'virtual-scroll': virtualScrolling }">
       <MockReceiptCard
@@ -53,7 +53,7 @@ const MockReceiptList = {
   },
 };
 
-describe('Component Rendering Performance', () => {
+describe("Component Rendering Performance", () => {
   let benchmark: PerformanceBenchmark;
   let memoryDetector: MemoryLeakDetector;
 
@@ -70,9 +70,9 @@ describe('Component Rendering Performance', () => {
     forceGarbageCollection();
   });
 
-  describe('Large List Rendering Performance', () => {
-    it('should render 100 receipts efficiently', async () => {
-      const testData = generateLargeDataset('small');
+  describe("Large List Rendering Performance", () => {
+    it("should render 100 receipts efficiently", async () => {
+      const testData = generateLargeDataset("small");
 
       const { result: wrapper, metrics } = await measurePerformance(
         () => {
@@ -83,7 +83,7 @@ describe('Component Rendering Performance', () => {
             },
           });
         },
-        { iterations: 5, warmup: 2, memoryTracking: true }
+        { iterations: 5, warmup: 2, memoryTracking: true },
       );
 
       expect(wrapper).toBeTruthy();
@@ -93,8 +93,8 @@ describe('Component Rendering Performance', () => {
       wrapper.unmount();
     });
 
-    it('should perform well with virtual scrolling for large datasets', async () => {
-      const testData = generateScenarioData('virtual-scrolling');
+    it("should perform well with virtual scrolling for large datasets", async () => {
+      const testData = generateScenarioData("virtual-scrolling");
 
       const { result: wrapper, metrics } = await measurePerformance(
         () => {
@@ -105,7 +105,7 @@ describe('Component Rendering Performance', () => {
             },
           });
         },
-        { iterations: 3, memoryTracking: true }
+        { iterations: 3, memoryTracking: true },
       );
 
       expect(wrapper).toBeTruthy();
@@ -115,8 +115,8 @@ describe('Component Rendering Performance', () => {
       wrapper.unmount();
     });
 
-    it('should handle memory-intensive receipts with images', async () => {
-      const testData = generateScenarioData('memory-intensive');
+    it("should handle memory-intensive receipts with images", async () => {
+      const testData = generateScenarioData("memory-intensive");
 
       const { result: wrapper, metrics } = await measurePerformance(
         () => {
@@ -127,7 +127,7 @@ describe('Component Rendering Performance', () => {
             },
           });
         },
-        { iterations: 3, gc: true, memoryTracking: true }
+        { iterations: 3, gc: true, memoryTracking: true },
       );
 
       expect(wrapper).toBeTruthy();
@@ -138,12 +138,12 @@ describe('Component Rendering Performance', () => {
     });
   });
 
-  describe('Component Mount/Unmount Performance', () => {
-    it('should mount and unmount components efficiently', async () => {
-      const testData = generateLargeDataset('medium');
+  describe("Component Mount/Unmount Performance", () => {
+    it("should mount and unmount components efficiently", async () => {
+      const testData = generateLargeDataset("medium");
 
       await benchmark.run(
-        'mount-unmount-cycles',
+        "mount-unmount-cycles",
         async () => {
           const wrapper = mount(MockReceiptList, {
             props: { receipts: testData.receipts.slice(0, 100) },
@@ -152,17 +152,17 @@ describe('Component Rendering Performance', () => {
           await nextTick();
           wrapper.unmount();
         },
-        { iterations: 10, warmup: 3 }
+        { iterations: 10, warmup: 3 },
       );
 
-      const avgMetrics = benchmark.getAverageMetrics('mount-unmount-cycles');
+      const avgMetrics = benchmark.getAverageMetrics("mount-unmount-cycles");
       expect(avgMetrics).toBeTruthy();
       expect(avgMetrics!.duration).toBeLessThan(200); // Average mount/unmount under 200ms (test env)
       expect(avgMetrics!.memoryUsage.leaked).toBeLessThan(10 * 1024 * 1024); // Less than 10MB average leak (test env)
     });
 
-    it('should detect memory leaks in component lifecycle', async () => {
-      const testData = generateLargeDataset('small');
+    it("should detect memory leaks in component lifecycle", async () => {
+      const testData = generateLargeDataset("small");
 
       for (let i = 0; i < 20; i++) {
         const wrapper = mount(MockReceiptList, {
@@ -178,7 +178,7 @@ describe('Component Rendering Performance', () => {
           console.warn(
             `Potential memory leak detected after ${i} iterations. Growth: ${
               memoryDetector.getGrowth() / 1024
-            }KB`
+            }KB`,
           );
         }
       }
@@ -189,9 +189,9 @@ describe('Component Rendering Performance', () => {
     });
   });
 
-  describe('Re-render Optimization with Props Changes', () => {
-    it('should optimize re-renders when props change', async () => {
-      const testData = generateLargeDataset('small');
+  describe("Re-render Optimization with Props Changes", () => {
+    it("should optimize re-renders when props change", async () => {
+      const testData = generateLargeDataset("small");
       const wrapper = mount(MockReceiptList, {
         props: { receipts: testData.receipts },
       });
@@ -204,21 +204,23 @@ describe('Component Rendering Performance', () => {
       // Measure re-render with new props
       const updateMetrics = await measurePerformance(
         async () => {
-          const newData = generateLargeDataset('small');
+          const newData = generateLargeDataset("small");
           await wrapper.setProps({ receipts: newData.receipts });
           await nextTick();
         },
-        { iterations: 5 }
+        { iterations: 5 },
       );
 
       expect(updateMetrics.metrics.duration).toBeLessThan(300); // Re-render should be reasonably fast
-      expect(updateMetrics.metrics.memoryUsage.leaked).toBeLessThan(50 * 1024 * 1024); // Test env leak tolerance
+      expect(updateMetrics.metrics.memoryUsage.leaked).toBeLessThan(
+        50 * 1024 * 1024,
+      ); // Test env leak tolerance
 
       wrapper.unmount();
     });
 
-    it('should handle frequent prop updates efficiently', async () => {
-      const testData = generateScenarioData('frequent-updates');
+    it("should handle frequent prop updates efficiently", async () => {
+      const testData = generateScenarioData("frequent-updates");
       const wrapper = mount(MockReceiptList, {
         props: { receipts: [] },
       });
@@ -226,17 +228,17 @@ describe('Component Rendering Performance', () => {
       const batches = createDataBatches(testData.receipts, 20);
 
       await benchmark.run(
-        'frequent-updates',
+        "frequent-updates",
         async () => {
           for (const batch of batches.slice(0, 5)) {
             await wrapper.setProps({ receipts: batch });
             await nextTick();
           }
         },
-        { iterations: 3, memoryTracking: true }
+        { iterations: 3, memoryTracking: true },
       );
 
-      const avgMetrics = benchmark.getAverageMetrics('frequent-updates');
+      const avgMetrics = benchmark.getAverageMetrics("frequent-updates");
       expect(avgMetrics).toBeTruthy();
       expect(avgMetrics!.duration).toBeLessThan(1000); // Handle frequent updates under 1000ms (test env)
       expect(avgMetrics!.memoryUsage.leaked).toBeLessThan(100 * 1024 * 1024); // Less than 100MB leak (test env)
@@ -245,10 +247,10 @@ describe('Component Rendering Performance', () => {
     });
   });
 
-  describe('Complex Component Tree Rendering', () => {
+  describe("Complex Component Tree Rendering", () => {
     const ComplexNestedComponent = {
-      name: 'ComplexNestedComponent',
-      props: ['data'],
+      name: "ComplexNestedComponent",
+      props: ["data"],
       template: `
         <div class="complex-tree">
           <div v-for="receipt in data" :key="receipt.id" class="receipt-branch">
@@ -271,8 +273,8 @@ describe('Component Rendering Performance', () => {
       components: { MockReceiptCard },
     };
 
-    it('should render complex nested components efficiently', async () => {
-      const testData = generateLargeDataset('medium');
+    it("should render complex nested components efficiently", async () => {
+      const testData = generateLargeDataset("medium");
 
       const { result: wrapper, metrics } = await measurePerformance(
         () => {
@@ -280,7 +282,7 @@ describe('Component Rendering Performance', () => {
             props: { data: testData.receipts.slice(0, 50) },
           });
         },
-        { iterations: 3, warmup: 1, memoryTracking: true }
+        { iterations: 3, warmup: 1, memoryTracking: true },
       );
 
       expect(wrapper).toBeTruthy();
@@ -290,35 +292,35 @@ describe('Component Rendering Performance', () => {
       wrapper.unmount();
     });
 
-    it('should compare shallow vs deep mounting performance', async () => {
-      const testData = generateLargeDataset('small');
+    it("should compare shallow vs deep mounting performance", async () => {
+      const testData = generateLargeDataset("small");
 
       // Shallow mount benchmark
       await benchmark.run(
-        'shallow-mount',
+        "shallow-mount",
         () => {
           const wrapper = shallowMount(ComplexNestedComponent, {
             props: { data: testData.receipts.slice(0, 30) },
           });
           wrapper.unmount();
         },
-        { iterations: 10, warmup: 2 }
+        { iterations: 10, warmup: 2 },
       );
 
       // Deep mount benchmark
       await benchmark.run(
-        'deep-mount',
+        "deep-mount",
         () => {
           const wrapper = mount(ComplexNestedComponent, {
             props: { data: testData.receipts.slice(0, 30) },
           });
           wrapper.unmount();
         },
-        { iterations: 10, warmup: 2 }
+        { iterations: 10, warmup: 2 },
       );
 
-      const shallowMetrics = benchmark.getAverageMetrics('shallow-mount');
-      const deepMetrics = benchmark.getAverageMetrics('deep-mount');
+      const shallowMetrics = benchmark.getAverageMetrics("shallow-mount");
+      const deepMetrics = benchmark.getAverageMetrics("deep-mount");
 
       expect(shallowMetrics).toBeTruthy();
       expect(deepMetrics).toBeTruthy();
@@ -330,9 +332,9 @@ describe('Component Rendering Performance', () => {
     });
   });
 
-  describe('Performance Regression Detection', () => {
-    it('should maintain consistent performance across multiple runs', async () => {
-      const testData = generateLargeDataset('small');
+  describe("Performance Regression Detection", () => {
+    it("should maintain consistent performance across multiple runs", async () => {
+      const testData = generateLargeDataset("small");
       const results: number[] = [];
 
       for (let run = 0; run < 10; run++) {
@@ -343,14 +345,16 @@ describe('Component Rendering Performance', () => {
             });
             wrapper.unmount();
           },
-          { iterations: 1, gc: true }
+          { iterations: 1, gc: true },
         );
         results.push(metrics.duration);
       }
 
       // Calculate coefficient of variation to measure consistency
       const mean = results.reduce((sum, val) => sum + val, 0) / results.length;
-      const variance = results.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / results.length;
+      const variance =
+        results.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+        results.length;
       const stdDev = Math.sqrt(variance);
       const coefficientOfVariation = stdDev / mean;
 
@@ -359,11 +363,14 @@ describe('Component Rendering Performance', () => {
       expect(mean).toBeLessThan(100); // Average should be under 100ms
     });
 
-    it('should track performance over time', () => {
+    it("should track performance over time", () => {
       const summary = benchmark.summary();
 
       // Log performance summary for monitoring
-      console.log('Performance Test Summary:', JSON.stringify(summary, null, 2));
+      console.log(
+        "Performance Test Summary:",
+        JSON.stringify(summary, null, 2),
+      );
 
       // Validate that we have meaningful metrics
       for (const [testName, stats] of Object.entries(summary)) {

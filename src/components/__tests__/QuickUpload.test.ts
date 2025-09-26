@@ -379,7 +379,7 @@ describe("QuickUpload Component", () => {
         expect.objectContaining({
           priority: 10,
           onUploadProgress: expect.any(Function),
-        })
+        }),
       );
     });
 
@@ -395,12 +395,14 @@ describe("QuickUpload Component", () => {
         expect.objectContaining({
           priority: 10,
           onUploadProgress: expect.any(Function),
-        })
+        }),
       );
     });
 
     it("should handle upload exception", async () => {
-      mockUploadFileAsync.mockRejectedValue(new Error("Network connection failed"));
+      mockUploadFileAsync.mockRejectedValue(
+        new Error("Network connection failed"),
+      );
 
       await wrapper.vm.handleQuickUpload();
       await nextTick();
@@ -411,7 +413,7 @@ describe("QuickUpload Component", () => {
         expect.objectContaining({
           priority: 10,
           onUploadProgress: expect.any(Function),
-        })
+        }),
       );
     });
 

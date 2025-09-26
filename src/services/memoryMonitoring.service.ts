@@ -17,8 +17,8 @@ export interface MemorySnapshot {
 
 export interface MemoryLeak {
   id: string;
-  type: 'component' | 'store' | 'general' | 'dom';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "component" | "store" | "general" | "dom";
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   growth: number; // MB
   duration: number; // seconds
@@ -38,7 +38,7 @@ export interface MemoryThresholds {
 
 export interface MemoryAlert {
   id: string;
-  type: 'warning' | 'critical' | 'leak_detected';
+  type: "warning" | "critical" | "leak_detected";
   message: string;
   memoryUsage: number;
   timestamp: number;
@@ -58,7 +58,7 @@ class MemoryMonitoringService {
     criticalThreshold: 250, // 250MB
     leakDetectionWindow: 5, // 5 minutes
     minimumGrowthRate: 10, // 10MB per minute
-    maxSnapshots: 100
+    maxSnapshots: 100,
   };
 
   private thresholds: MemoryThresholds = { ...this.defaultThresholds };
@@ -72,7 +72,7 @@ class MemoryMonitoringService {
     }
 
     // Only monitor in browser environment
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       this.setupPerformanceObservers();
       this.startMonitoring();
     }
@@ -83,7 +83,7 @@ class MemoryMonitoringService {
    */
   public startMonitoring(intervalMs: number = 30000): void {
     if (this.isMonitoring) {
-      console.warn('Memory monitoring is already running');
+      console.warn("Memory monitoring is already running");
       return;
     }
 
@@ -97,7 +97,7 @@ class MemoryMonitoringService {
       this.checkThresholds();
     }, intervalMs);
 
-    console.log('Memory monitoring started with', intervalMs, 'ms interval');
+    console.log("Memory monitoring started with", intervalMs, "ms interval");
   }
 
   /**
@@ -109,11 +109,11 @@ class MemoryMonitoringService {
       this.monitoringInterval = null;
     }
 
-    this.observerInstances.forEach(observer => observer.disconnect());
+    this.observerInstances.forEach((observer) => observer.disconnect());
     this.observerInstances.clear();
 
     this.isMonitoring = false;
-    console.log('Memory monitoring stopped');
+    console.log("Memory monitoring stopped");
   }
 
   /**
@@ -126,7 +126,7 @@ class MemoryMonitoringService {
       heapUsed: memory.usedJSHeapSize || 0,
       heapTotal: memory.totalJSHeapSize || 0,
       external: 0, // Not available in browser
-      arrayBuffers: 0 // Not directly available in browser
+      arrayBuffers: 0, // Not directly available in browser
     };
 
     this.snapshots.push(snapshot);
@@ -143,7 +143,7 @@ class MemoryMonitoringService {
    * Get current memory information
    */
   private getMemoryInfo(): any {
-    if ('memory' in performance) {
+    if ("memory" in performance) {
       return (performance as any).memory;
     }
 
@@ -151,7 +151,7 @@ class MemoryMonitoringService {
     return {
       usedJSHeapSize: 0,
       totalJSHeapSize: 0,
-      jsHeapSizeLimit: 0
+      jsHeapSizeLimit: 0,
     };
   }
 
@@ -159,46 +159,51 @@ class MemoryMonitoringService {
    * Setup performance observers for memory monitoring
    */
   private setupPerformanceObservers(): void {
-    if ('PerformanceObserver' in window) {
+    if ("PerformanceObserver" in window) {
       try {
         // Monitor long tasks that might indicate memory issues
         const longTaskObserver = new PerformanceObserver((list) => {
           const entries = list.getEntries();
-          entries.forEach(entry => {
-            if (entry.duration > 50) { // Tasks longer than 50ms
-              this.reportPotentialMemoryIssue('Long task detected', {
+          entries.forEach((entry) => {
+            if (entry.duration > 50) {
+              // Tasks longer than 50ms
+              this.reportPotentialMemoryIssue("Long task detected", {
                 duration: entry.duration,
-                type: 'long-task'
+                type: "long-task",
               });
             }
           });
         });
 
-        longTaskObserver.observe({ entryTypes: ['longtask'] });
-        this.observerInstances.set('longtask', longTaskObserver);
+        longTaskObserver.observe({ entryTypes: ["longtask"] });
+        this.observerInstances.set("longtask", longTaskObserver);
       } catch (error) {
-        console.warn('Long task observer not supported:', error);
+        console.warn("Long task observer not supported:", error);
       }
 
       try {
         // Monitor resource timing for memory-related metrics
         const resourceObserver = new PerformanceObserver((list) => {
           const entries = list.getEntries();
-          entries.forEach(entry => {
+          entries.forEach((entry) => {
             // Monitor large resources that might cause memory pressure
-            if ('transferSize' in entry && (entry as any).transferSize > 1024 * 1024) { // > 1MB
-              this.reportPotentialMemoryIssue('Large resource loaded', {
+            if (
+              "transferSize" in entry &&
+              (entry as any).transferSize > 1024 * 1024
+            ) {
+              // > 1MB
+              this.reportPotentialMemoryIssue("Large resource loaded", {
                 resource: entry.name,
-                size: (entry as any).transferSize
+                size: (entry as any).transferSize,
               });
             }
           });
         });
 
-        resourceObserver.observe({ entryTypes: ['resource'] });
-        this.observerInstances.set('resource', resourceObserver);
+        resourceObserver.observe({ entryTypes: ["resource"] });
+        this.observerInstances.set("resource", resourceObserver);
       } catch (error) {
-        console.warn('Resource observer not supported:', error);
+        console.warn("Resource observer not supported:", error);
       }
     }
   }
@@ -221,11 +226,11 @@ class MemoryMonitoringService {
 
       if (growthRate > this.thresholds.minimumGrowthRate) {
         this.reportMemoryLeak({
-          type: 'general',
-          severity: growthRate > 20 ? 'critical' : 'high',
+          type: "general",
+          severity: growthRate > 20 ? "critical" : "high",
           description: `Memory growing at ${growthRate.toFixed(2)} MB/min`,
           growth: memoryDiff,
-          duration: timeDiff * 60
+          duration: timeDiff * 60,
         });
       }
     }
@@ -238,31 +243,34 @@ class MemoryMonitoringService {
     if (this.snapshots.length < 5) return;
 
     const windowMinutes = this.thresholds.leakDetectionWindow;
-    const cutoffTime = Date.now() - (windowMinutes * 60 * 1000);
-    const windowSnapshots = this.snapshots.filter(s => s.timestamp >= cutoffTime);
+    const cutoffTime = Date.now() - windowMinutes * 60 * 1000;
+    const windowSnapshots = this.snapshots.filter(
+      (s) => s.timestamp >= cutoffTime,
+    );
 
     if (windowSnapshots.length < 3) return;
 
     const firstSnapshot = windowSnapshots[0];
     const lastSnapshot = windowSnapshots[windowSnapshots.length - 1];
 
-    const memoryGrowth = (lastSnapshot.heapUsed - firstSnapshot.heapUsed) / 1024 / 1024; // MB
+    const memoryGrowth =
+      (lastSnapshot.heapUsed - firstSnapshot.heapUsed) / 1024 / 1024; // MB
     const timeSpan = (lastSnapshot.timestamp - firstSnapshot.timestamp) / 1000; // seconds
 
     // Check for sustained growth
     const growthRate = memoryGrowth / (timeSpan / 60); // MB per minute
 
     if (memoryGrowth > 20 && growthRate > this.thresholds.minimumGrowthRate) {
-      const severity = memoryGrowth > 100 ? 'critical' :
-                      memoryGrowth > 50 ? 'high' : 'medium';
+      const severity =
+        memoryGrowth > 100 ? "critical" : memoryGrowth > 50 ? "high" : "medium";
 
       this.reportMemoryLeak({
-        type: 'general',
+        type: "general",
         severity,
         description: `Sustained memory growth detected: ${memoryGrowth.toFixed(2)}MB over ${windowMinutes} minutes`,
         growth: memoryGrowth,
         duration: timeSpan,
-        stackTrace: this.captureStackTrace()
+        stackTrace: this.captureStackTrace(),
       });
     }
   }
@@ -278,26 +286,26 @@ class MemoryMonitoringService {
 
     if (currentMemoryMB > this.thresholds.criticalThreshold) {
       this.createAlert({
-        type: 'critical',
+        type: "critical",
         message: `Critical memory usage: ${currentMemoryMB.toFixed(2)}MB`,
         memoryUsage: currentMemoryMB,
         recommendations: [
-          'Restart the application if possible',
-          'Clear caches and temporary data',
-          'Close unnecessary browser tabs',
-          'Contact support if issue persists'
-        ]
+          "Restart the application if possible",
+          "Clear caches and temporary data",
+          "Close unnecessary browser tabs",
+          "Contact support if issue persists",
+        ],
       });
     } else if (currentMemoryMB > this.thresholds.warningThreshold) {
       this.createAlert({
-        type: 'warning',
+        type: "warning",
         message: `High memory usage: ${currentMemoryMB.toFixed(2)}MB`,
         memoryUsage: currentMemoryMB,
         recommendations: [
-          'Monitor memory usage closely',
-          'Clear browser cache',
-          'Avoid opening too many receipts simultaneously'
-        ]
+          "Monitor memory usage closely",
+          "Clear browser cache",
+          "Avoid opening too many receipts simultaneously",
+        ],
       });
     }
   }
@@ -306,10 +314,10 @@ class MemoryMonitoringService {
    * Report a potential memory issue
    */
   private reportPotentialMemoryIssue(description: string, metadata: any): void {
-    console.warn('Potential memory issue:', description, metadata);
+    console.warn("Potential memory issue:", description, metadata);
 
     // In production, you might want to send this to an analytics service
-    if (import.meta.env.MODE === 'production') {
+    if (import.meta.env.MODE === "production") {
       // Example: Send to monitoring service
       // this.sendToMonitoringService('memory_issue', { description, metadata });
     }
@@ -318,27 +326,27 @@ class MemoryMonitoringService {
   /**
    * Report a memory leak
    */
-  private reportMemoryLeak(leak: Omit<MemoryLeak, 'id' | 'timestamp'>): void {
+  private reportMemoryLeak(leak: Omit<MemoryLeak, "id" | "timestamp">): void {
     const memoryLeak: MemoryLeak = {
       id: this.generateId(),
       timestamp: Date.now(),
-      ...leak
+      ...leak,
     };
 
     this.leaks.push(memoryLeak);
 
-    console.error('Memory leak detected:', memoryLeak);
+    console.error("Memory leak detected:", memoryLeak);
 
     // Create corresponding alert
     this.createAlert({
-      type: 'leak_detected',
+      type: "leak_detected",
       message: memoryLeak.description,
       memoryUsage: memoryLeak.growth,
-      recommendations: this.getLeakRecommendations(memoryLeak.type)
+      recommendations: this.getLeakRecommendations(memoryLeak.type),
     });
 
     // In production, send to monitoring service
-    if (import.meta.env.MODE === 'production') {
+    if (import.meta.env.MODE === "production") {
       // this.sendToMonitoringService('memory_leak', memoryLeak);
     }
   }
@@ -346,11 +354,11 @@ class MemoryMonitoringService {
   /**
    * Create a memory alert
    */
-  private createAlert(alert: Omit<MemoryAlert, 'id' | 'timestamp'>): void {
+  private createAlert(alert: Omit<MemoryAlert, "id" | "timestamp">): void {
     const memoryAlert: MemoryAlert = {
       id: this.generateId(),
       timestamp: Date.now(),
-      ...alert
+      ...alert,
     };
 
     this.alerts.push(memoryAlert);
@@ -361,38 +369,40 @@ class MemoryMonitoringService {
     }
 
     // Emit event for UI components to listen to
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('memory-alert', {
-        detail: memoryAlert
-      }));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("memory-alert", {
+          detail: memoryAlert,
+        }),
+      );
     }
   }
 
   /**
    * Get recommendations for different types of leaks
    */
-  private getLeakRecommendations(leakType: MemoryLeak['type']): string[] {
+  private getLeakRecommendations(leakType: MemoryLeak["type"]): string[] {
     const recommendations = {
       component: [
-        'Check for unremoved event listeners in components',
-        'Ensure proper cleanup in onUnmounted hooks',
-        'Clear timers and intervals on component destruction'
+        "Check for unremoved event listeners in components",
+        "Ensure proper cleanup in onUnmounted hooks",
+        "Clear timers and intervals on component destruction",
       ],
       store: [
-        'Review store mutations for unnecessary data retention',
-        'Clear unused cached data',
-        'Check for circular references in store state'
+        "Review store mutations for unnecessary data retention",
+        "Clear unused cached data",
+        "Check for circular references in store state",
       ],
       dom: [
-        'Check for detached DOM nodes',
-        'Clear unused element references',
-        'Remove unused CSS animations'
+        "Check for detached DOM nodes",
+        "Clear unused element references",
+        "Remove unused CSS animations",
       ],
       general: [
-        'Monitor browser console for warnings',
-        'Clear application caches',
-        'Restart the application if necessary'
-      ]
+        "Monitor browser console for warnings",
+        "Clear application caches",
+        "Restart the application if necessary",
+      ],
     };
 
     return recommendations[leakType] || recommendations.general;
@@ -403,9 +413,9 @@ class MemoryMonitoringService {
    */
   private captureStackTrace(): string {
     try {
-      throw new Error('Stack trace');
+      throw new Error("Stack trace");
     } catch (error) {
-      return error instanceof Error ? error.stack || '' : '';
+      return error instanceof Error ? error.stack || "" : "";
     }
   }
 
@@ -436,7 +446,7 @@ class MemoryMonitoringService {
       isMonitoring: this.isMonitoring,
       snapshotCount: this.snapshots.length,
       recentLeaks: this.leaks.slice(-5),
-      recentAlerts: this.alerts.slice(-5)
+      recentAlerts: this.alerts.slice(-5),
     };
   }
 
@@ -444,26 +454,28 @@ class MemoryMonitoringService {
    * Get memory usage history
    */
   public getMemoryHistory(minutes: number = 30): MemorySnapshot[] {
-    const cutoffTime = Date.now() - (minutes * 60 * 1000);
-    return this.snapshots.filter(snapshot => snapshot.timestamp >= cutoffTime);
+    const cutoffTime = Date.now() - minutes * 60 * 1000;
+    return this.snapshots.filter(
+      (snapshot) => snapshot.timestamp >= cutoffTime,
+    );
   }
 
   /**
    * Force garbage collection (if available)
    */
   public forceGarbageCollection(): boolean {
-    if ('gc' in window && typeof (window as any).gc === 'function') {
+    if ("gc" in window && typeof (window as any).gc === "function") {
       try {
         (window as any).gc();
-        console.log('Garbage collection forced');
+        console.log("Garbage collection forced");
         return true;
       } catch (error) {
-        console.warn('Failed to force garbage collection:', error);
+        console.warn("Failed to force garbage collection:", error);
         return false;
       }
     }
 
-    console.warn('Garbage collection not available');
+    console.warn("Garbage collection not available");
     return false;
   }
 
@@ -474,7 +486,7 @@ class MemoryMonitoringService {
     this.snapshots = [];
     this.leaks = [];
     this.alerts = [];
-    console.log('Memory monitoring data cleared');
+    console.log("Memory monitoring data cleared");
   }
 
   /**
@@ -482,7 +494,7 @@ class MemoryMonitoringService {
    */
   public updateThresholds(newThresholds: Partial<MemoryThresholds>): void {
     this.thresholds = { ...this.thresholds, ...newThresholds };
-    console.log('Memory monitoring thresholds updated:', this.thresholds);
+    console.log("Memory monitoring thresholds updated:", this.thresholds);
   }
 
   /**
@@ -500,7 +512,7 @@ class MemoryMonitoringService {
       leaks: this.leaks,
       alerts: this.alerts,
       thresholds: this.thresholds,
-      exportTimestamp: Date.now()
+      exportTimestamp: Date.now(),
     };
   }
 

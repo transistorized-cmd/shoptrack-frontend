@@ -46,7 +46,7 @@ export interface SearchResponse {
 
 // UI-specific types for search component
 export interface SearchResultItem {
-  type: 'receipt' | 'item' | 'category';
+  type: "receipt" | "item" | "category";
   id: number;
   primaryText: string;
   secondaryText?: string;

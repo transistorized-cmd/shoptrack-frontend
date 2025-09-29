@@ -24,7 +24,8 @@
     "tryAgain": "Try Again",
     "uploadAnother": "Upload Another",
     "hello": "Hello, {name}",
-    "or": "Or"
+    "or": "Or",
+    "dismiss": "Dismiss"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -301,6 +302,7 @@
     "generatingPlugin": "Generating {plugin}...",
     "noPluginsAvailable": "No report plugins available",
     "pluginsWillAppearWhenEnabled": "Report plugins will appear here when they are enabled",
+    "upgradeRequired": "Upgrade Required",
     "exportFormats": {
       "csv": "CSV",
       "pdf": "PDF",

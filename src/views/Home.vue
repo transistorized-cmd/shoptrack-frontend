@@ -194,7 +194,7 @@
               <p class="text-xs text-gray-500 dark:text-gray-400">
                 {{
                   receipt.receiptDate
-                    ? new Date(receipt.receiptDate).toLocaleDateString()
+                    ? formatDateSafe(receipt.receiptDate)
                     : t('home.noDate')
                 }}
               </p>
@@ -260,6 +260,7 @@
 <script setup lang="ts">
 import { onMounted, computed } from "vue";
 import { useTranslation } from "@/composables/useTranslation";
+import { useDateLocalization } from "@/composables/useDateLocalization";
 import { RouterLink } from "vue-router";
 import { useReceiptsStore } from "@/stores/receipts";
 import { usePluginsStore } from "@/stores/plugins";
@@ -267,6 +268,7 @@ import { usePluginsStore } from "@/stores/plugins";
 const receiptsStore = useReceiptsStore();
 const pluginsStore = usePluginsStore();
 const { t } = useTranslation();
+const { formatDate: formatDateSafe } = useDateLocalization();
 
 const recentReceipts = computed(() => receiptsStore.receipts.slice(0, 5));
 

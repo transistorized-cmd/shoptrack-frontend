@@ -16,6 +16,15 @@ vi.mock("@/services/plugins", () => ({
   },
 }));
 
+vi.mock("@/services/featureService", () => ({
+  featureService: {
+    checkReceiptUploadLimit: vi.fn(),
+    checkFeatureLimit: vi.fn(),
+    getFeatureMessages: vi.fn(),
+    getFeatureMessage: vi.fn(),
+  },
+}));
+
 const mockUploadFileAsync = vi.fn();
 
 vi.mock("@/composables/useAsyncJobs", () => ({
@@ -91,6 +100,16 @@ describe("QuickUpload Component", () => {
       success: true,
       plugin: mockPlugins[0],
       confidence: 0.9,
+    });
+
+    // Mock featureService
+    const { featureService } = require("@/services/featureService");
+    vi.mocked(featureService.checkReceiptUploadLimit).mockResolvedValue({
+      canUse: true,
+      isLimitReached: false,
+      usage: 0,
+      limit: 10,
+      remaining: 10,
     });
 
     const { mockRouter } = createMockRouter();

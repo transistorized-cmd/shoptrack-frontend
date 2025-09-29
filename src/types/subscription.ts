@@ -30,6 +30,7 @@ export interface PlanFeature {
   featureDescription?: string;
   featureType: "limit" | "boolean" | "access";
   unitType?: string;
+  sortOrder?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,6 +53,8 @@ export interface UserSubscription {
   externalSubscriptionId?: string;
   paymentProvider?: string;
   plan?: SubscriptionPlan;
+  planCode?: string;
+  isActive?: boolean;
   userEmail: string;
   userName?: string;
   createdAt: string;

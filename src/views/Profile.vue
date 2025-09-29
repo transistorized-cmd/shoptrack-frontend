@@ -9,33 +9,6 @@
         </p>
       </div>
 
-      <!-- Success/Error Messages -->
-      <div v-if="successMessage" class="mb-6 rounded-md bg-green-50 p-4">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div class="ml-3">
-            <p class="text-sm font-medium text-green-800">{{ successMessage }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="error" class="mb-6 rounded-md bg-red-50 p-4">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div class="ml-3">
-            <p class="text-sm font-medium text-red-800">{{ error }}</p>
-          </div>
-        </div>
-      </div>
-
       <!-- Main Content -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         <!-- Profile Summary Card -->
@@ -500,6 +473,7 @@ import { useTranslation } from '@/composables/useTranslation';
 import { useAuthStore } from '@/stores/auth';
 import { useWebAuthn } from '@/composables/useWebAuthn';
 import { useOAuth } from '@/composables/useOAuth';
+import { useNotifications } from '@/composables/useNotifications';
 import { authService } from '@/services/auth.service';
 import SubscriptionCard from '@/components/SubscriptionCard.vue';
 import { safeImageUrl } from '@/utils/urlSanitizer';
@@ -515,11 +489,10 @@ const { t, locale: currentLocale, setLocale } = useTranslation();
 const authStore = useAuthStore();
 const webauthn = useWebAuthn();
 const oauth = useOAuth();
+const { success: showSuccess, error: showError } = useNotifications();
 
 const loading = ref(false);
 const settingsLoading = ref(false);
-const successMessage = ref('');
-const error = ref('');
 
 
 // User settings
@@ -564,10 +537,29 @@ const displayName = computed(() => {
 
 const memberSince = computed(() => {
   if (authStore.user?.createdAt) {
-    return new Date(authStore.user.createdAt).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long'
-    });
+    try {
+      const date = new Date(authStore.user.createdAt);
+      // Safe browser API access with fallback
+      if (typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
+        return new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'long'
+        }).format(date);
+      } else if (typeof date.toLocaleDateString === 'function') {
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long'
+        });
+      } else {
+        // Fallback for environments without browser APIs
+        const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+        return `${months[date.getMonth()]} ${date.getFullYear()}`;
+      }
+    } catch (error) {
+      console.warn('Error formatting member since date:', error);
+      return '';
+    }
   }
   return '';
 });
@@ -598,27 +590,9 @@ const hasUnsavedSettings = computed(() => {
 // });
 
 // Methods
-function clearMessages() {
-  successMessage.value = '';
-  error.value = '';
-}
-
-function showSuccess(message: string) {
-  clearMessages();
-  successMessage.value = message;
-  setTimeout(() => {
-    successMessage.value = '';
-  }, 5000);
-}
-
-function showError(message: string) {
-  clearMessages();
-  error.value = message;
-}
 
 async function updatePersonalInfo() {
   loading.value = true;
-  clearMessages();
 
   try {
     const response = await authStore.updateProfile(personalInfoForm);
@@ -638,7 +612,6 @@ async function changePassword() {
   if (!isPasswordFormValid.value) return;
 
   loading.value = true;
-  clearMessages();
 
   try {
     const response = await authStore.changePassword(passwordForm);
@@ -663,7 +636,6 @@ async function handleProfilePictureChange(event: Event) {
   if (!file) return;
 
   loading.value = true;
-  clearMessages();
 
   try {
     const response = await authStore.updateProfile({ profilePicture: file });
@@ -748,7 +720,6 @@ async function saveSettings() {
   if (!hasUnsavedSettings.value) return;
 
   settingsLoading.value = true;
-  clearMessages();
 
   try {
     const settingsToUpdate: Partial<UserSettings> = {
@@ -796,8 +767,6 @@ async function saveSettings() {
 }
 
 async function setupPasskey() {
-  clearMessages();
-  
   const passkeyData = await webauthn.registerPasskey();
   if (!passkeyData) {
     showError(webauthn.error.value || 'Failed to set up passkey');
@@ -816,9 +785,7 @@ async function removePasskey() {
   if (!confirm(t('profile.passkeyRemoveConfirm'))) {
     return;
   }
-  
-  clearMessages();
-  
+
   try {
     const response = await authStore.removePasskey();
     if (response.success) {
@@ -840,7 +807,6 @@ async function removePasskey() {
 
 async function resendEmailConfirmation() {
   loading.value = true;
-  clearMessages();
 
   try {
     const response = await authStore.resendEmailConfirmation();

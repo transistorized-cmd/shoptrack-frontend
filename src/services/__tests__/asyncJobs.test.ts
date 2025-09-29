@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { asyncJobsService } from "../asyncJobs";
 import api, { apiWithTimeout } from "../api";
 import { errorLogger } from "../errorLogging";
+import { csrfManager } from "@/composables/useCsrfToken";
 
 // Mock the dependencies
 vi.mock("../api", () => {
@@ -60,6 +61,8 @@ describe("AsyncJobs Service", () => {
 
       const mockPost = apiWithTimeout.standardUpload.post as any;
       mockPost.mockResolvedValue(expectedResponse);
+      const mockGetToken = csrfManager.getToken as any;
+      mockGetToken.mockResolvedValue("csrf-token-123");
 
       const result = await asyncJobsService.uploadAsync(mockFile, {
         priority: 5,
@@ -71,7 +74,7 @@ describe("AsyncJobs Service", () => {
         "/upload/async",
         expect.any(FormData),
         {
-          headers: { "X-Session-Id": "test-session" },
+          headers: { "X-Session-Id": "test-session", "X-CSRF-TOKEN": "csrf-token-123" },
           onUploadProgress: undefined,
         },
       );
@@ -87,6 +90,8 @@ describe("AsyncJobs Service", () => {
 
       const mockPost = apiWithTimeout.standardUpload.post as any;
       mockPost.mockRejectedValue(mockError);
+      const mockGetToken = csrfManager.getToken as any;
+      mockGetToken.mockResolvedValue("csrf-token-123");
 
       await expect(asyncJobsService.uploadAsync(mockFile)).rejects.toThrow(
         "Upload failed",
@@ -106,6 +111,8 @@ describe("AsyncJobs Service", () => {
 
       const mockPost = apiWithTimeout.standardUpload.post as any;
       mockPost.mockResolvedValue(expectedResponse);
+      const mockGetToken = csrfManager.getToken as any;
+      mockGetToken.mockResolvedValue("csrf-token-123");
 
       await asyncJobsService.uploadAsync(mockFile, {
         onUploadProgress: progressCallback,
@@ -115,7 +122,7 @@ describe("AsyncJobs Service", () => {
         "/upload/async",
         expect.any(FormData),
         {
-          headers: {},
+          headers: { "X-CSRF-TOKEN": "csrf-token-123" },
           onUploadProgress: progressCallback,
         },
       );
@@ -440,3 +447,8 @@ describe("AsyncJobs Service", () => {
     });
   });
 });
+vi.mock("@/composables/useCsrfToken", () => ({
+  csrfManager: {
+    getToken: vi.fn(),
+  },
+}));

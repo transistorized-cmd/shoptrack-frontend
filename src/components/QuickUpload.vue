@@ -62,7 +62,6 @@
           type="file"
           accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.csv"
           class="hidden"
-          required
           @change="handleQuickFileSelect"
         />
 
@@ -138,6 +137,55 @@
         </div>
       </div>
 
+      <!-- Upload Limit Reached -->
+      <div
+        v-if="showLimitReached && uploadLimitResult && !uploadLimitResult.canUse"
+        class="mt-4 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg"
+      >
+        <div class="flex items-start">
+          <svg
+            class="w-5 h-5 text-orange-600 dark:text-orange-400 mt-0.5 mr-2"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <div class="flex-1">
+            <p class="font-medium text-orange-900 dark:text-orange-200 mb-1">
+              {{ uploadLimitResult.message?.title || $t('upload.limitReached.title', 'Upload Limit Reached') }}
+            </p>
+            <p class="text-sm text-orange-800 dark:text-orange-300 mb-3">
+              {{ uploadLimitResult.message?.message || $t('upload.limitReached.message', 'You have reached your monthly upload limit.') }}
+            </p>
+            <div class="text-xs text-orange-700 dark:text-orange-400 mb-3">
+              {{ $t('upload.limitReached.usage', 'Usage: {usage} of {limit}', {
+                usage: uploadLimitResult.usage,
+                limit: uploadLimitResult.limit || 0
+              }) }}
+            </div>
+            <div class="flex items-center space-x-3">
+              <button
+                v-if="uploadLimitResult.message?.actionUrl"
+                @click="openActionUrl(uploadLimitResult.message.actionUrl)"
+                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-orange-700 bg-orange-100 hover:bg-orange-200 dark:bg-orange-800 dark:text-orange-200 dark:hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+              >
+                {{ uploadLimitResult.message.actionText || $t('upload.limitReached.upgrade', 'Upgrade Plan') }}
+              </button>
+              <button
+                @click="clearLimitMessage"
+                class="text-xs text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300"
+              >
+                {{ $t('upload.limitReached.dismiss', 'Dismiss') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Validation Warnings -->
       <div
         v-if="
@@ -198,6 +246,7 @@
       <div class="flex items-center justify-between mt-6">
         <button
           type="submit"
+          formnovalidate
           :disabled="!selectedFile || quickUploading"
           class="btn btn-primary disabled:opacity-50"
         >
@@ -405,6 +454,7 @@ import { FILE_SIZE } from "@/constants/app";
 import { pluginsService, type PluginDetectionResult } from "@/services/plugins";
 import { useAsyncJobs } from "@/composables/useAsyncJobs";
 import { useJobNotifications } from "@/composables/useJobNotifications";
+import { featureService, type FeatureLimitCheckResult } from "@/services/featureService";
 import type { AsyncUploadResult, ReceiptPlugin } from "@/types/plugin";
 import {
   validateFile,
@@ -422,6 +472,8 @@ const uploadResult = ref<AsyncUploadResult | null>(null);
 const availablePlugins = ref<ReceiptPlugin[]>([]);
 const fileValidationResult = ref<FileValidationResult | null>(null);
 const showValidationErrors = ref(false);
+const uploadLimitResult = ref<FeatureLimitCheckResult | null>(null);
+const showLimitReached = ref(false);
 
 // Async job management
 const { 
@@ -512,12 +564,50 @@ const detectPluginForFile = async (file: File) => {
   }
 };
 
+const checkUploadLimit = async (): Promise<boolean> => {
+  try {
+    const limitCheck = await featureService.checkReceiptUploadLimit();
+    uploadLimitResult.value = limitCheck;
+
+    if (!limitCheck.canUse) {
+      showLimitReached.value = true;
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Failed to check upload limit:', error);
+    // Allow upload on error to not block users
+    return true;
+  }
+};
+
+const openActionUrl = (url?: string) => {
+  if (!url) {
+    return;
+  }
+
+  try {
+    if (typeof window !== 'undefined' && typeof window.open === 'function') {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  } catch (error) {
+    console.warn('Unable to open action URL:', error);
+  }
+};
+
 const handleQuickUpload = async () => {
   if (!selectedFile.value) return;
 
   // Check if we have a cached validation result and it's valid
   if (!fileValidationResult.value || !fileValidationResult.value.isValid) {
     showValidationErrors.value = true;
+    return;
+  }
+
+  // Check upload limits before processing
+  const canUpload = await checkUploadLimit();
+  if (!canUpload) {
     return;
   }
 
@@ -598,6 +688,11 @@ const handleQuickUpload = async () => {
 const clearUploadResult = () => {
   uploadResult.value = null;
   clearQuickFile();
+};
+
+const clearLimitMessage = () => {
+  showLimitReached.value = false;
+  uploadLimitResult.value = null;
 };
 
 // Get receipt ID from completed job

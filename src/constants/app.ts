@@ -28,7 +28,7 @@ export const TIMEOUT = {
   CSRF_BUFFER: 5000, // 5 seconds buffer before expiry
 
   // UI timeouts
-  NOTIFICATION_DEFAULT: 5000, // 5 seconds for notifications
+  NOTIFICATION_DEFAULT: 30000, // 30 seconds for notifications
   ERROR_DISPLAY: 10000, // 10 seconds for error messages
   DEBOUNCE_SEARCH: 500, // 500ms for search debouncing
   DEBOUNCE_AUTOCOMPLETE: 150, // 150ms for autocomplete

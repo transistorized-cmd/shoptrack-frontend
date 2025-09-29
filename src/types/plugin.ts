@@ -28,6 +28,10 @@ export interface ReportPlugin {
   isEnabled: boolean;
   prerequisites: string[];
   type: "report";
+  isAccessible?: boolean;
+  isPremiumFeature?: boolean;
+  accessMessage?: string;
+  historyLimitDays?: number | null;
 }
 
 export interface ProcessingResult {

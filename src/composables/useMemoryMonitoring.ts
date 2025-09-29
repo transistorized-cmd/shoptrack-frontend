@@ -341,6 +341,7 @@ export function useMemoryMonitoring(options: MemoryMonitoringOptions = {}) {
 
     const growth = (last.heapUsed - first.heapUsed) / 1024 / 1024; // MB
 
+    if (growth > 20) return "rapidly-increasing";
     if (growth > 10) return "increasing";
     if (growth < -5) return "decreasing";
     return "stable";

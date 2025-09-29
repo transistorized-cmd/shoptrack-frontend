@@ -78,7 +78,13 @@
       <div class="mt-2 pt-1.5 border-t border-gray-200 dark:border-gray-600">
         <button
           type="button"
-          class="w-full px-3 py-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
+          :disabled="isDateDisabled(new Date())"
+          :class="[
+            'w-full px-3 py-1.5 text-sm rounded transition-colors',
+            isDateDisabled(new Date())
+              ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+              : 'bg-blue-500 hover:bg-blue-600 text-white'
+          ]"
           @click="selectToday"
         >
           {{ todayButtonText }}
@@ -103,6 +109,8 @@ import { useDateLocalization } from '@/composables/useDateLocalization'
 interface Props {
   modelValue?: string
   class?: string
+  minDate?: string
+  maxDate?: string
 }
 
 interface Emits {
@@ -259,24 +267,46 @@ const calendarDays = computed(() => {
   return days
 })
 
+// Check if a date is disabled based on min/max constraints
+const isDateDisabled = (date: Date) => {
+  if (props.minDate) {
+    const minDate = new Date(props.minDate)
+    if (date < minDate) return true
+  }
+
+  if (props.maxDate) {
+    const maxDate = new Date(props.maxDate)
+    if (date > maxDate) return true
+  }
+
+  return false
+}
+
 // Day button classes
 const getDayClass = (day: any) => {
-  const baseClass = 'py-1 px-1.5 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'
+  const baseClass = 'py-1 px-1.5 text-sm rounded transition-colors'
+  const isDisabled = isDateDisabled(day.date)
 
   let classes = [baseClass]
 
-  if (!day.isCurrentMonth) {
-    classes.push('text-gray-400 dark:text-gray-500')
+  if (isDisabled) {
+    classes.push('text-gray-300 dark:text-gray-600 cursor-not-allowed bg-gray-50 dark:bg-gray-800')
   } else {
-    classes.push('text-gray-900 dark:text-white')
-  }
+    classes.push('hover:bg-gray-100 dark:hover:bg-gray-700')
 
-  if (day.isSelected) {
-    classes.push('bg-blue-500 text-white hover:bg-blue-600')
-  }
+    if (!day.isCurrentMonth) {
+      classes.push('text-gray-400 dark:text-gray-500')
+    } else {
+      classes.push('text-gray-900 dark:text-white')
+    }
 
-  if (day.isToday && !day.isSelected) {
-    classes.push('font-bold text-blue-500 dark:text-blue-400')
+    if (day.isSelected) {
+      classes.push('bg-blue-500 text-white hover:bg-blue-600')
+    }
+
+    if (day.isToday && !day.isSelected) {
+      classes.push('font-bold text-blue-500 dark:text-blue-400')
+    }
   }
 
   return classes.join(' ')
@@ -293,6 +323,11 @@ const nextMonth = () => {
 
 // Date selection
 const selectDate = (day: any) => {
+  // Prevent selection of disabled dates
+  if (isDateDisabled(day.date)) {
+    return
+  }
+
   if (day.month !== 'current') {
     // If clicking on prev/next month day, navigate to that month
     if (day.month === 'prev') {
@@ -312,6 +347,12 @@ const selectDate = (day: any) => {
 
 const selectToday = () => {
   const today = new Date()
+
+  // Don't select today if it's disabled
+  if (isDateDisabled(today)) {
+    return
+  }
+
   selectedDate.value = today
   currentDate.value = new Date(today.getFullYear(), today.getMonth(), 1)
   const dateString = today.toISOString().split('T')[0]

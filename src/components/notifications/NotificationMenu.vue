@@ -199,6 +199,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useJobNotifications } from '@/composables/useJobNotifications'
+import { useDateLocalization } from '@/composables/useDateLocalization'
 
 const props = defineProps<{
   maxDisplay?: number
@@ -216,6 +217,8 @@ const {
   startPolling,
   stopPolling
 } = useJobNotifications()
+
+const { formatDate: formatDateSafe } = useDateLocalization()
 
 // Component state
 const isOpen = ref(false)
@@ -363,8 +366,8 @@ const formatNotificationTime = (timestamp: string) => {
   if (diffMins < 60) return `${diffMins}m ago`
   if (diffHours < 24) return `${diffHours}h ago`
   if (diffDays < 7) return `${diffDays}d ago`
-  
-  return date.toLocaleDateString()
+
+  return formatDateSafe(timestamp)
 }
 
 // Click outside to close

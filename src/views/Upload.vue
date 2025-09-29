@@ -9,12 +9,50 @@
       </p>
     </div>
 
+    <!-- Global Receipt Limit Reached Prompt -->
+    <div
+      v-if="globalReceiptLimitReached && globalUpgradeMessage"
+      class="card border-l-4 border-amber-400 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-6 mb-8"
+    >
+      <div class="flex items-start space-x-4">
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-amber-600 dark:text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-amber-800 dark:text-amber-200 mb-2">
+            {{ globalUpgradeMessage.title }}
+          </h3>
+          <p class="text-amber-700 dark:text-amber-300 mb-4">
+            {{ globalUpgradeMessage.message }}
+          </p>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button
+              @click="openSubscriptionModal"
+              class="btn bg-amber-600 hover:bg-amber-700 text-white border-amber-600 hover:border-amber-700 w-full sm:w-auto"
+            >
+              {{ globalUpgradeMessage.actionText || $t('receipts.upgrade') }}
+            </button>
+            <button
+              @click="globalReceiptLimitReached = false"
+              class="btn btn-secondary w-full sm:w-auto"
+            >
+              {{ $t('common.dismiss') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Quick Upload Component -->
-    <QuickUpload />
+    <QuickUpload v-if="!globalReceiptLimitReached" />
 
     <!-- Plugin Selection Grid -->
     <div
-      v-if="availablePlugins.length > 0"
+      v-if="availablePlugins.length > 0 && !globalReceiptLimitReached"
       class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8"
     >
       <div
@@ -182,6 +220,55 @@
                 </div>
               </div>
             </div>
+
+            <!-- Upload Limit Reached -->
+            <div
+              v-if="showLimitReached[plugin.key] && uploadLimitResults[plugin.key] && !uploadLimitResults[plugin.key].canUse"
+              class="mt-2 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg"
+            >
+              <div class="flex items-start">
+                <svg
+                  class="w-4 h-4 text-orange-600 dark:text-orange-400 mt-0.5 mr-2 flex-shrink-0"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <div class="text-sm flex-1">
+                  <p class="text-orange-900 dark:text-orange-200 font-medium">
+                    {{ uploadLimitResults[plugin.key].message?.title || $t('upload.limitReached.title', 'Upload Limit Reached') }}
+                  </p>
+                  <p class="text-orange-800 dark:text-orange-300 mt-1 mb-2">
+                    {{ uploadLimitResults[plugin.key].message?.message || $t('upload.limitReached.message', 'You have reached your monthly upload limit.') }}
+                  </p>
+                  <div class="text-xs text-orange-700 dark:text-orange-400 mb-2">
+                    {{ $t('upload.limitReached.usage', 'Usage: {usage} of {limit}', {
+                      usage: uploadLimitResults[plugin.key].usage,
+                      limit: uploadLimitResults[plugin.key].limit || 0
+                    }) }}
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <button
+                      v-if="uploadLimitResults[plugin.key].message?.actionUrl"
+                      @click="openActionUrl(uploadLimitResults[plugin.key].message.actionUrl)"
+                      class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-orange-700 bg-orange-100 hover:bg-orange-200 dark:bg-orange-800 dark:text-orange-200 dark:hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                    >
+                      {{ uploadLimitResults[plugin.key].message.actionText || $t('upload.limitReached.upgrade', 'Upgrade Plan') }}
+                    </button>
+                    <button
+                      @click="clearPluginLimitMessage(plugin.key)"
+                      class="text-xs text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300"
+                    >
+                      {{ $t('upload.limitReached.dismiss', 'Dismiss') }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </form>
 
           <!-- Manual Entry Button -->
@@ -197,7 +284,7 @@
     </div>
 
     <!-- File Type Reference -->
-    <div v-if="availablePlugins.length > 0" class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+    <div v-if="availablePlugins.length > 0 && !globalReceiptLimitReached" class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
       <h3 class="text-lg font-semibold text-gray-800 mb-4">
         {{ $t('upload.supportedFileTypes') }}
       </h3>
@@ -292,16 +379,25 @@
         </div>
       </div>
     </div>
+
+    <!-- Subscription Modal -->
+    <SubscriptionModal
+      :is-open="showSubscriptionModal"
+      @close="closeSubscriptionModal"
+      @subscribed="handleSubscribed"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { useTranslation } from "@/composables/useTranslation";
 import { usePluginsStore } from "@/stores/plugins";
 import { useReceiptsStore } from "@/stores/receipts";
+import { featureService, type FeatureLimitCheckResult, type FeatureMessage } from "@/services/featureService";
 import QuickUpload from "@/components/QuickUpload.vue";
+import SubscriptionModal from "@/components/SubscriptionModal.vue";
 import type { ProcessingResult, ReceiptPlugin } from "@/types/plugin";
 import { FILE_SIZE } from "@/constants/app";
 import {
@@ -313,7 +409,7 @@ import { getPluginTranslations, hasPluginTranslations } from "@/i18n/plugins";
 import { getCurrentLocale } from "@/i18n";
 
 const router = useRouter();
-const { t } = useTranslation();
+const { t, locale } = useTranslation();
 const pluginsStore = usePluginsStore();
 const receiptsStore = useReceiptsStore();
 
@@ -352,9 +448,17 @@ const pluginFiles = ref<Record<string, File>>({});
 const pluginUploading = ref<Record<string, boolean>>({});
 const fileValidationResults = ref<Record<string, FileValidationResult>>({});
 const showValidationErrors = ref<Record<string, boolean>>({});
+const uploadLimitResults = ref<Record<string, FeatureLimitCheckResult>>({});
+const showLimitReached = ref<Record<string, boolean>>({});
 
 // General state
 const uploadResult = ref<ProcessingResult | null>(null);
+
+// Global receipt limit state
+const globalReceiptLimitReached = ref(false);
+const globalUpgradeMessage = ref<FeatureMessage | null>(null);
+const checkingGlobalLimit = ref(false);
+const showSubscriptionModal = ref(false);
 
 
 // Computed properties
@@ -396,6 +500,31 @@ function handlePluginFileChange(event: Event, pluginKey: string) {
   }
 }
 
+// Check upload limit for plugin
+async function checkPluginUploadLimit(pluginKey: string): Promise<boolean> {
+  try {
+    const limitCheck = await featureService.checkReceiptUploadLimit();
+    uploadLimitResults.value[pluginKey] = limitCheck;
+
+    if (!limitCheck.canUse) {
+      showLimitReached.value[pluginKey] = true;
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Failed to check upload limit for plugin:', pluginKey, error);
+    // Allow upload on error to not block users
+    return true;
+  }
+}
+
+// Clear limit message for plugin
+function clearPluginLimitMessage(pluginKey: string) {
+  showLimitReached.value[pluginKey] = false;
+  uploadLimitResults.value[pluginKey] = {} as FeatureLimitCheckResult;
+}
+
 // Plugin upload handling
 async function handlePluginUpload({
   file,
@@ -415,6 +544,12 @@ async function handlePluginUpload({
 
   if (!validationResult.isValid) {
     showValidationErrors.value[pluginKey] = true;
+    return;
+  }
+
+  // Check upload limits before processing
+  const canUpload = await checkPluginUploadLimit(pluginKey);
+  if (!canUpload) {
     return;
   }
 
@@ -440,7 +575,14 @@ async function handlePluginUpload({
         successfullyParsed: Math.floor(Math.random() * 5) + 1,
         processingStatus: "completed",
         pluginUsed: pluginKey,
-        uploadedAt: new Date().toISOString(),
+        uploadedAt: (() => {
+          try {
+            return new Date().toISOString();
+          } catch (error) {
+            console.warn('Error creating timestamp:', error);
+            return Date.now().toString();
+          }
+        })(),
         processingTime: Math.floor(Math.random() * 5000) + 1000,
       },
       errors: [],
@@ -449,10 +591,18 @@ async function handlePluginUpload({
 
     // Clear the form
     pluginFiles.value[pluginKey] = null as any;
-    const fileInput = document.querySelector(
-      `input[type="file"][data-plugin="${pluginKey}"]`
-    ) as HTMLInputElement;
-    if (fileInput) fileInput.value = "";
+
+    // Safely clear file input
+    try {
+      if (typeof document !== 'undefined' && document.querySelector) {
+        const fileInput = document.querySelector(
+          `input[type="file"][data-plugin="${pluginKey}"]`
+        ) as HTMLInputElement;
+        if (fileInput) fileInput.value = "";
+      }
+    } catch (error) {
+      console.warn('Could not clear file input:', error);
+    }
   } catch (error) {
     console.error("Upload failed:", error);
     uploadResult.value = {
@@ -476,6 +626,72 @@ function clearUploadResult() {
   uploadResult.value = null;
 }
 
+// Global receipt limit functions
+const fetchGlobalUpgradeMessage = async () => {
+  try {
+    globalUpgradeMessage.value = await featureService.getFeatureMessage(
+      'receipt_monthly_limit',
+      'upgrade_prompt',
+      locale.value // Pass current locale to get localized message
+    );
+  } catch (error) {
+    console.error("Failed to get global upgrade message:", error);
+    globalUpgradeMessage.value = null;
+  }
+};
+
+const checkGlobalReceiptLimit = async () => {
+  if (checkingGlobalLimit.value) return;
+
+  checkingGlobalLimit.value = true;
+  try {
+    const limitResult = await featureService.checkReceiptUploadLimit();
+
+    // Show upgrade prompt if limit is reached or exceeded
+    globalReceiptLimitReached.value = limitResult.isLimitReached;
+
+    if (limitResult.isLimitReached) {
+      await fetchGlobalUpgradeMessage();
+    } else {
+      globalUpgradeMessage.value = null;
+    }
+  } catch (error) {
+    console.error("Failed to check global receipt limit:", error);
+  } finally {
+    checkingGlobalLimit.value = false;
+  }
+};
+
+const openSubscriptionModal = () => {
+  showSubscriptionModal.value = true;
+};
+
+const closeSubscriptionModal = () => {
+  showSubscriptionModal.value = false;
+};
+
+const handleSubscribed = () => {
+  showSubscriptionModal.value = false;
+  // Re-check limits after subscription
+  checkGlobalReceiptLimit();
+};
+
+// Safe window.open wrapper
+const openActionUrl = (url: string) => {
+  try {
+    if (typeof window !== 'undefined' && window.open) {
+      window.open(url, '_blank');
+    } else {
+      // Fallback: try to navigate in same window
+      window.location.href = url;
+    }
+  } catch (error) {
+    console.warn('Could not open action URL:', error);
+    // Final fallback: copy URL to console for user
+    console.log('Please visit:', url);
+  }
+};
+
 // Plugin translation helper
 function getPluginTranslation(pluginKey: string, translationKey: string): string {
   if (!hasPluginTranslations(pluginKey)) {
@@ -494,6 +710,13 @@ function getPluginTranslation(pluginKey: string, translationKey: string): string
   return value || translationKey.split('.').pop() || translationKey;
 }
 
+// Watch for locale changes and refetch upgrade message if limit is reached
+watch(locale, async (newLocale) => {
+  if (globalReceiptLimitReached.value) {
+    await fetchGlobalUpgradeMessage();
+  }
+});
+
 // Load plugins on mount
 onMounted(async () => {
   try {
@@ -503,6 +726,9 @@ onMounted(async () => {
     if (pluginsStore.availableReceiptPlugins.length > 0) {
       availablePlugins.value = pluginsStore.availableReceiptPlugins;
     }
+
+    // Check global receipt limits
+    await checkGlobalReceiptLimit();
   } catch (error) {
     console.error("Failed to load plugins, using demo data:", error);
   }

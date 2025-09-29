@@ -70,7 +70,7 @@ const { isDarkMode } = useDarkMode()
 const { locale, setLocale } = useTranslation()
 
 // Use the reactive locale from useTranslation - locale is already a computed ref
-const currentLocale = computed(() => locale.value)
+const currentLocale = computed<LocaleCode>(() => locale.value as LocaleCode)
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value

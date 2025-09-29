@@ -55,7 +55,10 @@ class CsrfTokenManager {
    */
   private async fetchTokenFromBackend(): Promise<BackendCsrfResponse> {
     const baseUrl = this.getApiBaseURL();
-    const response = await fetch(`${baseUrl}/security/csrf-token`, {
+    const url = `${baseUrl}/security/csrf-token`;
+    console.log('[CSRF Manager] Fetching CSRF token from:', url);
+
+    const response = await fetch(url, {
       method: "GET",
       credentials: "include", // Include session cookies
       headers: {
@@ -64,13 +67,19 @@ class CsrfTokenManager {
       },
     });
 
+    console.log('[CSRF Manager] Response status:', response.status, response.statusText);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[CSRF Manager] Failed to fetch CSRF token:', response.status, errorText);
       throw new Error(
         `Failed to fetch CSRF token: ${response.status} ${response.statusText}`,
       );
     }
 
-    return await response.json();
+    const result = await response.json();
+    console.log('[CSRF Manager] Successfully fetched CSRF token:', result.token?.substring(0, 20) + '...');
+    return result;
   }
 
   /**
@@ -186,12 +195,21 @@ class CsrfTokenManager {
       const stored = this.loadFromStorage();
       if (stored && stored.expires > Date.now() + 60000) {
         // Must have >1 min remaining
-        this.tokenState.value = stored;
-        console.debug("CSRF token restored from storage");
-        return;
+        // Validate the stored token with the backend to ensure session is still valid
+        console.debug("CSRF token found in storage, validating with backend...");
+        const isValid = await this.validateToken(stored.token);
+        if (isValid) {
+          this.tokenState.value = stored;
+          console.debug("CSRF token restored from storage and validated");
+          return;
+        } else {
+          console.warn("Stored CSRF token is invalid (session expired or server restarted), fetching new token");
+          sessionStorage.removeItem('csrf_token');
+        }
       }
     } catch (error) {
       console.warn("Failed to restore CSRF token from storage:", error);
+      sessionStorage.removeItem('csrf_token');
     }
 
     // Fetch new token from backend if none exists or expired

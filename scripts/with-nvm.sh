@@ -17,4 +17,10 @@ nvm use
 
 # Run the command passed as arguments
 echo "▶️  Running: $@"
+
+# Ensure Vite uses a writable temp directory when running inside sandboxes
+mkdir -p ./.vite-temp
+export VITE_CLI_TEMP_DIR="$(pwd)/.vite-temp"
+export TMPDIR="$(pwd)/.vite-temp"
+
 exec "$@"

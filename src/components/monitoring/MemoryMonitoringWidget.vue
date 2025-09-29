@@ -183,6 +183,12 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useMemoryMonitoring } from '@/composables/useMemoryMonitoring';
 import { useMemoryMonitoringStore } from '@/stores/memoryMonitoring.store';
+import type { MemorySnapshot, MemoryAlert } from '@/services/memoryMonitoring.service';
+
+interface ChartDataPoint {
+  timestamp: number;
+  memory: number;
+}
 
 interface Props {
   showComponentInfo?: boolean;
@@ -225,7 +231,7 @@ const isVisible = ref(true);
 const isRefreshing = ref(false);
 const isPerformingAction = ref(false);
 const chartCanvas = ref<HTMLCanvasElement | null>(null);
-const isDevelopment = ref(import.meta.env.MODE === 'development');
+const isDevelopment = ref(import.meta.env.DEV);
 
 // Computed properties
 const widgetClasses = computed(() => ({
@@ -270,10 +276,10 @@ const criticalAlerts = computed(() => memoryStore.criticalAlerts);
 const activeLeaks = computed(() => memoryStore.activeLeaks);
 const totalStateSize = computed(() => memoryStore.totalStateSize);
 
-const chartData = computed(() => {
-  return memoryHistory.value.slice(-20).map(snapshot => ({
+const chartData = computed<ChartDataPoint[]>(() => {
+  return memoryHistory.value.slice(-20).map((snapshot: MemorySnapshot) => ({
     timestamp: snapshot.timestamp,
-    memory: snapshot.heapUsed / 1024 / 1024 // Convert to MB
+    memory: snapshot.heapUsed / 1024 / 1024, // Convert to MB
   }));
 });
 
@@ -384,7 +390,7 @@ const exportData = () => {
 
 const dismissAlert = (alertId: string) => {
   // Remove alert from local list (in real implementation, might call store action)
-  const index = alerts.value.findIndex(alert => alert.id === alertId);
+  const index = alerts.value.findIndex((alert: MemoryAlert) => alert.id === alertId);
   if (index > -1) {
     alerts.value.splice(index, 1);
   }
@@ -432,8 +438,8 @@ const drawChart = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   const data = chartData.value;
-  const maxMemory = Math.max(...data.map(d => d.memory));
-  const minMemory = Math.min(...data.map(d => d.memory));
+  const maxMemory = Math.max(...data.map((d: ChartDataPoint) => d.memory));
+  const minMemory = Math.min(...data.map((d: ChartDataPoint) => d.memory));
   const range = maxMemory - minMemory || 1;
 
   const width = canvas.width;
@@ -461,7 +467,7 @@ const drawChart = () => {
   ctx.lineWidth = 2;
   ctx.beginPath();
 
-  data.forEach((point, index) => {
+  data.forEach((point: ChartDataPoint, index: number) => {
     const x = padding + ((width - 2 * padding) * index) / (data.length - 1);
     const y = height - padding - ((point.memory - minMemory) / range) * (height - 2 * padding);
 

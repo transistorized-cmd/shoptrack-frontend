@@ -426,6 +426,61 @@ describe("CategoryAnalytics Component - Locale Switching", () => {
     });
   });
 
+  describe("Response normalization", () => {
+    it("should gracefully handle analytics responses wrapped in metadata", async () => {
+      getCurrentLocaleMock.mockReturnValue("en");
+
+      mockedAxios.get.mockImplementation((url: string) => {
+        if (url.includes("/api/analytics/categories?")) {
+          return Promise.resolve({
+            data: {
+              summary: { totalSpent: 1000 },
+              categories: mockCategoryData,
+            },
+          });
+        }
+
+        if (url.includes("/api/analytics/categories/items?")) {
+          return Promise.resolve({
+            data: {
+              category: { id: 1, name: "Groceries" },
+              items: mockItemData,
+            },
+          });
+        }
+
+        if (url.includes("/api/analytics/categories/items/receipts?")) {
+          return Promise.resolve({
+            data: {
+              receipts: mockReceiptData,
+            },
+          });
+        }
+
+        return Promise.reject(new Error("Unknown endpoint"));
+      });
+
+      wrapper = createWrapper();
+
+      await nextTick();
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.vm.categoryData).toEqual(mockCategoryData);
+
+      await wrapper.vm.drillDownToCategory(1, "groceries");
+      await nextTick();
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.vm.itemData).toEqual(mockItemData);
+
+      await wrapper.vm.drillDownToItem(1, "milk");
+      await nextTick();
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.vm.receiptData).toEqual(mockReceiptData);
+    });
+  });
+
   describe("Pluralization and Number Formatting", () => {
     it("should handle pluralization in English", async () => {
       wrapper = createWrapper({}, "en");

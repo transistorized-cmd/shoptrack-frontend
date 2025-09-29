@@ -44,7 +44,31 @@ export const useDateLocalization = () => {
       }
 
       const jsLocale = getJavaScriptLocale(locale.value);
-      return date.toLocaleDateString(jsLocale, options);
+
+      // Safe browser API access with fallbacks
+      if (typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
+        return new Intl.DateTimeFormat(jsLocale, options).format(date);
+      } else if (typeof date.toLocaleDateString === 'function') {
+        return date.toLocaleDateString(jsLocale, options);
+      } else {
+        // Fallback for environments without browser APIs
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const month = options.month === 'long' ?
+          ['January', 'February', 'March', 'April', 'May', 'June',
+           'July', 'August', 'September', 'October', 'November', 'December'][date.getMonth()] :
+          months[date.getMonth()];
+        const day = date.getDate();
+        const year = date.getFullYear();
+
+        if (options.year === 'numeric' && options.month && options.day) {
+          return `${month} ${day}, ${year}`;
+        } else if (options.month && options.day) {
+          return `${month} ${day}`;
+        } else {
+          return `${month} ${day}, ${year}`;
+        }
+      }
     } catch (error) {
       console.error("Error formatting date:", error);
       return "Invalid Date";
@@ -78,7 +102,31 @@ export const useDateLocalization = () => {
       }
 
       const jsLocale = getJavaScriptLocale(locale.value);
-      return date.toLocaleString(jsLocale, options);
+
+      // Safe browser API access with fallbacks
+      if (typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
+        return new Intl.DateTimeFormat(jsLocale, options).format(date);
+      } else if (typeof date.toLocaleString === 'function') {
+        return date.toLocaleString(jsLocale, options);
+      } else {
+        // Fallback for environments without browser APIs
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const month = options.month === 'long' ?
+          ['January', 'February', 'March', 'April', 'May', 'June',
+           'July', 'August', 'September', 'October', 'November', 'December'][date.getMonth()] :
+          months[date.getMonth()];
+        const day = date.getDate();
+        const year = date.getFullYear();
+        const hour = String(date.getHours()).padStart(2, '0');
+        const minute = String(date.getMinutes()).padStart(2, '0');
+
+        if (options.hour && options.minute) {
+          return `${month} ${day}, ${year} ${hour}:${minute}`;
+        } else {
+          return `${month} ${day}, ${year}`;
+        }
+      }
     } catch (error) {
       console.error("Error formatting date time:", error);
       return "Invalid Date";

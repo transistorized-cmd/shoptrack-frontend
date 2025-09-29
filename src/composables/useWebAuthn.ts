@@ -1,7 +1,7 @@
 import { ref, computed, onMounted } from "vue";
 import type {
-  PublicKeyCredentialCreationOptions,
-  PublicKeyCredentialRequestOptions,
+  PasskeyCreationOptionsResponse,
+  PasskeyRequestOptionsResponse,
   PasskeyLoginRequest,
   PasskeyRegistrationRequest,
 } from "@/types/auth";
@@ -97,19 +97,27 @@ export function useWebAuthn() {
 
     try {
       // Get creation options from server
-      const options = await authService.getPasskeyCreationOptions();
+      const options: PasskeyCreationOptionsResponse =
+        await authService.getPasskeyCreationOptions();
 
-      // Convert base64 strings to ArrayBuffers
       const publicKeyOptions: PublicKeyCredentialCreationOptions = {
-        ...options,
         challenge: base64ToArrayBuffer(options.challenge),
+        rp: options.rp,
         user: {
-          ...options.user,
           id: new TextEncoder().encode(options.user.id),
+          name: options.user.name,
+          displayName: options.user.displayName,
         },
+        pubKeyCredParams: options.pubKeyCredParams.map((param) => ({
+          type: param.type,
+          alg: param.alg,
+        })),
+        authenticatorSelection: options.authenticatorSelection,
+        timeout: options.timeout,
         excludeCredentials: options.excludeCredentials?.map((cred) => ({
-          ...cred,
+          type: cred.type,
           id: base64ToArrayBuffer(cred.id),
+          transports: cred.transports,
         })),
       };
 
@@ -125,9 +133,24 @@ export function useWebAuthn() {
 
       const response = credential.response as AuthenticatorAttestationResponse;
       const clientDataJSON = arrayBufferToBase64(response.clientDataJSON);
-      const authenticatorData = arrayBufferToBase64(response.authenticatorData);
-      const publicKey = arrayBufferToBase64(response.getPublicKey()!);
-      const attestationObject = arrayBufferToBase64(response.attestationObject);
+      const authenticatorDataBuffer =
+        typeof response.getAuthenticatorData === "function"
+          ? response.getAuthenticatorData()
+          : (response as unknown as { authenticatorData?: ArrayBuffer })
+              .authenticatorData ?? new ArrayBuffer(0);
+      const publicKeyBuffer =
+        typeof response.getPublicKey === "function"
+          ? response.getPublicKey()
+          : null;
+      const attestationObjectBuffer = response.attestationObject;
+
+      const authenticatorData = arrayBufferToBase64(authenticatorDataBuffer);
+      const publicKey = publicKeyBuffer
+        ? arrayBufferToBase64(publicKeyBuffer)
+        : "";
+      const attestationObject = attestationObjectBuffer
+        ? arrayBufferToBase64(attestationObjectBuffer)
+        : undefined;
 
       return {
         credentialId: arrayBufferToBase64(credential.rawId),
@@ -167,7 +190,8 @@ export function useWebAuthn() {
 
     try {
       // Get request options from server
-      const options = await authService.getPasskeyRequestOptions();
+      const options: PasskeyRequestOptionsResponse =
+        await authService.getPasskeyRequestOptions();
 
       // Validate rpId against current origin to prevent silent SecurityError
       // rpId must be the current effective domain or a registrable suffix of it
@@ -193,12 +217,15 @@ export function useWebAuthn() {
       }
 
       // Convert base64 strings to ArrayBuffers
-      const publicKeyOptions: PublicKeyCredentialRequestOptionsInit = {
-        ...options,
+      const publicKeyOptions: PublicKeyCredentialRequestOptions = {
         challenge: base64ToArrayBuffer(options.challenge),
+        timeout: options.timeout,
+        rpId: options.rpId,
+        userVerification: options.userVerification,
         allowCredentials: options.allowCredentials?.map((cred) => ({
-          ...cred,
+          type: cred.type,
           id: base64ToArrayBuffer(cred.id),
+          transports: cred.transports,
         })),
       };
 

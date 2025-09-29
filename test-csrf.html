@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head><title>CSRF Debug</title></head>
+<body>
+<h1>CSRF Debug Test</h1>
+<button onclick="getToken()">1. Get CSRF Token</button>
+<button onclick="testUpdate()">2. Test Profile Update</button>
+<pre id="output"></pre>
+
+<script>
+let csrfToken = '';
+const log = (msg) => {
+  document.getElementById('output').textContent += msg + '\n';
+  console.log(msg);
+};
+
+async function getToken() {
+  try {
+    const res = await fetch('http://localhost:5300/api/security/csrf-token', {
+      credentials: 'include'
+    });
+    const data = await res.json();
+    csrfToken = data.token;
+    log('Got CSRF token: ' + csrfToken);
+    log('Cookie after getting token:');
+    log(document.cookie);
+  } catch (e) {
+    log('Error getting token: ' + e.message);
+  }
+}
+
+async function testUpdate() {
+  try {
+    const res = await fetch('http://localhost:5300/api/auth/profile', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken
+      },
+      body: JSON.stringify({
+        firstName: 'Test',
+        lastName: 'User'
+      })
+    });
+    const data = await res.json();
+    log('Response: ' + JSON.stringify(data, null, 2));
+  } catch (e) {
+    log('Error: ' + e.message);
+  }
+}
+</script>
+</body>
+</html>

@@ -280,14 +280,14 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useI18n } from 'vue-i18n';
+import { useTranslation } from '@/composables/useTranslation';
 import { useAuthStore } from '@/stores/auth';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import type { ResetPasswordRequest } from '@/types/auth';
 
 const router = useRouter();
 const route = useRoute();
-const { t } = useI18n();
+const { t } = useTranslation();
 const authStore = useAuthStore();
 
 const showPassword = ref(false);

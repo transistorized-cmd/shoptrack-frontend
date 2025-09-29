@@ -620,6 +620,34 @@ const averagePrice = computed(() => {
 
 // formatDate is now provided by useDateLocalization composable
 
+function extractArrayResponse<T>(payload: unknown, key: string): T[] {
+  if (Array.isArray(payload)) {
+    return payload as T[];
+  }
+
+  if (payload && typeof payload === "object") {
+    const recordPayload = payload as Record<string, unknown>;
+
+    if (Array.isArray(recordPayload[key])) {
+      return recordPayload[key] as T[];
+    }
+
+    const nestedData = recordPayload.data;
+    if (Array.isArray(nestedData)) {
+      return nestedData as T[];
+    }
+
+    if (nestedData && typeof nestedData === "object") {
+      const nestedRecord = nestedData as Record<string, unknown>;
+      if (Array.isArray(nestedRecord[key])) {
+        return nestedRecord[key] as T[];
+      }
+    }
+  }
+
+  return [];
+}
+
 async function fetchCategoryData() {
   loading.value = true;
   try {
@@ -633,7 +661,10 @@ async function fetchCategoryData() {
     params.append("locale", locale);
 
     const response = await axios.get(`/api/analytics/categories?${params}`);
-    categoryData.value = response.data;
+    categoryData.value = extractArrayResponse<CategoryAnalytics>(
+      response.data,
+      "categories",
+    );
   } catch (error) {
     console.error("Failed to fetch category data:", error);
   } finally {
@@ -658,7 +689,7 @@ async function fetchItemData(categoryId: number, category?: string) {
     const response = await axios.get(
       `/api/analytics/categories/items?${params}`,
     );
-    itemData.value = response.data;
+    itemData.value = extractArrayResponse<ItemAnalytics>(response.data, "items");
   } catch (error) {
     console.error("Failed to fetch item data:", error);
   } finally {
@@ -688,7 +719,10 @@ async function fetchReceiptData(
     const response = await axios.get(
       `/api/analytics/categories/items/receipts?${params}`,
     );
-    receiptData.value = response.data;
+    receiptData.value = extractArrayResponse<ItemReceipt>(
+      response.data,
+      "receipts",
+    );
   } catch (error) {
     console.error("Failed to fetch receipt data:", error);
   } finally {

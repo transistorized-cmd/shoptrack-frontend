@@ -69,7 +69,7 @@ function initializeLocale(): LocaleCode {
 }
 
 // Safe path traversal for nested objects with proper value extraction
-function getNestedValue(obj: any, path: string): string | undefined {
+function getNestedValue(obj: any, path: string): unknown {
   const value = path.split(".").reduce((current, key) => {
     return current && current[key] !== undefined ? current[key] : undefined;
   }, obj);
@@ -128,6 +128,25 @@ function getNestedValue(obj: any, path: string): string | undefined {
   return String(value);
 }
 
+interface CompiledMessageBody {
+  t?: number;
+  i?: any[];
+  s?: string;
+}
+
+interface CompiledMessage {
+  b?: CompiledMessageBody;
+}
+
+function hasCompiledInterpolation(value: unknown): value is CompiledMessage {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const body = (value as CompiledMessage).b;
+  return Boolean(body && body.t === 2 && Array.isArray(body.i));
+}
+
 // Process vue-i18n compiled interpolation instructions
 function processInterpolationInstructions(
   instructions: any[],
@@ -173,13 +192,8 @@ export function t(key: string, values?: Record<string, any>): string {
     }
 
     // Handle vue-i18n compiled interpolation format
-    if (
-      typeof message === "object" &&
-      message.b &&
-      message.b.t === 2 &&
-      Array.isArray(message.b.i)
-    ) {
-      return processInterpolationInstructions(message.b.i, values);
+    if (hasCompiledInterpolation(message)) {
+      return processInterpolationInstructions(message.b!.i!, values);
     }
 
     return String(message);
@@ -193,13 +207,11 @@ export function t(key: string, values?: Record<string, any>): string {
     }
 
     // Handle vue-i18n compiled interpolation format for fallback
-    if (
-      typeof fallbackMessage === "object" &&
-      fallbackMessage.b &&
-      fallbackMessage.b.t === 2 &&
-      Array.isArray(fallbackMessage.b.i)
-    ) {
-      return processInterpolationInstructions(fallbackMessage.b.i, values);
+    if (hasCompiledInterpolation(fallbackMessage)) {
+      return processInterpolationInstructions(
+        fallbackMessage.b!.i!,
+        values,
+      );
     }
 
     return String(fallbackMessage);
@@ -221,13 +233,8 @@ export const reactiveT = computed(() => {
       }
 
       // Handle vue-i18n compiled interpolation format
-      if (
-        typeof message === "object" &&
-        message.b &&
-        message.b.t === 2 &&
-        Array.isArray(message.b.i)
-      ) {
-        return processInterpolationInstructions(message.b.i, values);
+      if (hasCompiledInterpolation(message)) {
+        return processInterpolationInstructions(message.b!.i!, values);
       }
 
       return String(message);
@@ -241,13 +248,11 @@ export const reactiveT = computed(() => {
       }
 
       // Handle vue-i18n compiled interpolation format for fallback
-      if (
-        typeof fallbackMessage === "object" &&
-        fallbackMessage.b &&
-        fallbackMessage.b.t === 2 &&
-        Array.isArray(fallbackMessage.b.i)
-      ) {
-        return processInterpolationInstructions(fallbackMessage.b.i, values);
+      if (hasCompiledInterpolation(fallbackMessage)) {
+        return processInterpolationInstructions(
+          fallbackMessage.b!.i!,
+          values,
+        );
       }
 
       return String(fallbackMessage);

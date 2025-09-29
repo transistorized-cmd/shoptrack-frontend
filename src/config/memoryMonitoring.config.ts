@@ -432,7 +432,7 @@ export function isFeatureEnabled(
   feature: keyof MemoryMonitoringConfig["monitoring"],
 ): boolean {
   const config = getMemoryMonitoringConfig();
-  return config.enabled && config.monitoring[feature];
+  return Boolean(config.enabled && config.monitoring[feature]);
 }
 
 /**

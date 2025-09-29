@@ -127,16 +127,14 @@ const { t } = useTranslation();
 
 // Group results by type
 const groupedResults = computed(() => {
-  const groups: Record<string, SearchResultItem[]> = {
+  const groups: Record<'receipt' | 'item' | 'category', SearchResultItem[]> = {
     receipt: [],
     item: [],
-    category: []
+    category: [],
   };
 
-  props.results.forEach(result => {
-    if (groups[result.type]) {
-      groups[result.type].push(result);
-    }
+  props.results.forEach((result) => {
+    groups[result.type]?.push(result);
   });
 
   return groups;
@@ -154,16 +152,13 @@ function handleSelect(result: SearchResultItem) {
 }
 
 function getGroupTitle(type: 'receipt' | 'item' | 'category'): string {
-  switch (type) {
-    case 'receipt':
-      return t('search.groups.receipts', 'Receipts');
-    case 'item':
-      return t('search.groups.items', 'Items');
-    case 'category':
-      return t('search.groups.categories', 'Categories');
-    default:
-      return type.charAt(0).toUpperCase() + type.slice(1);
-  }
+  const titles: Record<'receipt' | 'item' | 'category', string> = {
+    receipt: t('search.groups.receipts', 'Receipts'),
+    item: t('search.groups.items', 'Items'),
+    category: t('search.groups.categories', 'Categories'),
+  };
+
+  return titles[type];
 }
 
 function getTypeLabel(type: 'receipt' | 'item' | 'category'): string {

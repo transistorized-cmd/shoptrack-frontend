@@ -79,6 +79,16 @@ export const asyncJobsService = {
         headers["X-Session-Id"] = options.sessionId;
       }
 
+      try {
+        const csrfToken = await csrfManager.getToken();
+        if (csrfToken) {
+          headers["X-CSRF-TOKEN"] = csrfToken;
+        }
+      } catch (error) {
+        console.error("Failed to acquire CSRF token for async upload:", error);
+        throw error;
+      }
+
       // Use standard upload timeout for async endpoint
       const response = await apiWithTimeout.standardUpload.post(
         "/upload/async",

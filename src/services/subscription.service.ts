@@ -5,15 +5,47 @@ import type {
   CreateUserSubscriptionRequest,
   FeatureUsage,
   SubscriptionStatus,
+  PlanFeature,
 } from "@/types/subscription";
 
 class SubscriptionService {
+  private sortFeatures(features: PlanFeature[] = []): PlanFeature[] {
+    return [...features].sort((a, b) => {
+      if (a.sortOrder !== b.sortOrder) {
+        return a.sortOrder - b.sortOrder;
+      }
+      return a.featureName.localeCompare(b.featureName);
+    });
+  }
+
+  private normalizePlan(plan: SubscriptionPlan): SubscriptionPlan {
+    return {
+      ...plan,
+      features: this.sortFeatures(plan.features)
+    };
+  }
+
+  private normalizeSubscription(subscription: UserSubscription | null): UserSubscription | null {
+    if (!subscription) {
+      return null;
+    }
+
+    if (subscription.plan) {
+      return {
+        ...subscription,
+        plan: this.normalizePlan(subscription.plan)
+      };
+    }
+
+    return subscription;
+  }
+
   /**
    * Get all available subscription plans
    */
   async getAvailablePlans(): Promise<SubscriptionPlan[]> {
     const response = await api.get("/subscriptions/plans");
-    return response.data;
+    return (response.data as SubscriptionPlan[]).map((plan) => this.normalizePlan(plan));
   }
 
   /**
@@ -21,7 +53,7 @@ class SubscriptionService {
    */
   async getPlanById(planId: number): Promise<SubscriptionPlan> {
     const response = await api.get(`/subscriptions/plans/${planId}`);
-    return response.data;
+    return this.normalizePlan(response.data as SubscriptionPlan);
   }
 
   /**
@@ -29,7 +61,7 @@ class SubscriptionService {
    */
   async getPlanByCode(planCode: string): Promise<SubscriptionPlan> {
     const response = await api.get(`/subscriptions/plans/by-code/${planCode}`);
-    return response.data;
+    return this.normalizePlan(response.data as SubscriptionPlan);
   }
 
   /**
@@ -38,7 +70,7 @@ class SubscriptionService {
   async getMySubscription(): Promise<UserSubscription | null> {
     try {
       const response = await api.get("/subscriptions/my-subscription");
-      return response.data;
+      return this.normalizeSubscription(response.data as UserSubscription);
     } catch (error: any) {
       if (error.response?.status === 404) {
         return null;
@@ -57,7 +89,7 @@ class SubscriptionService {
       "/subscriptions/subscribe",
       subscriptionRequest,
     );
-    return response.data;
+    return this.normalizeSubscription(response.data as UserSubscription)!;
   }
 
   /**
@@ -127,7 +159,7 @@ class SubscriptionService {
       newPlanId,
       billingInterval,
     });
-    return response.data;
+    return this.normalizeSubscription(response.data as UserSubscription)!;
   }
 }
 

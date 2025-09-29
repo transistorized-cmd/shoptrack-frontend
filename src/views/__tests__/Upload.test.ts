@@ -42,6 +42,15 @@ vi.mock("@/services/plugins", () => ({
   },
 }));
 
+vi.mock("@/services/featureService", () => ({
+  featureService: {
+    checkReceiptUploadLimit: vi.fn(),
+    checkFeatureLimit: vi.fn(),
+    getFeatureMessages: vi.fn(),
+    getFeatureMessage: vi.fn(),
+  },
+}));
+
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
     t: vi.fn((key: string) => key),
@@ -132,6 +141,7 @@ describe("Upload View", () => {
     const pluginsModule = await import("@/services/plugins");
     const validationModule = await import("@/utils/fileValidation");
     const pluginI18nModule = await import("@/i18n/plugins");
+    const featureModule = await import("@/services/featureService");
 
     mockPluginsService = vi.mocked(pluginsModule.pluginsService);
     mockValidateFile = vi.mocked(validationModule.validateFile);
@@ -163,6 +173,16 @@ describe("Upload View", () => {
 
     mockPluginsStore.fetchAllPlugins.mockResolvedValue([]);
     mockPluginsStore.availableReceiptPlugins = [];
+
+    // Mock featureService
+    const mockFeatureService = vi.mocked(featureModule.featureService);
+    mockFeatureService.checkReceiptUploadLimit.mockResolvedValue({
+      canUse: true,
+      isLimitReached: false,
+      usage: 0,
+      limit: 10,
+      remaining: 10,
+    });
   });
 
   afterEach(() => {

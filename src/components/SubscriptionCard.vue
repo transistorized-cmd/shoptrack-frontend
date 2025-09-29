@@ -68,12 +68,12 @@
 
           <!-- Plan Actions -->
           <div class="ml-6 flex flex-col space-y-2">
-            <router-link
-              to="/subscription"
-              class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-center"
+            <button
+              @click="showSubscriptionModal = true"
+              class="px-4 py-2 bg-shoptrack-600 hover:bg-shoptrack-700 dark:bg-shoptrack-700 dark:hover:bg-shoptrack-800 text-white text-sm font-medium rounded-lg focus:ring-2 focus:ring-shoptrack-500 focus:ring-offset-2 dark:ring-offset-gray-800 transition-colors"
             >
               {{ $t('subscription.viewPlans', 'View Plans') }}
-            </router-link>
+            </button>
             
             <button
               v-if="currentSubscription && currentSubscription.status === 'active'"
@@ -86,87 +86,77 @@
         </div>
       </div>
 
-      <!-- Feature Usage -->
-      <div v-if="currentSubscription?.plan?.features?.length" class="mb-6">
+      <!-- All Features (sorted by sortOrder) -->
+      <div v-if="allFeaturesSorted.length" class="mb-6">
         <h5 class="text-sm font-medium text-gray-900 dark:text-white mb-4 uppercase tracking-wide">
-          {{ $t('subscription.featureUsage', 'Feature Usage') }}
+          {{ $t('subscription.features', 'Features') }}
         </h5>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <div class="space-y-3">
           <div
-            v-for="feature in limitedFeatures"
+            v-for="feature in allFeaturesSorted"
             :key="feature.id"
-            class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4"
           >
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-gray-900 dark:text-white">
+            <!-- Limit Feature -->
+            <div v-if="feature.featureType === 'limit'" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-900 dark:text-white">
+                  {{ feature.featureName }}
+                </span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ featureUsage[feature.featureCode]?.usage || 0 }} / {{ feature.limitValue || '∞' }}
+                </span>
+              </div>
+
+              <!-- Usage Bar -->
+              <div v-if="feature.limitValue" class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                <div
+                  class="h-2 rounded-full transition-all duration-300"
+                  :class="getUsageBarClass(featureUsage[feature.featureCode]?.usage || 0, feature.limitValue)"
+                  :style="{ width: `${Math.min(((featureUsage[feature.featureCode]?.usage || 0) / feature.limitValue) * 100, 100)}%` }"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Boolean / Access Feature -->
+            <div v-else-if="isBooleanFeature(feature)" class="flex items-center bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+              <svg
+                v-if="isFeatureEnabled(feature)"
+                class="flex-shrink-0 h-5 w-5 text-green-500 mr-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <svg
+                v-else
+                class="flex-shrink-0 h-5 w-5 text-gray-400 mr-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <span
+                class="text-sm"
+                :class="isFeatureEnabled(feature) ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'"
+              >
                 {{ feature.featureName }}
               </span>
-              <span class="text-xs text-gray-500 dark:text-gray-400">
-                {{ featureUsage[feature.featureCode]?.usage || 0 }} / {{ feature.limitValue || '∞' }}
-              </span>
             </div>
-            
-            <!-- Usage Bar -->
-            <div v-if="feature.limitValue" class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-              <div 
-                class="h-2 rounded-full transition-all duration-300"
-                :class="getUsageBarClass(featureUsage[feature.featureCode]?.usage || 0, feature.limitValue)"
-                :style="{ width: `${Math.min(((featureUsage[feature.featureCode]?.usage || 0) / feature.limitValue) * 100, 100)}%` }"
-              ></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Boolean Features -->
-      <div v-if="booleanFeatures.length" class="mb-6">
-        <h5 class="text-sm font-medium text-gray-900 dark:text-white mb-4 uppercase tracking-wide">
-          {{ $t('subscription.includedFeatures', 'Included Features') }}
-        </h5>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div
-            v-for="feature in booleanFeatures"
-            :key="feature.id"
-            class="flex items-center"
-          >
-            <svg 
-              v-if="feature.booleanValue"
-              class="flex-shrink-0 h-5 w-5 text-green-500 mr-3"
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <svg 
-              v-else
-              class="flex-shrink-0 h-5 w-5 text-gray-400 mr-3"
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span 
-              class="text-sm"
-              :class="feature.booleanValue ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'"
-            >
-              {{ feature.featureName }}
-            </span>
           </div>
         </div>
       </div>
 
       <!-- Subscription History Link -->
       <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
-        <router-link
-          to="/subscription"
-          class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+        <button
+          @click="showSubscriptionModal = true"
+          class="text-sm text-shoptrack-600 dark:text-shoptrack-400 hover:text-shoptrack-800 dark:hover:text-shoptrack-300 font-medium"
         >
           {{ $t('subscription.manageSubscription', 'Manage subscription and view billing history') }} →
-        </router-link>
+        </button>
       </div>
     </div>
 
@@ -201,17 +191,27 @@
         </div>
       </div>
     </div>
+
+    <!-- Subscription Modal -->
+    <SubscriptionModal
+      :is-open="showSubscriptionModal"
+      @close="showSubscriptionModal = false"
+      @subscribed="handleSubscriptionUpdate"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import { useDateLocalization } from '@/composables/useDateLocalization';
 import { subscriptionService } from '@/services/subscription.service';
 import { getStatusBadgeClass, getUsageBarClass } from '@/utils/uiHelpers';
-import type { UserSubscription, FeatureUsage } from '@/types/subscription';
+import SubscriptionModal from './SubscriptionModal.vue';
+import type { UserSubscription, FeatureUsage, PlanFeature } from '@/types/subscription';
 
 const { t } = useTranslation();
+const { formatDate: formatDateSafe } = useDateLocalization();
 
 // Reactive state
 const currentSubscription = ref<UserSubscription | null>(null);
@@ -219,20 +219,42 @@ const featureUsage = ref<Record<string, FeatureUsage>>({});
 const loading = ref(true);
 const error = ref<string | null>(null);
 const showCancelDialog = ref(false);
+const showSubscriptionModal = ref(false);
 const cancelling = ref(false);
 
 // Computed properties
-const limitedFeatures = computed(() => {
-  return currentSubscription.value?.plan?.features?.filter(f => f.featureType === 'limit' && f.limitValue) || [];
+const allFeaturesSorted = computed(() => {
+  return (
+    currentSubscription.value?.plan?.features?.slice().sort((a, b) => {
+      const orderA = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
+      const orderB = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
+      return orderA - orderB;
+    }) ?? []
+  );
 });
 
-const booleanFeatures = computed(() => {
-  return currentSubscription.value?.plan?.features?.filter(f => f.featureType === 'boolean') || [];
-});
+const isBooleanFeature = (feature: PlanFeature) =>
+  feature.featureType === 'boolean' || feature.featureType === 'access';
+
+const isFeatureEnabled = (feature: PlanFeature) => {
+  if (!feature.isActive) {
+    return false;
+  }
+
+  if (feature.featureType === 'boolean' || feature.featureType === 'access') {
+    return feature.booleanValue !== false;
+  }
+
+  if (feature.featureType === 'limit') {
+    return feature.limitValue != null && feature.limitValue > 0;
+  }
+
+  return feature.booleanValue === true;
+};
 
 // Methods
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString();
+  return formatDateSafe(dateString);
 };
 
 const loadSubscriptionData = async () => {
@@ -241,11 +263,42 @@ const loadSubscriptionData = async () => {
     error.value = null;
 
     const subscription = await subscriptionService.getMySubscription();
-    currentSubscription.value = subscription;
+
+    if (subscription) {
+      // User has an active subscription
+      currentSubscription.value = subscription;
+    } else {
+      // No active subscription - load Free plan as fallback
+      console.info('No active subscription found, loading Free plan as fallback');
+      try {
+        const freePlan = await subscriptionService.getPlanByCode('free');
+        currentSubscription.value = {
+          id: 0, // Use 0 for free plan
+          userId: 0, // Use 0 for free plan
+          subscriptionPlanId: freePlan.id,
+          planCode: freePlan.code,
+          status: 'active' as const, // Free plan is considered active
+          billingInterval: 'monthly' as const,
+          amount: 0,
+          currency: freePlan.currency,
+          startDate: new Date().toISOString(),
+          endDate: undefined,
+          isActive: true,
+          userEmail: '',
+          userName: '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          plan: freePlan
+        };
+      } catch (freePlanErr) {
+        console.error('Failed to load Free plan fallback:', freePlanErr);
+        throw freePlanErr; // Re-throw to be handled by main catch block
+      }
+    }
 
     // Load feature usage for limited features
-    if (subscription?.plan?.features) {
-      const usagePromises = subscription.plan.features
+    if (currentSubscription.value?.plan?.features) {
+      const usagePromises = currentSubscription.value.plan.features
         .filter(f => f.featureType === 'limit')
         .map(async (feature) => {
           try {
@@ -276,7 +329,7 @@ const cancelSubscription = async () => {
   try {
     cancelling.value = true;
     const result = await subscriptionService.cancelSubscription('User requested cancellation from profile page');
-    
+
     if (result.success) {
       showCancelDialog.value = false;
       await loadSubscriptionData(); // Reload to show updated status
@@ -289,6 +342,11 @@ const cancelSubscription = async () => {
   } finally {
     cancelling.value = false;
   }
+};
+
+const handleSubscriptionUpdate = async () => {
+  showSubscriptionModal.value = false;
+  await loadSubscriptionData(); // Refresh subscription data
 };
 
 // Lifecycle

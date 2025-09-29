@@ -24,7 +24,8 @@
     "tryAgain": "Intentar de nuevo",
     "uploadAnother": "Subir otro",
     "hello": "Hola, {name}",
-    "or": "O"
+    "or": "O",
+    "dismiss": "Descartar"
   },
   "navigation": {
     "dashboard": "Panel",
@@ -300,6 +301,7 @@
     "generatingPlugin": "Generando {plugin}...",
     "noPluginsAvailable": "No hay plugins de informes disponibles",
     "pluginsWillAppearWhenEnabled": "Los plugins de informes aparecerán aquí cuando estén habilitados",
+    "upgradeRequired": "Actualización Requerida",
     "exportFormats": {
       "csv": "CSV",
       "pdf": "PDF",

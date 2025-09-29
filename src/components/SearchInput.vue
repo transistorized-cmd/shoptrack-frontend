@@ -57,6 +57,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import { useDateLocalization } from '@/composables/useDateLocalization';
 import { getCurrentLocale } from '@/utils/i18nUtils';
 import { useRouter } from 'vue-router';
 import { searchService } from '@/services/search.service';
@@ -76,6 +77,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useTranslation();
+const { formatDate: formatDateSafe } = useDateLocalization();
 const router = useRouter();
 
 // Default configuration
@@ -172,17 +174,11 @@ function transformSearchResponse(response: SearchResponse): SearchResultItem[] {
 
 function formatDate(dateString: string | null): string {
   if (!dateString) return 'No Date';
-
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString(getCurrentLocale(), {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  } catch {
-    return 'Invalid Date';
-  }
+  return formatDateSafe(dateString, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
 }
 
 // Event handlers

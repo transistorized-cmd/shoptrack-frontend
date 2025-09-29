@@ -108,10 +108,10 @@ export default defineConfig(({ mode }) => {
       __DEV__: !isProd,
     },
     build: {
-      // Production optimizations - temporarily disable minification for debugging
-      minify: false,
-      cssMinify: true,
-      sourcemap: true,
+      // Production optimizations
+      minify: isProd ? 'terser' : false,
+      cssMinify: isProd,
+      sourcemap: !isProd,
       terserOptions: {
         compress: {
           drop_console: false,

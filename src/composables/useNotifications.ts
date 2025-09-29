@@ -11,6 +11,7 @@ export interface Notification {
 }
 
 const notifications = ref<Notification[]>([]);
+const MAX_NOTIFICATIONS = 5;
 
 let notificationId = 0;
 
@@ -31,10 +32,16 @@ export const useNotifications = () => {
       title,
       message,
       duration: options?.duration ?? TIMEOUT.NOTIFICATION_DEFAULT,
-      persistent: options?.persistent ?? true,
+      persistent: options?.persistent ?? false,
     };
 
     notifications.value.push(notification);
+
+    // If we exceed max notifications, remove the oldest one
+    if (notifications.value.length > MAX_NOTIFICATIONS) {
+      const oldestNotification = notifications.value[0];
+      removeNotification(oldestNotification.id);
+    }
 
     // Auto-remove after duration unless persistent
     if (

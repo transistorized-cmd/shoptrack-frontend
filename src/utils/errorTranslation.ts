@@ -38,21 +38,30 @@ const ERROR_MESSAGE_MAP: Record<string, string> = {
 export function translateError(error: AuthError | string): string {
   const message = typeof error === "string" ? error : error.message;
 
-  // Check for exact matches first
-  const translationKey = ERROR_MESSAGE_MAP[message];
-  if (translationKey) {
-    return i18n.global.t(translationKey);
-  }
-
-  // Check for partial matches (case-insensitive)
-  const lowerMessage = message.toLowerCase();
-  for (const [pattern, key] of Object.entries(ERROR_MESSAGE_MAP)) {
-    if (lowerMessage.includes(pattern.toLowerCase())) {
-      return i18n.global.t(key);
+  try {
+    // Check for exact matches first
+    const translationKey = ERROR_MESSAGE_MAP[message];
+    if (translationKey) {
+      if (i18n?.global?.t) {
+        return i18n.global.t(translationKey);
+      }
     }
+
+    // Check for partial matches (case-insensitive)
+    const lowerMessage = message.toLowerCase();
+    for (const [pattern, key] of Object.entries(ERROR_MESSAGE_MAP)) {
+      if (lowerMessage.includes(pattern.toLowerCase())) {
+        if (i18n?.global?.t) {
+          return i18n.global.t(key);
+        }
+      }
+    }
+  } catch (translationError) {
+    console.warn('Error during translation:', translationError);
+    // Fall through to return original message
   }
 
-  // If no match found, return the original message
+  // If no match found or translation failed, return the original message
   // This ensures we don't break existing functionality for new/unknown errors
   return message;
 }
@@ -71,15 +80,29 @@ export function translateValidationError(
   const validationKey = `validation.${errorType}`;
 
   try {
-    return i18n.global.t(validationKey);
+    if (i18n?.global?.t) {
+      return i18n.global.t(validationKey);
+    }
   } catch {
     // If translation key doesn't exist, try field-specific error
     const fieldSpecificKey = `validation.${fieldName}${errorType.charAt(0).toUpperCase() + errorType.slice(1)}`;
     try {
-      return i18n.global.t(fieldSpecificKey);
+      if (i18n?.global?.t) {
+        return i18n.global.t(fieldSpecificKey);
+      }
     } catch {
       // Fallback to generic required message
-      return i18n.global.t("validation.required");
+      try {
+        if (i18n?.global?.t) {
+          return i18n.global.t("validation.required");
+        }
+      } catch {
+        // Ultimate fallback
+        return `${fieldName} is ${errorType}`;
+      }
     }
   }
+
+  // If i18n is not available, return a fallback message
+  return `${fieldName} is ${errorType}`;
 }

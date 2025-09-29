@@ -130,8 +130,21 @@ export interface TwoFactorSetupResponse {
   recoveryCodes: string[];
 }
 
-// WebAuthn / Passkey types
-export interface PublicKeyCredentialCreationOptions {
+// WebAuthn / Passkey server response types
+export type WebAuthnTransport =
+  | "usb"
+  | "nfc"
+  | "ble"
+  | "internal"
+  | "hybrid";
+
+export interface PasskeyCredentialDescriptor {
+  type: "public-key";
+  id: string;
+  transports?: WebAuthnTransport[];
+}
+
+export interface PasskeyCreationOptionsResponse {
   challenge: string;
   rp: {
     name: string;
@@ -142,48 +155,27 @@ export interface PublicKeyCredentialCreationOptions {
     name: string;
     displayName: string;
   };
-  pubKeyCredParams: PublicKeyCredentialParameters[];
-  authenticatorSelection?: AuthenticatorSelectionCriteria;
+  pubKeyCredParams: Array<{
+    type: "public-key";
+    alg: number;
+  }>;
+  authenticatorSelection?: {
+    authenticatorAttachment?: "platform" | "cross-platform";
+    requireResidentKey?: boolean;
+    residentKey?: "discouraged" | "preferred" | "required";
+    userVerification?: "required" | "preferred" | "discouraged";
+  };
   timeout?: number;
-  excludeCredentials?: PublicKeyCredentialDescriptor[];
+  excludeCredentials?: PasskeyCredentialDescriptor[];
 }
 
-export interface PublicKeyCredentialRequestOptions {
+export interface PasskeyRequestOptionsResponse {
   challenge: string;
   timeout?: number;
   rpId?: string;
-  allowCredentials?: PublicKeyCredentialDescriptor[];
-  userVerification?: UserVerificationRequirement;
+  allowCredentials?: PasskeyCredentialDescriptor[];
+  userVerification?: "required" | "preferred" | "discouraged";
 }
-
-export interface PublicKeyCredentialParameters {
-  type: "public-key";
-  alg: number;
-}
-
-export interface PublicKeyCredentialDescriptor {
-  type: "public-key";
-  id: string;
-  transports?: AuthenticatorTransport[];
-}
-
-export interface AuthenticatorSelectionCriteria {
-  authenticatorAttachment?: "platform" | "cross-platform";
-  requireResidentKey?: boolean;
-  residentKey?: "discouraged" | "preferred" | "required";
-  userVerification?: UserVerificationRequirement;
-}
-
-export type UserVerificationRequirement =
-  | "required"
-  | "preferred"
-  | "discouraged";
-export type AuthenticatorTransport =
-  | "usb"
-  | "nfc"
-  | "ble"
-  | "internal"
-  | "hybrid";
 
 // Session and token types
 export interface AuthTokens {

@@ -3,35 +3,67 @@
     <!-- Header -->
     <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:items-center sm:justify-between">
       <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{{ $t('receipts.title') }}</h1>
-      <RouterLink to="/upload" class="btn btn-primary w-full sm:w-auto text-center">
-        {{ $t('receipts.uploadReceipt') }}
-      </RouterLink>
+      <div class="relative">
+        <RouterLink
+          v-if="!receiptLimitReached"
+          to="/upload"
+          class="btn btn-primary w-full sm:w-auto text-center"
+        >
+          {{ $t('receipts.uploadReceipt') }}
+        </RouterLink>
+        <button
+          v-else
+          :disabled="true"
+          class="btn btn-primary opacity-50 cursor-not-allowed w-full sm:w-auto"
+          @click="openSubscriptionModal"
+        >
+          {{ $t('receipts.uploadReceipt') }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Upgrade Prompt for Receipt Limit -->
+    <div
+      v-if="receiptLimitReached && upgradeMessage"
+      class="card border-l-4 border-amber-400 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-6"
+    >
+      <div class="flex items-start space-x-4">
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-amber-600 dark:text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-amber-800 dark:text-amber-200 mb-2">
+            {{ upgradeMessage.title }}
+          </h3>
+          <p class="text-amber-700 dark:text-amber-300 mb-4">
+            {{ upgradeMessage.message }}
+          </p>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button
+              @click="openSubscriptionModal"
+              class="btn bg-amber-600 hover:bg-amber-700 text-white border-amber-600 hover:border-amber-700 w-full sm:w-auto"
+            >
+              {{ upgradeMessage.actionText || $t('receipts.upgrade') }}
+            </button>
+            <button
+              @click="receiptLimitReached = false"
+              class="btn btn-secondary w-full sm:w-auto"
+            >
+              {{ $t('common.dismiss') }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Filters -->
     <div class="card p-4 sm:p-6">
       <h2 class="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-4 sm:hidden">{{ $t('receipts.filters.title') }}</h2>
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <label
-            for="status"
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >{{ $t('receipts.filters.status') }}</label
-          >
-          <select
-            id="status"
-            v-model="filters.processingStatus"
-            class="input w-full"
-            @change="fetchReceipts"
-          >
-            <option value="">{{ $t('receipts.filters.allStatuses') }}</option>
-            <option value="pending">{{ $t('receipts.status.pending') }}</option>
-            <option value="processing">{{ $t('receipts.status.processing') }}</option>
-            <option value="completed">{{ $t('receipts.status.completed') }}</option>
-            <option value="failed">{{ $t('receipts.status.failed') }}</option>
-          </select>
-        </div>
-
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div>
           <label
             for="startDate"
@@ -42,6 +74,7 @@
             id="startDate"
             v-model="filters.startDate"
             class="input w-full"
+            :min-date="minAllowedDate"
             @change="fetchReceipts"
           />
         </div>
@@ -56,6 +89,7 @@
             id="endDate"
             v-model="filters.endDate"
             class="input w-full"
+            :min-date="minAllowedDate"
             @change="fetchReceipts"
           />
         </div>
@@ -173,27 +207,50 @@
         </div>
       </div>
     </div>
+
+    <!-- Subscription Modal -->
+    <SubscriptionModal
+      :is-open="showSubscriptionModal"
+      @close="closeSubscriptionModal"
+      @subscribed="handleSubscribed"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { RouterLink } from "vue-router";
 import { useTranslation } from "@/composables/useTranslation";
 import { TIMEOUT } from "@/constants/app";
 import { useReceiptsStore } from "@/stores/receipts";
 import ReceiptCard from "@/components/receipts/ReceiptCard.vue";
 import LocalizedDateInput from "@/components/common/LocalizedDateInput.vue";
+import SubscriptionModal from "@/components/SubscriptionModal.vue";
 import { useDebounceFn } from "@vueuse/core";
+import { featureService, type FeatureMessage } from "@/services/featureService";
 
-const { t } = useTranslation();
+const { t, locale } = useTranslation();
 const receiptsStore = useReceiptsStore();
 
 const filters = ref({
-  processingStatus: "",
   startDate: "",
   endDate: "",
   search: "",
+});
+
+const receiptLimitReached = ref(false);
+const upgradeMessage = ref<FeatureMessage | null>(null);
+const checkingLimit = ref(false);
+const showSubscriptionModal = ref(false);
+
+// Date constraints for user's membership limits
+const historyDaysLimit = ref<number | null>(null);
+const minAllowedDate = computed(() => {
+  if (!historyDaysLimit.value) return undefined;
+  const today = new Date();
+  const minDate = new Date(today);
+  minDate.setDate(today.getDate() - historyDaysLimit.value);
+  return minDate.toISOString().split('T')[0];
 });
 
 const fetchReceipts = async () => {
@@ -206,6 +263,8 @@ const fetchReceipts = async () => {
   };
 
   await receiptsStore.fetchReceipts(query);
+  // Check receipt limit after fetching receipts to show/hide upgrade prompt
+  await checkReceiptLimit();
 };
 
 const debouncedSearch = useDebounceFn(fetchReceipts, TIMEOUT.DEBOUNCE_SEARCH);
@@ -228,13 +287,85 @@ const handleDelete = async (receiptId: number) => {
   if (confirm(t('receipts.deleteConfirm'))) {
     try {
       await receiptsStore.deleteReceipt(receiptId);
+      // Re-check limits after deletion
+      await checkReceiptLimit();
     } catch (error) {
       console.error("Failed to delete receipt:", error);
     }
   }
 };
 
-onMounted(() => {
-  fetchReceipts();
+const fetchUpgradeMessage = async () => {
+  try {
+    upgradeMessage.value = await featureService.getFeatureMessage(
+      'receipt_monthly_limit',
+      'upgrade_prompt',
+      locale.value // Pass current locale to get localized message
+    );
+  } catch (error) {
+    console.error("Failed to get upgrade message:", error);
+    upgradeMessage.value = null;
+  }
+};
+
+const checkReceiptLimit = async () => {
+  if (checkingLimit.value) return;
+
+  checkingLimit.value = true;
+  try {
+    const limitResult = await featureService.checkReceiptUploadLimit();
+
+    // Show upgrade prompt if limit is reached or exceeded
+    receiptLimitReached.value = limitResult.isLimitReached;
+
+    if (limitResult.isLimitReached) {
+      await fetchUpgradeMessage();
+    } else {
+      upgradeMessage.value = null;
+    }
+  } catch (error) {
+    console.error("Failed to check receipt limit:", error);
+  } finally {
+    checkingLimit.value = false;
+  }
+};
+
+const fetchHistoryLimit = async () => {
+  try {
+    const limitResult = await featureService.checkFeatureLimit('history_days_limit');
+    historyDaysLimit.value = limitResult.limit || null;
+  } catch (error) {
+    console.error("Failed to get history days limit:", error);
+    // Default to 30 days for free users if we can't fetch the limit
+    historyDaysLimit.value = 30;
+  }
+};
+
+const openSubscriptionModal = () => {
+  showSubscriptionModal.value = true;
+};
+
+const closeSubscriptionModal = () => {
+  showSubscriptionModal.value = false;
+};
+
+const handleSubscribed = () => {
+  showSubscriptionModal.value = false;
+  // Re-check limits after subscription
+  checkReceiptLimit();
+};
+
+// Watch for locale changes and refetch upgrade message if limit is reached
+watch(locale, async (newLocale) => {
+  if (receiptLimitReached.value) {
+    await fetchUpgradeMessage();
+  }
+});
+
+onMounted(async () => {
+  await Promise.all([
+    fetchReceipts(),
+    fetchHistoryLimit()
+  ]);
 });
 </script>

@@ -15,19 +15,27 @@ export type LocaleCode = (typeof availableLocales)[number]["code"];
 
 // Get default locale from localStorage or browser preference
 function getDefaultLocale(): LocaleCode {
-  // First check localStorage
-  const storedLocale = localStorage.getItem("shoptrack-locale");
-  if (
-    storedLocale &&
-    availableLocales.some((locale) => locale.code === storedLocale)
-  ) {
-    return storedLocale as LocaleCode;
-  }
+  try {
+    // First check localStorage (if available)
+    if (typeof localStorage !== 'undefined') {
+      const storedLocale = localStorage.getItem("shoptrack-locale");
+      if (
+        storedLocale &&
+        availableLocales.some((locale) => locale.code === storedLocale)
+      ) {
+        return storedLocale as LocaleCode;
+      }
+    }
 
-  // Then check browser language
-  const browserLocale = navigator.language.split("-")[0];
-  if (availableLocales.some((locale) => locale.code === browserLocale)) {
-    return browserLocale as LocaleCode;
+    // Then check browser language (if available)
+    if (typeof navigator !== 'undefined' && navigator.language) {
+      const browserLocale = navigator.language.split("-")[0];
+      if (availableLocales.some((locale) => locale.code === browserLocale)) {
+        return browserLocale as LocaleCode;
+      }
+    }
+  } catch (error) {
+    console.warn('Error detecting locale:', error);
   }
 
   // Default to English
@@ -60,8 +68,10 @@ const i18n = createI18n({
   datetimeFormats: {}, // No datetime formats to avoid runtime compilation
   numberFormats: {}, // No number formats to avoid runtime compilation
   // Production safety: ensure messages are pre-compiled strings only
-  messageResolver: import.meta.env.PROD ? undefined : undefined, // No custom resolver in production
-  postTranslation: import.meta.env.PROD ? undefined : undefined, // No post-processing in production
+  ...(import.meta.env.PROD ? {} : {
+    messageResolver: undefined,
+    postTranslation: undefined,
+  }),
 } as I18nOptions);
 
 // Helper function to map locale codes to browser-compatible language tags
@@ -84,11 +94,16 @@ export default i18n;
 // Helper function to change locale
 export function setLocale(locale: LocaleCode) {
   // Use proper typing for locale assignment
-  if (i18n.global.locale && "value" in i18n.global.locale) {
-    (i18n.global.locale as any).value = locale;
-  } else {
-    // Fallback for different vue-i18n versions
-    i18n.global.locale = locale as any;
+  const composerLocale = i18n.global.locale as unknown;
+
+  if (typeof composerLocale === "string") {
+    (i18n.global as any).locale = locale;
+  } else if (
+    composerLocale &&
+    typeof composerLocale === "object" &&
+    "value" in composerLocale
+  ) {
+    (composerLocale as { value: string }).value = locale;
   }
 
   // Persist locale choice
@@ -105,12 +120,21 @@ export function setLocale(locale: LocaleCode) {
 // Helper function to get current locale
 export function getCurrentLocale(): LocaleCode {
   // Use proper typing for locale access
-  if (i18n.global.locale && "value" in i18n.global.locale) {
-    return (i18n.global.locale as any).value as LocaleCode;
-  } else {
-    // Fallback for different vue-i18n versions
-    return i18n.global.locale as LocaleCode;
+  const composerLocale = i18n.global.locale as unknown;
+
+  if (typeof composerLocale === "string") {
+    return composerLocale as LocaleCode;
   }
+
+  if (
+    composerLocale &&
+    typeof composerLocale === "object" &&
+    "value" in composerLocale
+  ) {
+    return (composerLocale as { value: string }).value as LocaleCode;
+  }
+
+  return "en";
 }
 
 // Helper function to get locale display name

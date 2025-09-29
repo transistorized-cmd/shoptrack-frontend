@@ -258,6 +258,9 @@ const showDebugInfo = ref(false);
 const imageUrl = ref<string | null>(null);
 const locale = ref(getCurrentLocale());
 
+const closeModal = () => {
+  emit('close');
+};
 
 
 const handleImageError = () => {

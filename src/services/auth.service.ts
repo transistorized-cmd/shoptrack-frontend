@@ -12,8 +12,8 @@ import type {
   User,
   PasskeyLoginRequest,
   PasskeyRegistrationRequest,
-  PublicKeyCredentialCreationOptions,
-  PublicKeyCredentialRequestOptions,
+  PasskeyCreationOptionsResponse,
+  PasskeyRequestOptionsResponse,
   TwoFactorRequest,
   TwoFactorSetupResponse,
   UserSession,
@@ -135,7 +135,7 @@ class AuthService {
   }
 
   // Passkey / WebAuthn support
-  async getPasskeyCreationOptions(): Promise<PublicKeyCredentialCreationOptions> {
+  async getPasskeyCreationOptions(): Promise<PasskeyCreationOptionsResponse> {
     const response = await api.get("/passkey/creation-options");
     return response.data;
   }
@@ -147,7 +147,7 @@ class AuthService {
     return response.data;
   }
 
-  async getPasskeyRequestOptions(): Promise<PublicKeyCredentialRequestOptions> {
+  async getPasskeyRequestOptions(): Promise<PasskeyRequestOptionsResponse> {
     const response = await api.get("/passkey/assertion-options");
     return response.data;
   }

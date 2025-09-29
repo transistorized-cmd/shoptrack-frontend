@@ -152,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import ThemeToggle from '@/components/ThemeToggle.vue';
@@ -165,6 +165,10 @@ const loading = ref(false);
 const emailSent = ref(false);
 
 const error = computed(() => authStore.error?.message || null);
+
+onMounted(() => {
+  authStore.clearError();
+});
 
 async function handleSubmit() {
   if (!email.value) return;

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { csrfManager } from "@/composables/useCsrfToken";
 
 // Timeout configurations for different operation types - reduced to under 10s
 export const TIMEOUT_CONFIG = Object.freeze({
@@ -77,15 +78,30 @@ const api = axios.create({
   withCredentials: true, // Send cookies with all requests for authentication
 });
 
-// Request interceptor - Add common security headers
+// Request interceptor - Add common security headers and CSRF tokens
 api.interceptors.request.use(
   async (config) => {
     try {
       // Add common security headers
       config.headers["X-Requested-With"] = "XMLHttpRequest";
 
-      // Note: No longer adding CSRF tokens since we're using pure ASP.NET Core Identity cookie authentication
-      // The backend now relies on built-in anti-forgery protection
+      // Add CSRF token for state-changing operations
+      const method = config.method?.toUpperCase();
+      if (method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+        try {
+          console.log(`[API Interceptor] Attempting to get CSRF token for ${method} ${config.url}`);
+          const csrfToken = await csrfManager.getToken();
+          if (csrfToken) {
+            console.log('[API Interceptor] CSRF token obtained successfully:', csrfToken.substring(0, 20) + '...');
+            config.headers['X-CSRF-TOKEN'] = csrfToken;
+          } else {
+            console.error('[API Interceptor] CSRF token is empty!');
+          }
+        } catch (error) {
+          console.error('[API Interceptor] Failed to get CSRF token:', error);
+          // Don't block the request, let the server handle missing CSRF token
+        }
+      }
     } catch (error) {
       console.error("Failed to configure request headers:", error);
     }

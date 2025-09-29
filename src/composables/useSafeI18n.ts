@@ -8,10 +8,10 @@ import { computed, type ComputedRef } from "vue";
 import { useI18n } from "vue-i18n";
 import type { LocaleCode } from "@/i18n";
 
+type TranslationParams = Record<string, unknown> | unknown[];
+
 interface SafeTranslationFunction {
-  (key: string, named?: Record<string, unknown>): string;
-  (key: string, list?: unknown[]): string;
-  (key: string, namedOrList?: Record<string, unknown> | unknown[]): string;
+  (key: string, params?: TranslationParams | string): string;
 }
 
 interface SafeI18nReturn {
@@ -28,32 +28,31 @@ interface SafeI18nReturn {
  * and no eval() or runtime compilation occurs.
  */
 export function useSafeI18n(): SafeI18nReturn {
-  const { t: originalT, locale, availableLocales } = useI18n();
+  const i18n = useI18n();
+  const localeRef = i18n.locale;
+  const availableLocalesRef = i18n.availableLocales;
 
   /**
    * Safe translation function that prevents runtime compilation
    */
-  const t: SafeTranslationFunction = (
-    key: string,
-    namedOrList?: Record<string, unknown> | unknown[],
-  ): string => {
+  const t: SafeTranslationFunction = (key: string, params?: TranslationParams | string): string => {
     try {
-      // In production, ensure we only use pre-compiled messages
-      if (import.meta.env.PROD) {
-        // Use the simplest possible translation call to avoid runtime compilation
-        if (namedOrList) {
-          return originalT(key, namedOrList);
-        } else {
-          return originalT(key);
-        }
-      } else {
-        // In development, allow full functionality
-        return originalT(key, namedOrList as any);
+      if (typeof params === "string") {
+        const translated = i18n.t(key);
+        return translated === key ? params : translated;
       }
+
+      if (Array.isArray(params)) {
+        return i18n.t(key, params);
+      }
+
+      if (params && typeof params === "object") {
+        return i18n.t(key, params);
+      }
+
+      return i18n.t(key);
     } catch (error) {
       console.error(`Translation error for key "${key}":`, error);
-
-      // Fallback to key itself if translation fails
       return key;
     }
   };
@@ -63,9 +62,7 @@ export function useSafeI18n(): SafeI18nReturn {
    */
   const setLocale = (newLocale: LocaleCode) => {
     try {
-      if (locale && "value" in locale) {
-        (locale as any).value = newLocale;
-      }
+      localeRef.value = newLocale;
     } catch (error) {
       console.error("Locale setting error:", error);
     }
@@ -73,8 +70,8 @@ export function useSafeI18n(): SafeI18nReturn {
 
   return {
     t,
-    locale: computed(() => locale.value),
-    availableLocales: computed(() => availableLocales.value),
+    locale: computed(() => localeRef.value),
+    availableLocales: computed(() => [...availableLocalesRef]),
     setLocale,
   };
 }

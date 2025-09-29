@@ -376,14 +376,14 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
+import { useTranslation } from '@/composables/useTranslation';
 import { useAuthStore } from '@/stores/auth';
 import { useOAuth } from '@/composables/useOAuth';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import type { RegisterRequest } from '@/types/auth';
 
 const router = useRouter();
-const { t } = useI18n();
+const { t } = useTranslation();
 const authStore = useAuthStore();
 const oauth = useOAuth();
 

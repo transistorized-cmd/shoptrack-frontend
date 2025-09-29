@@ -20,6 +20,16 @@ import type {
 } from "@/types/auth";
 import { authService } from "@/services/auth.service";
 import { languageSettingsService } from "@/services/languageSettings.service";
+import { useCsrfToken } from "@/composables/useCsrfToken";
+
+// Import csrf manager at module level to avoid dynamic imports in error paths
+let csrfManagerPromise: Promise<any> | null = null;
+const getCsrfManager = async () => {
+  if (!csrfManagerPromise) {
+    csrfManagerPromise = import('@/composables/useCsrfToken').then(module => module.csrfManager);
+  }
+  return csrfManagerPromise;
+};
 
 export const useAuthStore = defineStore("auth", () => {
   // State
@@ -147,6 +157,18 @@ export const useAuthStore = defineStore("auth", () => {
 
         // Initialize user data (settings, language, etc.) after successful login
         await initializeUserData();
+
+        // Initialize CSRF protection after successful login
+        try {
+          const csrfManager = await getCsrfManager();
+          if (csrfManager && csrfManager.initialize) {
+            await csrfManager.initialize();
+            console.info('CSRF protection initialized after login');
+          }
+        } catch (csrfError) {
+          console.warn('Failed to initialize CSRF protection after login', csrfError);
+          // Don't fail the login process for CSRF issues
+        }
 
         // Authentication is now handled by secure HTTP-only cookies automatically
         updateLastActivity();
@@ -313,6 +335,16 @@ export const useAuthStore = defineStore("auth", () => {
       // Authentication cookies are cleared by the backend automatically
       sessionExpired.value = false;
       clearError();
+
+      // Clear CSRF tokens on logout
+      try {
+        const { invalidateCsrf } = useCsrfToken()
+        invalidateCsrf()
+      } catch (error) {
+        // Don't fail logout for CSRF cleanup issues
+        console.warn('Failed to clear CSRF tokens during logout')
+      }
+
       loading.value = false;
 
       // Navigate to login page if callback is set

@@ -1,7 +1,7 @@
 import { computed } from "vue";
 import { useSettingsStore } from "@/stores/settings";
 import {
-  formatCurrency,
+  formatCurrency as formatCurrencyUtil,
   formatCurrencyCompact,
   getCurrencySymbol,
   getCurrencyInfo,
@@ -27,7 +27,12 @@ export function useCurrencyFormat() {
       showZeroDecimals?: boolean;
     },
   ) => {
-    return formatCurrency(amount, receiptCurrency, userCurrency.value, options);
+    return formatCurrencyUtil(
+      amount,
+      receiptCurrency,
+      userCurrency.value,
+      options,
+    );
   };
 
   /**
@@ -36,6 +41,18 @@ export function useCurrencyFormat() {
   const formatAmountCompact = (amount: number, receiptCurrency?: string) => {
     return formatCurrencyCompact(amount, receiptCurrency, userCurrency.value);
   };
+
+  /**
+   * Backwards compatible currency formatter (alias for formatAmount)
+   */
+  const formatCurrency = (
+    amount: number,
+    receiptCurrency?: string,
+    options?: {
+      decimals?: number;
+      showZeroDecimals?: boolean;
+    },
+  ) => formatAmount(amount, receiptCurrency, options);
 
   /**
    * Get currency symbol for a given currency code
@@ -63,6 +80,7 @@ export function useCurrencyFormat() {
     userCurrency,
     formatAmount,
     formatAmountCompact,
+    formatCurrency,
     getSymbol,
     getInfo,
     isUserPreferredCurrency,

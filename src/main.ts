@@ -16,6 +16,7 @@ import { setupDIContainer } from "./core/di/setup";
 import { setupGlobalAsyncErrorHandler } from "./composables/useAsyncErrorHandler";
 import { useAuthStore } from "@/stores/auth";
 import { useCategoriesStore } from "@/stores/categories";
+import { useCsrfToken } from "@/composables/useCsrfToken";
 import { availableLocales } from "@/i18n";
 import { memoryMonitoringPlugin } from "@/plugins/memoryMonitoring.plugin";
 
@@ -158,13 +159,22 @@ const initializeApp = async () => {
   // Initialize plugin system
   initializePlugins();
 
-  // CSRF token management removed - using pure cookie authentication
-  console.info(
-    "Using cookie-based authentication - no CSRF token management needed",
-  );
+  // Initialize CSRF protection first (required for authenticated requests)
+  try {
+    const { initializeCsrf } = useCsrfToken()
+    await initializeCsrf()
+    console.info("CSRF protection initialized")
+  } catch (error: any) {
+    // CSRF token initialization can fail if user is not authenticated
+    // This is expected behavior for unauthenticated users
+    console.info("CSRF token initialization deferred - will initialize after login")
+  }
 
   const app = createApp(App);
   const pinia = createPinia();
+  const setDevtools = (enabled: boolean) => {
+    (app.config as typeof app.config & { devtools?: boolean }).devtools = enabled;
+  };
 
   // Browser detection for Chrome-specific features
   const isChromeBrowser = (): boolean => {
@@ -193,7 +203,7 @@ const initializeApp = async () => {
 
     if (isChrome) {
       // Enable DevTools for Chrome in production
-      app.config.devtools = true;
+      setDevtools(true);
 
       if (typeof window !== "undefined") {
         // Enable production DevTools for Chrome
@@ -234,7 +244,7 @@ const initializeApp = async () => {
       }
     } else {
       // Disable DevTools for non-Chrome browsers in production
-      app.config.devtools = false;
+      setDevtools(false);
 
       if (typeof window !== "undefined") {
         (window as any).__VUE_PROD_DEVTOOLS__ = false;
@@ -245,7 +255,7 @@ const initializeApp = async () => {
     }
   } else if (import.meta.env.DEV) {
     // Always enable DevTools in development
-    app.config.devtools = true;
+    setDevtools(true);
     console.info("[App] Vue DevTools enabled in development mode");
   }
 
@@ -313,7 +323,8 @@ const initializeApp = async () => {
         testTranslation,
       );
 
-      app.config.globalProperties.$t = productionSafeI18n.t;
+      app.config.globalProperties.$t =
+        productionSafeI18n.t as typeof app.config.globalProperties.$t;
       app.provide("i18n", productionSafeI18n);
       console.info("[i18n] ✅ Production-safe i18n configured successfully");
     } else {
@@ -336,15 +347,9 @@ const initializeApp = async () => {
   // Install Memory Monitoring Plugin
   // This will automatically initialize memory monitoring in production-ready mode
   app.use(memoryMonitoringPlugin, {
-    autoStart: true, // Automatically start monitoring when app mounts
-    registerAllStores: true, // Register all Pinia stores for monitoring
-    showWidget: import.meta.env.MODE === "development", // Show widget only in development
-    config: {
-      // Override default configuration if needed
-      monitoring: {
-        interval: import.meta.env.MODE === "development" ? 15000 : 60000, // More frequent in dev
-      },
-    },
+    autoStart: true,
+    registerAllStores: true,
+    showWidget: import.meta.env.MODE === "development",
   });
 
   // Initialize authentication after pinia and router are set up

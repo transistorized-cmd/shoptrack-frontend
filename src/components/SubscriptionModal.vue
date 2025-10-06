@@ -239,7 +239,7 @@ const successMessage = ref<string | null>(null);
 
 // Computed properties
 const isCurrentPlan = computed(() => (plan: SubscriptionPlan) => {
-  return currentSubscription.value?.subscriptionPlanId === plan.id;
+  return currentSubscription.value?.plan?.code === plan.code;
 });
 
 // Methods
@@ -279,24 +279,66 @@ const subscribeToPlan = async (plan: SubscriptionPlan) => {
     selectedPlanId.value = plan.id;
     error.value = null;
 
-    const subscriptionRequest = {
-      subscriptionPlanId: plan.id,
-      billingInterval: 'monthly' as const,
-      startTrial: plan.allowTrial
-    };
+    // Check if it's a free plan
+    const isFree = plan.monthlyPrice <= 0 && plan.yearlyPrice <= 0;
 
-    const newSubscription = await subscriptionService.subscribe(subscriptionRequest);
-    currentSubscription.value = newSubscription;
+    // Check if user already has a subscription
+    const hasExistingSubscription = currentSubscription.value &&
+                                     currentSubscription.value.id > 0 &&
+                                     currentSubscription.value.status === 'active';
 
-    successMessage.value = t('subscription.success.message',
-      `Successfully subscribed to ${plan.name}! You can now enjoy all the features included in this plan.`
-    );
+    if (isFree) {
+      // Free plans can be assigned directly
+      if (hasExistingSubscription) {
+        // User has existing subscription - use UPDATE endpoint
+        const updateRequest = {
+          newPlanCode: plan.code,
+          newBillingInterval: 'monthly' as const
+        };
+        const result = await subscriptionService.updateSubscription(updateRequest);
+        if (!result.success || !result.subscription) {
+          throw new Error(result.errorMessage || 'Failed to update subscription');
+        }
+        currentSubscription.value = result.subscription;
+      } else {
+        // No existing subscription - use CREATE endpoint
+        const createRequest = {
+          planCode: plan.code,
+          billingInterval: 'monthly' as const
+        };
+        const result = await subscriptionService.subscribe(createRequest);
+        if (!result.success || !result.subscription) {
+          throw new Error(result.errorMessage || 'Failed to create subscription');
+        }
+        currentSubscription.value = result.subscription;
+      }
 
-    emit('subscribed');
+      successMessage.value = t('subscription.success.message',
+        `Successfully subscribed to ${plan.name}! You can now enjoy all the features included in this plan.`
+      );
+
+      emit('subscribed');
+
+      subscribing.value = false;
+      selectedPlanId.value = null;
+    } else {
+      // Paid plans require Stripe Checkout Session
+      const successUrl = `${window.location.origin}/subscription/success?session_id={CHECKOUT_SESSION_ID}`;
+      const cancelUrl = `${window.location.origin}/subscription`;
+
+      const checkoutSession = await subscriptionService.createCheckoutSession(
+        plan.code,
+        'monthly',
+        successUrl,
+        cancelUrl
+      );
+
+      // Redirect to Stripe Checkout (modal will close automatically on redirect, don't set loading to false)
+      window.location.href = checkoutSession.sessionUrl;
+    }
   } catch (err: any) {
     console.error('Failed to subscribe:', err);
     error.value = err.response?.data?.message || t('subscription.error.subscribeFailed', 'Failed to subscribe to plan');
-  } finally {
     subscribing.value = false;
     selectedPlanId.value = null;
   }

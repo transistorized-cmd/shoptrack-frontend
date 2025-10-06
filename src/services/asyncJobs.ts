@@ -126,6 +126,38 @@ export const asyncJobsService = {
   },
 
   /**
+   * Get user jobs with optional status filter
+   */
+  async getUserJobs(options?: {
+    limit?: number;
+    status?: string;
+  }): Promise<{ jobs: JobStatus[]; total: number }> {
+    try {
+      const params = new URLSearchParams();
+
+      if (options?.limit) {
+        params.append("limit", options.limit.toString());
+      }
+
+      if (options?.status) {
+        params.append("status", options.status);
+      }
+
+      const response = await apiWithTimeout.fast.get(
+        `/jobs${params.toString() ? "?" + params.toString() : ""}`,
+      );
+
+      return response.data;
+    } catch (error) {
+      errorLogger.logApiError(
+        error instanceof Error ? error : new Error(String(error)),
+        "/jobs",
+      );
+      throw error;
+    }
+  },
+
+  /**
    * Cancel a job
    */
   async cancelJob(jobId: string): Promise<void> {
@@ -135,7 +167,6 @@ export const asyncJobsService = {
       errorLogger.logApiError(
         error instanceof Error ? error : new Error(String(error)),
         `/jobs/${jobId}`,
-        "DELETE",
       );
       throw error;
     }
@@ -259,11 +290,12 @@ export const asyncJobsService = {
           await csrfManager.initialize();
           const cfg = { ...(error.config || {}) };
           cfg._retried = true;
-          return await apiWithTimeout.fast.patch(
+          await apiWithTimeout.fast.patch(
             "/notifications/mark-all-read",
             undefined,
             cfg as any,
           );
+          return;
         } catch (retryErr) {
           errorLogger.logApiError(
             retryErr instanceof Error ? retryErr : new Error(String(retryErr)),

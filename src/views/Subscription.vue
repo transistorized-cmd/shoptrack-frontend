@@ -4,13 +4,13 @@
       <!-- Back Navigation -->
       <div class="mb-6">
         <router-link
-          to="/profile"
+          to="/billing"
           class="inline-flex items-center text-sm text-shoptrack-600 dark:text-shoptrack-400 hover:text-shoptrack-800 dark:hover:text-shoptrack-300 font-medium transition-colors"
         >
           <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
-          {{ $t('subscription.backToProfile', 'Back to profile') }}
+          {{ $t('subscription.backToBilling', 'Back to Billing') }}
         </router-link>
       </div>
 
@@ -42,7 +42,11 @@
                   <strong>{{ currentSubscription.plan?.name }}</strong> -
                   {{ $t('subscription.status.' + currentSubscription.status, currentSubscription.status) }}
                 </p>
-                <p v-if="currentSubscription.nextBillingDate" class="mt-1">
+                <p v-if="currentSubscription.cancelledAt && currentSubscription.endDate" class="mt-1 text-amber-700 dark:text-amber-400">
+                  {{ $t('subscription.cancelledAccessUntil', 'Cancelled - Access until') }}:
+                  {{ formatDate(currentSubscription.endDate) }}
+                </p>
+                <p v-else-if="currentSubscription.nextBillingDate" class="mt-1">
                   {{ $t('subscription.nextBilling', 'Next billing') }}:
                   {{ formatDate(currentSubscription.nextBillingDate) }}
                 </p>
@@ -216,7 +220,7 @@ const successMessage = ref<string | null>(null);
 
 // Computed properties
 const isCurrentPlan = computed(() => (plan: SubscriptionPlan) => {
-  return currentSubscription.value?.subscriptionPlanId === plan.id;
+  return currentSubscription.value?.plan?.code === plan.code;
 });
 
 // Methods
@@ -252,22 +256,64 @@ const subscribeToPlan = async (plan: SubscriptionPlan) => {
     selectedPlanId.value = plan.id;
     error.value = null;
 
-    const subscriptionRequest = {
-      subscriptionPlanId: plan.id,
-      billingInterval: 'monthly' as const,
-      startTrial: plan.allowTrial
-    };
+    // Check if it's a free plan
+    const isFree = plan.monthlyPrice <= 0 && plan.yearlyPrice <= 0;
 
-    const newSubscription = await subscriptionService.subscribe(subscriptionRequest);
-    currentSubscription.value = newSubscription;
+    // Check if user already has a subscription
+    const hasExistingSubscription = currentSubscription.value &&
+                                     currentSubscription.value.id > 0 &&
+                                     currentSubscription.value.status === 'active';
 
-    successMessage.value = t('subscription.success.message',
-      `Successfully subscribed to ${plan.name}! You can now enjoy all the features included in this plan.`
-    );
+    if (isFree) {
+      // Free plans can be assigned directly
+      if (hasExistingSubscription) {
+        // User has existing subscription - use UPDATE endpoint
+        const updateRequest = {
+          newPlanCode: plan.code,
+          newBillingInterval: 'monthly' as const
+        };
+        const result = await subscriptionService.updateSubscription(updateRequest);
+        if (!result.success || !result.subscription) {
+          throw new Error(result.errorMessage || 'Failed to update subscription');
+        }
+        currentSubscription.value = result.subscription;
+      } else {
+        // No existing subscription - use CREATE endpoint
+        const createRequest = {
+          planCode: plan.code,
+          billingInterval: 'monthly' as const
+        };
+        const result = await subscriptionService.subscribe(createRequest);
+        if (!result.success || !result.subscription) {
+          throw new Error(result.errorMessage || 'Failed to create subscription');
+        }
+        currentSubscription.value = result.subscription;
+      }
+
+      successMessage.value = t('subscription.success.message',
+        `Successfully subscribed to ${plan.name}! You can now enjoy all the features included in this plan.`
+      );
+
+      subscribing.value = false;
+      selectedPlanId.value = null;
+    } else {
+      // Paid plans require Stripe Checkout Session
+      const successUrl = `${window.location.origin}/subscription/success?session_id={CHECKOUT_SESSION_ID}`;
+      const cancelUrl = `${window.location.origin}/subscription`;
+
+      const checkoutSession = await subscriptionService.createCheckoutSession(
+        plan.code,
+        'monthly',
+        successUrl,
+        cancelUrl
+      );
+
+      // Redirect to Stripe Checkout (don't set loading to false since we're redirecting)
+      window.location.href = checkoutSession.sessionUrl;
+    }
   } catch (err: any) {
     console.error('Failed to subscribe:', err);
     error.value = err.response?.data?.message || t('subscription.error.subscribeFailed', 'Failed to subscribe to plan');
-  } finally {
     subscribing.value = false;
     selectedPlanId.value = null;
   }

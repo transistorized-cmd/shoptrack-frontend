@@ -60,6 +60,7 @@
     "nvm:build": "./scripts/with-nvm.sh npm run build"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^7.9.0",
     "@vueuse/core": "^11.2.0",
     "axios": "^1.7.7",
     "chart.js": "^4.4.6",

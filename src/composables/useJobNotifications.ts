@@ -6,6 +6,10 @@ const jobNotifications = ref<JobNotification[]>([]);
 const unreadCount = ref(0);
 const isPolling = ref(false);
 const pollingInterval = ref<number | null>(null);
+const hasActiveJobs = ref(false);
+const lastJobCheckTime = ref<number>(0);
+const pollCount = ref(0); // Track poll cycles for adaptive interval
+const isInitialized = ref(false); // Ensure we only initialize once globally
 
 export const useJobNotifications = () => {
   const { success, error, info, warning } = useNotifications();
@@ -21,23 +25,96 @@ export const useJobNotifications = () => {
   );
 
   /**
-   * Start polling for job notifications
+   * Check if there are any active/running jobs based on recent notification activity
+   * This helps determine the appropriate polling interval
    */
-  const startPolling = (intervalMs: number = 5000) => {
+  const checkActiveJobs = async (): Promise<boolean> => {
+    const now = Date.now();
+
+    // Only check for active jobs every 30 seconds to reduce load
+    if (now - lastJobCheckTime.value < 30000) {
+      return hasActiveJobs.value;
+    }
+
+    try {
+      // Fetch recent jobs (limited to 10 for performance)
+      const response = await asyncJobsService.getUserJobs({ limit: 10 });
+      const activeStatuses = ["pending", "processing"];
+
+      // Check if any jobs are in active states
+      const hasActive = response.jobs?.some((job) =>
+        activeStatuses.includes(job.status)
+      ) ?? false;
+
+      hasActiveJobs.value = hasActive;
+      lastJobCheckTime.value = now;
+
+      return hasActive;
+    } catch (err) {
+      console.error("Error checking active jobs:", err);
+      // Default to assuming there might be active jobs on error
+      return hasActiveJobs.value;
+    }
+  };
+
+  /**
+   * Update active jobs state based on notifications
+   * If we receive job-related notifications, assume there are active jobs
+   */
+  const updateActiveJobsFromNotifications = (notifications: JobNotification[]) => {
+    const jobRelatedTypes = ["job_started", "job_progress", "job_retry"];
+    const hasJobActivity = notifications.some((n) =>
+      jobRelatedTypes.includes(n.notificationType)
+    );
+
+    if (hasJobActivity) {
+      hasActiveJobs.value = true;
+      lastJobCheckTime.value = Date.now();
+    }
+  };
+
+  /**
+   * Start polling for job notifications with adaptive interval
+   * - Fast polling (5s): When there are unread notifications or active jobs
+   * - Slow polling (30s): When no activity (skips 5 out of 6 poll cycles)
+   *
+   * Benefits from 5-second server-side cache on unread-count endpoint.
+   * The cache ensures that even during fast polling, database load is minimal.
+   */
+  const startPolling = (baseIntervalMs: number = 5000) => {
     if (isPolling.value) return;
 
     isPolling.value = true;
+    pollCount.value = 0;
 
     const poll = async () => {
       try {
+        pollCount.value++;
+
+        // Determine if we should poll this cycle
+        const shouldUseFastPolling = hasActiveJobs.value || unreadCount.value > 0;
+
+        // Slow polling: only poll every 6th cycle (30 seconds if base is 5s)
+        // Fast polling: poll every cycle (5 seconds)
+        if (!shouldUseFastPolling && pollCount.value % 6 !== 0) {
+          return; // Skip this poll cycle
+        }
+
         // Lightweight poll for unread count first
+        // Server caches this for 5 seconds, so rapid polls don't hit the database
         const countResponse = await asyncJobsService.getUnreadCount();
         unreadCount.value = countResponse.count;
 
         // If we have unread notifications, fetch the full list
         if (countResponse.count > 0) {
-          await fetchNotifications({ unreadOnly: true });
+          const notifications = await fetchNotifications({ unreadOnly: true });
+          if (notifications) {
+            updateActiveJobsFromNotifications(notifications.notifications);
+          }
         }
+
+        // Periodically check for active jobs (every 30 seconds)
+        await checkActiveJobs();
       } catch (err) {
         console.error("Error polling job notifications:", err);
       }
@@ -46,8 +123,8 @@ export const useJobNotifications = () => {
     // Initial poll
     poll();
 
-    // Set up interval
-    pollingInterval.value = setInterval(poll, intervalMs) as unknown as number;
+    // Set up interval - always use base interval, but skip cycles for slow polling
+    pollingInterval.value = setInterval(poll, baseIntervalMs) as unknown as number;
   };
 
   /**
@@ -94,9 +171,12 @@ export const useJobNotifications = () => {
         .forEach((notification) => {
           showNotificationInUI(notification);
         });
+
+      return response;
     } catch (err) {
       console.error("Failed to fetch job notifications:", err);
       error("Notification Error", "Failed to fetch notifications");
+      return null;
     }
   };
 
@@ -272,9 +352,16 @@ export const useJobNotifications = () => {
   };
 
   /**
-   * Initialize the notification system
+   * Initialize the notification system (singleton - only runs once globally)
    */
   const initialize = () => {
+    // Prevent multiple initializations from different components
+    if (isInitialized.value) {
+      return;
+    }
+
+    isInitialized.value = true;
+
     // Initial fetch
     fetchNotifications({ limit: 50 });
 
@@ -285,15 +372,13 @@ export const useJobNotifications = () => {
     clearOldNotifications();
   };
 
-  // Auto-initialize on mount
+  // Auto-initialize on mount (but only once globally)
   onMounted(() => {
     initialize();
   });
 
-  // Cleanup on unmount
-  onUnmounted(() => {
-    stopPolling();
-  });
+  // Note: We don't stop polling on unmount because this is a global singleton
+  // The polling continues across all components that use this composable
 
   return {
     // State

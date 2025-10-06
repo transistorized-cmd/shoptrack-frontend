@@ -27,41 +27,85 @@
 
     <!-- Subscription Content -->
     <div v-else>
-      <!-- Current Plan -->
-      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-6 mb-6">
+      <!-- No Active Subscription - Prompt to Choose Plan -->
+      <div v-if="!currentSubscription || currentSubscription.id === 0" class="text-center py-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/20 mb-4">
+          <svg class="w-8 h-8 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </div>
+
+        <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+          {{ $t('subscription.noActivePlan', 'No Active Subscription') }}
+        </h4>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
+          {{ $t('subscription.choosePlanPrompt', 'Choose a plan to unlock powerful features for managing your receipts and expenses. Start with our Free plan or upgrade for advanced capabilities.') }}
+        </p>
+
+        <button
+          @click="showSubscriptionModal = true"
+          class="inline-flex items-center px-6 py-3 bg-shoptrack-600 hover:bg-shoptrack-700 dark:bg-shoptrack-700 dark:hover:bg-shoptrack-800 text-white font-medium rounded-lg focus:ring-2 focus:ring-shoptrack-500 focus:ring-offset-2 dark:ring-offset-gray-800 transition-colors"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          {{ $t('subscription.choosePlan', 'Choose a Plan') }}
+        </button>
+      </div>
+
+      <!-- Current Plan (Active Subscription) -->
+      <div v-else class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-6 mb-6">
         <div class="flex items-center justify-between">
           <div class="flex-1">
             <div class="flex items-center mb-2">
               <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
-                {{ currentSubscription?.plan?.name || $t('subscription.freePlan', 'Free Plan') }}
+                {{ currentSubscription.plan?.name || $t('subscription.freePlan', 'Free Plan') }}
               </h4>
-              <span 
+              <span
                 class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                :class="getStatusBadgeClass(currentSubscription?.status || 'free')"
+                :class="getStatusBadgeClass(currentSubscription.status)"
               >
-                {{ $t(`subscription.status.${currentSubscription?.status || 'free'}`, currentSubscription?.status || 'Free') }}
+                {{ $t(`subscription.status.${currentSubscription.status}`, currentSubscription.status) }}
               </span>
             </div>
-            
+
             <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
-              {{ currentSubscription?.plan?.description || $t('subscription.freeDescription', 'Basic features to get you started') }}
+              {{ currentSubscription.plan?.description || $t('subscription.freeDescription', 'Basic features to get you started') }}
             </p>
 
             <!-- Pricing Display -->
             <div class="flex items-center text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              <span>${{ (currentSubscription?.plan?.monthlyPrice || 0).toFixed(2) }}</span>
+              <span>${{ (currentSubscription.plan?.monthlyPrice || 0).toFixed(2) }}</span>
               <span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">/month</span>
             </div>
 
+            <!-- Cancellation Warning -->
+            <div v-if="currentSubscription.cancelledAt && currentSubscription.nextBillingDate" class="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <div class="flex items-start">
+                <svg class="h-5 w-5 text-amber-500 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-amber-800 dark:text-amber-200">
+                    {{ $t('subscription.cancellationPending', 'Subscription Cancelled') }}
+                  </p>
+                  <p class="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                    {{ $t('subscription.accessUntil', 'You will have access until') }} {{ formatDate(currentSubscription.nextBillingDate) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <!-- Next Billing Date -->
-            <div v-if="currentSubscription?.nextBillingDate" class="text-sm text-gray-600 dark:text-gray-300">
-              {{ $t('subscription.nextBilling', 'Next billing') }}: 
+            <div v-else-if="currentSubscription.nextBillingDate" class="text-sm text-gray-600 dark:text-gray-300">
+              {{ $t('subscription.nextBilling', 'Next billing') }}:
               {{ formatDate(currentSubscription.nextBillingDate) }}
             </div>
-            
+
             <!-- Trial Info -->
-            <div v-else-if="currentSubscription?.trialEndDate" class="text-sm text-amber-600 dark:text-amber-400">
-              {{ $t('subscription.trialEnds', 'Trial ends') }}: 
+            <div v-else-if="currentSubscription.trialEndDate" class="text-sm text-amber-600 dark:text-amber-400">
+              {{ $t('subscription.trialEnds', 'Trial ends') }}:
               {{ formatDate(currentSubscription.trialEndDate) }}
             </div>
           </div>
@@ -72,11 +116,11 @@
               @click="showSubscriptionModal = true"
               class="px-4 py-2 bg-shoptrack-600 hover:bg-shoptrack-700 dark:bg-shoptrack-700 dark:hover:bg-shoptrack-800 text-white text-sm font-medium rounded-lg focus:ring-2 focus:ring-shoptrack-500 focus:ring-offset-2 dark:ring-offset-gray-800 transition-colors"
             >
-              {{ $t('subscription.viewPlans', 'View Plans') }}
+              {{ $t('subscription.changePlan', 'Change Plan') }}
             </button>
-            
+
             <button
-              v-if="currentSubscription && currentSubscription.status === 'active'"
+              v-if="currentSubscription.status === 'active' && currentSubscription.plan?.monthlyPrice > 0 && !currentSubscription.cancelledAt"
               @click="showCancelDialog = true"
               class="px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
             >
@@ -268,32 +312,9 @@ const loadSubscriptionData = async () => {
       // User has an active subscription
       currentSubscription.value = subscription;
     } else {
-      // No active subscription - load Free plan as fallback
-      console.info('No active subscription found, loading Free plan as fallback');
-      try {
-        const freePlan = await subscriptionService.getPlanByCode('free');
-        currentSubscription.value = {
-          id: 0, // Use 0 for free plan
-          userId: 0, // Use 0 for free plan
-          subscriptionPlanId: freePlan.id,
-          planCode: freePlan.code,
-          status: 'active' as const, // Free plan is considered active
-          billingInterval: 'monthly' as const,
-          amount: 0,
-          currency: freePlan.currency,
-          startDate: new Date().toISOString(),
-          endDate: undefined,
-          isActive: true,
-          userEmail: '',
-          userName: '',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          plan: freePlan
-        };
-      } catch (freePlanErr) {
-        console.error('Failed to load Free plan fallback:', freePlanErr);
-        throw freePlanErr; // Re-throw to be handled by main catch block
-      }
+      // No active subscription - set to null to show "choose plan" prompt
+      console.info('No active subscription found, prompting user to choose a plan');
+      currentSubscription.value = null;
     }
 
     // Load feature usage for limited features

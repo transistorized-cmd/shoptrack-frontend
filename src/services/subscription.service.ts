@@ -3,10 +3,12 @@ import type {
   SubscriptionPlan,
   UserSubscription,
   CreateUserSubscriptionRequest,
+  UpdateUserSubscriptionRequest,
   FeatureUsage,
   SubscriptionStatus,
   PlanFeature,
 } from "@/types/subscription";
+import { generateIdempotencyKey } from "@/utils/idempotency";
 
 class SubscriptionService {
   private sortFeatures(features: PlanFeature[] = []): PlanFeature[] {
@@ -80,16 +82,58 @@ class SubscriptionService {
   }
 
   /**
-   * Subscribe to a plan
+   * Subscribe to a plan (for new subscriptions)
    */
   async subscribe(
     subscriptionRequest: CreateUserSubscriptionRequest,
-  ): Promise<UserSubscription> {
+  ): Promise<{ success: boolean; subscription: UserSubscription | null; errorMessage?: string }> {
     const response = await api.post(
-      "/subscriptions/subscribe",
+      "/subscriptions",
       subscriptionRequest,
     );
-    return this.normalizeSubscription(response.data as UserSubscription)!;
+    const result = response.data;
+    return {
+      success: result.success,
+      subscription: result.subscription ? this.normalizeSubscription(result.subscription) : null,
+      errorMessage: result.errorMessage
+    };
+  }
+
+  /**
+   * Update existing subscription (change plan or billing interval)
+   *
+   * @param updateRequest - Subscription update details
+   * @param idempotencyKey - Optional idempotency key (auto-generated if not provided)
+   * @returns Success status, updated subscription, and optional error message
+   *
+   * @remarks
+   * This is a CRITICAL endpoint that REQUIRES idempotency protection.
+   * If no idempotency key is provided, one will be auto-generated.
+   * The same key must be used for retries to prevent duplicate subscription updates.
+   */
+  async updateSubscription(
+    updateRequest: UpdateUserSubscriptionRequest,
+    idempotencyKey?: string
+  ): Promise<{ success: boolean; subscription: UserSubscription | null; errorMessage?: string }> {
+    console.log('UpdateSubscription request:', updateRequest);
+    const key = idempotencyKey || generateIdempotencyKey();
+
+    const response = await api.put(
+      "/subscriptions",
+      updateRequest,
+      {
+        headers: {
+          'Idempotency-Key': key
+        }
+      }
+    );
+    console.log('UpdateSubscription response:', response.data);
+    const result = response.data;
+    return {
+      success: result.success,
+      subscription: result.subscription ? this.normalizeSubscription(result.subscription) : null,
+      errorMessage: result.errorMessage
+    };
   }
 
   /**
@@ -130,20 +174,42 @@ class SubscriptionService {
 
   /**
    * Cancel current user's subscription
+   *
+   * @param reason - Optional reason for cancellation
+   * @param immediately - Whether to cancel immediately or at period end
+   * @param idempotencyKey - Optional idempotency key (auto-generated if not provided)
+   * @returns Success status and message
+   *
+   * @remarks
+   * This is a CRITICAL endpoint that REQUIRES idempotency protection.
+   * If no idempotency key is provided, one will be auto-generated.
+   * The same key must be used for retries to prevent duplicate cancellation requests.
    */
   async cancelSubscription(
     reason?: string,
+    immediately: boolean = false,
+    idempotencyKey?: string
   ): Promise<{ success: boolean; message?: string }> {
     try {
-      const response = await api.post("/subscriptions/cancel", { reason });
-      return response.data;
+      const key = idempotencyKey || generateIdempotencyKey();
+
+      const response = await api.post("/subscriptions/cancel", {
+        reason: reason || "User requested cancellation",
+        immediately
+      }, {
+        headers: {
+          'Idempotency-Key': key
+        }
+      });
+      return {
+        success: true,
+        message: response.data.message
+      };
     } catch (error: any) {
-      // For now, return a mock response since the cancel endpoint isn't implemented yet
-      console.warn("Cancel subscription endpoint not implemented yet:", error);
+      console.error("Failed to cancel subscription:", error);
       return {
         success: false,
-        message:
-          "Subscription cancellation is not available yet. Please contact support.",
+        message: error.response?.data?.message || "Failed to cancel subscription. Please try again.",
       };
     }
   }
@@ -160,6 +226,44 @@ class SubscriptionService {
       billingInterval,
     });
     return this.normalizeSubscription(response.data as UserSubscription)!;
+  }
+
+  /**
+   * Create a Stripe Checkout Session for paid subscription plans
+   * Returns a URL to redirect the user to Stripe's hosted payment page
+   *
+   * @param planCode - The subscription plan code
+   * @param billingInterval - Monthly or yearly billing
+   * @param successUrl - URL to redirect to after successful payment
+   * @param cancelUrl - URL to redirect to if payment is cancelled
+   * @param idempotencyKey - Optional idempotency key (auto-generated if not provided)
+   * @returns Checkout session details with redirect URL
+   *
+   * @remarks
+   * This is a CRITICAL endpoint that REQUIRES idempotency protection.
+   * If no idempotency key is provided, one will be auto-generated.
+   * The same key must be used for retries to prevent duplicate checkout sessions.
+   */
+  async createCheckoutSession(
+    planCode: string,
+    billingInterval: 'monthly' | 'yearly',
+    successUrl: string,
+    cancelUrl: string,
+    idempotencyKey?: string
+  ): Promise<{ sessionId: string; sessionUrl: string }> {
+    const key = idempotencyKey || generateIdempotencyKey();
+
+    const response = await api.post('/subscriptions/checkout-session', {
+      planCode,
+      billingInterval,
+      successUrl,
+      cancelUrl
+    }, {
+      headers: {
+        'Idempotency-Key': key
+      }
+    });
+    return response.data;
   }
 }
 

@@ -86,13 +86,30 @@ const router = createRouter({
       component: () => import("@/views/Profile.vue"),
       meta: { requiresAuth: true },
     },
-    // Subscription page converted to modal - see SubscriptionModal.vue
-    // {
-    //   path: "/subscription",
-    //   name: "subscription",
-    //   component: () => import("@/views/Subscription.vue"),
-    //   meta: { requiresAuth: true },
-    // },
+    {
+      path: "/billing",
+      name: "billing",
+      component: () => import("@/views/Billing.vue"),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/subscription-plans",
+      name: "subscription-plans",
+      component: () => import("@/views/SubscriptionPlans.vue"),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/subscription",
+      name: "subscription",
+      component: () => import("@/views/Subscription.vue"),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/subscription/success",
+      name: "subscription-success",
+      component: () => import("@/views/SubscriptionSuccess.vue"),
+      meta: { requiresAuth: true },
+    },
 
     // Error pages
     {

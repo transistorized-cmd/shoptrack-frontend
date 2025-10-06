@@ -341,9 +341,6 @@
             </div>
           </div>
 
-          <!-- Subscription Management -->
-          <SubscriptionCard />
-
           <!-- Preferences -->
           <div class="card p-6">
             <div class="flex items-center mb-6">
@@ -475,7 +472,6 @@ import { useWebAuthn } from '@/composables/useWebAuthn';
 import { useOAuth } from '@/composables/useOAuth';
 import { useNotifications } from '@/composables/useNotifications';
 import { authService } from '@/services/auth.service';
-import SubscriptionCard from '@/components/SubscriptionCard.vue';
 import { safeImageUrl } from '@/utils/urlSanitizer';
 import { availableLocales, type LocaleCode } from '@/i18n';
 import type { UpdateProfileRequest, ChangePasswordRequest, ConnectedAccount } from '@/types/auth';

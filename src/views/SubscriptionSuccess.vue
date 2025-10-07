@@ -78,7 +78,24 @@ onMounted(async () => {
       return;
     }
 
-    // Poll for subscription activation (webhook should create it within a few seconds)
+    // First, try to verify the checkout session directly
+    // This will work even if webhooks aren't configured (development mode)
+    try {
+      const verificationResult = await subscriptionService.verifyCheckoutSession(sessionId);
+
+      if (verificationResult.success && verificationResult.subscription) {
+        success.value = true;
+        loading.value = false;
+        return;
+      }
+
+      // If verification says it's processing, wait a bit and try again
+      console.log('Checkout session verified but subscription not yet created, polling...');
+    } catch (verifyErr) {
+      console.warn('Checkout session verification failed, falling back to polling:', verifyErr);
+    }
+
+    // If verification didn't work, poll for subscription activation
     // The webhook handler processes checkout.session.completed and creates the subscription
     let attempts = 0;
     const maxAttempts = 15; // Try for up to 15 seconds

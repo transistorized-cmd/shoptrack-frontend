@@ -706,6 +706,20 @@
       "past_due": "Past Due",
       "canceled": "Canceled",
       "expired": "Expired"
+    },
+    "success": {
+      "processing": "Processing your subscription...",
+      "title": "Subscription Successful!",
+      "message": "Your subscription has been activated successfully. You can now enjoy all the premium features!",
+      "goToReceipts": "Go to Receipts",
+      "viewSubscription": "View Subscription"
+    },
+    "error": {
+      "title": "Subscription Error",
+      "tryAgain": "Try Again",
+      "noSessionId": "No session ID provided",
+      "notActivated": "Subscription activation is taking longer than expected. This usually means the webhook hasn't been received yet. Please refresh the page in a few moments or contact support if the issue persists.",
+      "verifyFailed": "Failed to check subscription status"
     }
   }
 }

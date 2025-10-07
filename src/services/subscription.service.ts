@@ -265,6 +265,33 @@ class SubscriptionService {
     });
     return response.data;
   }
+
+  /**
+   * Verify a Stripe Checkout Session after payment
+   * This retrieves the checkout session status and subscription details
+   *
+   * @param sessionId - The Stripe checkout session ID from the redirect URL
+   * @returns Verification result with subscription details if successful
+   */
+  async verifyCheckoutSession(sessionId: string): Promise<{
+    success: boolean;
+    status?: string;
+    paymentStatus?: string;
+    subscription?: UserSubscription | null;
+    message?: string;
+  }> {
+    const response = await api.post(`/subscriptions/checkout-session/verify`, null, {
+      params: { sessionId }
+    });
+    const result = response.data;
+    return {
+      success: result.success,
+      status: result.status,
+      paymentStatus: result.paymentStatus,
+      subscription: result.subscription ? this.normalizeSubscription(result.subscription) : null,
+      message: result.message
+    };
+  }
 }
 
 export const subscriptionService = new SubscriptionService();

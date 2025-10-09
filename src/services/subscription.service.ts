@@ -45,9 +45,29 @@ class SubscriptionService {
   /**
    * Get all available subscription plans
    */
-  async getAvailablePlans(): Promise<SubscriptionPlan[]> {
+  async getAvailablePlans(): Promise<{
+    plans: SubscriptionPlan[];
+    detectedCurrency: string;
+    detectionMethod: string;
+    detectionSource: string | null;
+    availableCurrencies: string[];
+  }> {
     const response = await api.get("/subscriptions/plans");
-    return (response.data as SubscriptionPlan[]).map((plan) => this.normalizePlan(plan));
+    const data = response.data as {
+      plans: SubscriptionPlan[];
+      detectedCurrency: string;
+      detectionMethod: string;
+      detectionSource: string | null;
+      availableCurrencies: string[];
+    };
+
+    return {
+      plans: data.plans.map((plan) => this.normalizePlan(plan)),
+      detectedCurrency: data.detectedCurrency,
+      detectionMethod: data.detectionMethod,
+      detectionSource: data.detectionSource,
+      availableCurrencies: data.availableCurrencies
+    };
   }
 
   /**
@@ -249,6 +269,7 @@ class SubscriptionService {
     billingInterval: 'monthly' | 'yearly',
     successUrl: string,
     cancelUrl: string,
+    currency?: string,
     idempotencyKey?: string
   ): Promise<{ sessionId: string; sessionUrl: string }> {
     const key = idempotencyKey || generateIdempotencyKey();
@@ -256,6 +277,7 @@ class SubscriptionService {
     const response = await api.post('/subscriptions/checkout-session', {
       planCode,
       billingInterval,
+      currency,
       successUrl,
       cancelUrl
     }, {

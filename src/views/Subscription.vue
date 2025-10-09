@@ -78,8 +78,26 @@
         </div>
       </div>
 
+      <!-- Currency Switcher -->
+      <div v-if="!loading && !error" class="mb-6 flex justify-center">
+        <div class="inline-flex items-center gap-3 bg-white dark:bg-gray-800 rounded-lg px-4 py-3 shadow-sm border border-gray-200 dark:border-gray-700">
+          <label for="currency-select" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ $t('subscription.currency', 'Currency') }}:
+          </label>
+          <select
+            id="currency-select"
+            v-model="selectedCurrency"
+            class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-shoptrack-500 focus:border-shoptrack-500 px-3 py-2 cursor-pointer"
+          >
+            <option v-for="currency in availableCurrencies" :key="currency" :value="currency">
+              {{ currency }} - {{ getCurrencySymbol(currency) }}
+            </option>
+          </select>
+        </div>
+      </div>
+
       <!-- Subscription Plans -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+      <div v-if="!loading && !error" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
         <div
           v-for="plan in plans"
           :key="plan.id"
@@ -98,11 +116,14 @@
               <!-- Price -->
               <div class="mb-6">
                 <span class="text-4xl font-bold text-gray-900 dark:text-white">
-                  ${{ plan.monthlyPrice.toFixed(2) }}
+                  {{ getCurrencySymbol(selectedCurrency) }}{{ getPlanPrice(plan, 'monthly').toFixed(selectedCurrency === 'MXN' ? 0 : 2) }}
                 </span>
                 <span class="text-gray-600 dark:text-gray-400 ml-2">/month</span>
-                <div v-if="plan.yearlyPrice > 0" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  ${{ plan.yearlyPrice.toFixed(2) }}/year (save {{ Math.round((1 - plan.yearlyPrice / (plan.monthlyPrice * 12)) * 100) }}%)
+                <div v-if="getPlanPrice(plan, 'yearly') > 0" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {{ getCurrencySymbol(selectedCurrency) }}{{ getPlanPrice(plan, 'yearly').toFixed(selectedCurrency === 'MXN' ? 0 : 2) }}/year
+                  <span v-if="getPlanPrice(plan, 'monthly') > 0">
+                    (save {{ Math.round((1 - getPlanPrice(plan, 'yearly') / (getPlanPrice(plan, 'monthly') * 12)) * 100) }}%)
+                  </span>
                 </div>
               </div>
 
@@ -217,10 +238,21 @@ const subscribing = ref(false);
 const selectedPlanId = ref<number | null>(null);
 const error = ref<string | null>(null);
 const successMessage = ref<string | null>(null);
+const selectedCurrency = ref<string>('USD');
+const availableCurrencies = ref<string[]>(['USD', 'EUR', 'MXN']);
 
 // Computed properties
 const isCurrentPlan = computed(() => (plan: SubscriptionPlan) => {
   return currentSubscription.value?.plan?.code === plan.code;
+});
+
+const getPlanPrice = computed(() => (plan: SubscriptionPlan, interval: 'monthly' | 'yearly') => {
+  if (!plan.prices || !plan.prices[selectedCurrency.value]) {
+    // Fallback to default prices if currency pricing not available
+    return interval === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
+  }
+  const pricing = plan.prices[selectedCurrency.value];
+  return interval === 'monthly' ? pricing.monthlyPrice : pricing.yearlyPrice;
 });
 
 // Methods
@@ -228,18 +260,37 @@ const formatDate = (dateString: string) => {
   return formatDateSafe(dateString);
 };
 
+const getCurrencySymbol = (currency: string): string => {
+  const symbols: Record<string, string> = {
+    'USD': '$',
+    'EUR': '€',
+    'MXN': '$',
+    'GBP': '£',
+    'JPY': '¥'
+  };
+  return symbols[currency] || currency;
+};
+
 const loadPlans = async () => {
   try {
     loading.value = true;
     error.value = null;
 
-    const [plansData, subscriptionData] = await Promise.all([
+    const [plansResponse, subscriptionData] = await Promise.all([
       subscriptionService.getAvailablePlans(),
       subscriptionService.getMySubscription()
     ]);
 
-    plans.value = plansData;
+    plans.value = plansResponse.plans;
     currentSubscription.value = subscriptionData;
+    availableCurrencies.value = plansResponse.availableCurrencies;
+    selectedCurrency.value = plansResponse.detectedCurrency;
+
+    // Log detected currency for debugging
+    console.log('Detected currency:', plansResponse.detectedCurrency);
+    console.log('Detection method:', plansResponse.detectionMethod);
+    console.log('Detection source:', plansResponse.detectionSource);
+    console.log('Available currencies:', plansResponse.availableCurrencies);
   } catch (err: any) {
     console.error('Failed to load subscription data:', err);
     error.value = err.response?.data?.message || t('subscription.error.loadFailed', 'Failed to load subscription plans');
@@ -305,7 +356,8 @@ const subscribeToPlan = async (plan: SubscriptionPlan) => {
         plan.code,
         'monthly',
         successUrl,
-        cancelUrl
+        cancelUrl,
+        selectedCurrency.value
       );
 
       // Redirect to Stripe Checkout (don't set loading to false since we're redirecting)

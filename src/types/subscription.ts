@@ -13,8 +13,19 @@ export interface SubscriptionPlan {
   sortOrder: number;
   currency: string;
   features: PlanFeature[];
+  prices?: { [currency: string]: PlanPricing };
+  availableCurrencies?: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PlanPricing {
+  currency: string;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  stripeMonthlyPriceId?: string;
+  stripeYearlyPriceId?: string;
+  isActive: boolean;
 }
 
 export interface PlanFeature {

@@ -118,6 +118,15 @@
       "veryStrong": "Very Strong"
     }
   },
+  "registration": {
+    "selectPlan": "Select Plan",
+    "yourInfo": "Your Info",
+    "chooseYourPlan": "Choose Your Plan",
+    "planDescription": "Select a plan to get started. No credit card required.",
+    "free": "Free Forever",
+    "dayFreeTrial": "day free trial",
+    "changePlan": "Change Plan"
+  },
   "receipts": {
     "title": "Receipts",
     "uploadReceipt": "Upload Receipt",

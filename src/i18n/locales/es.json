@@ -118,6 +118,15 @@
       "veryStrong": "Muy Fuerte"
     }
   },
+  "registration": {
+    "selectPlan": "Seleccionar Plan",
+    "yourInfo": "Tu Información",
+    "chooseYourPlan": "Elige tu Plan",
+    "planDescription": "Selecciona un plan para comenzar. No se requiere tarjeta de crédito.",
+    "free": "Gratis para Siempre",
+    "dayFreeTrial": "días de prueba gratuita",
+    "changePlan": "Cambiar Plan"
+  },
   "receipts": {
     "title": "Recibos",
     "uploadReceipt": "Subir Recibo",

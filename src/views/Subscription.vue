@@ -78,8 +78,40 @@
         </div>
       </div>
 
-      <!-- Currency Switcher -->
-      <div v-if="!loading && !error" class="mb-6 flex justify-center">
+      <!-- Billing Interval & Currency Switcher -->
+      <div v-if="!loading && !error" class="mb-6 flex flex-col sm:flex-row justify-center items-center gap-4">
+        <!-- Billing Interval Toggle -->
+        <div class="inline-flex items-center gap-3 bg-white dark:bg-gray-800 rounded-lg px-4 py-3 shadow-sm border border-gray-200 dark:border-gray-700">
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ $t('subscription.billingInterval', 'Billing') }}:
+          </span>
+          <div class="inline-flex rounded-lg bg-gray-100 dark:bg-gray-700 p-1">
+            <button
+              @click="selectedBillingInterval = 'monthly'"
+              :class="[
+                'px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                selectedBillingInterval === 'monthly'
+                  ? 'bg-shoptrack-600 text-white shadow-sm'
+                  : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              ]"
+            >
+              {{ $t('subscription.monthly', 'Monthly') }}
+            </button>
+            <button
+              @click="selectedBillingInterval = 'yearly'"
+              :class="[
+                'px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                selectedBillingInterval === 'yearly'
+                  ? 'bg-shoptrack-600 text-white shadow-sm'
+                  : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              ]"
+            >
+              {{ $t('subscription.yearly', 'Yearly') }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Currency Switcher -->
         <div class="inline-flex items-center gap-3 bg-white dark:bg-gray-800 rounded-lg px-4 py-3 shadow-sm border border-gray-200 dark:border-gray-700">
           <label for="currency-select" class="text-sm font-medium text-gray-700 dark:text-gray-300">
             {{ $t('subscription.currency', 'Currency') }}:
@@ -115,15 +147,20 @@
 
               <!-- Price -->
               <div class="mb-6">
-                <span class="text-4xl font-bold text-gray-900 dark:text-white">
-                  {{ getCurrencySymbol(selectedCurrency) }}{{ getPlanPrice(plan, 'monthly').toFixed(selectedCurrency === 'MXN' ? 0 : 2) }}
-                </span>
-                <span class="text-gray-600 dark:text-gray-400 ml-2">/month</span>
-                <div v-if="getPlanPrice(plan, 'yearly') > 0" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  {{ getCurrencySymbol(selectedCurrency) }}{{ getPlanPrice(plan, 'yearly').toFixed(selectedCurrency === 'MXN' ? 0 : 2) }}/year
-                  <span v-if="getPlanPrice(plan, 'monthly') > 0">
-                    (save {{ Math.round((1 - getPlanPrice(plan, 'yearly') / (getPlanPrice(plan, 'monthly') * 12)) * 100) }}%)
+                <div v-if="selectedBillingInterval === 'monthly'">
+                  <span class="text-4xl font-bold text-gray-900 dark:text-white">
+                    {{ getCurrencySymbol(selectedCurrency) }}{{ getPlanPrice(plan, 'monthly').toFixed(selectedCurrency === 'MXN' ? 0 : 2) }}
                   </span>
+                  <span class="text-gray-600 dark:text-gray-400 ml-2">/month</span>
+                </div>
+                <div v-else>
+                  <span class="text-4xl font-bold text-gray-900 dark:text-white">
+                    {{ getCurrencySymbol(selectedCurrency) }}{{ getPlanPrice(plan, 'yearly').toFixed(selectedCurrency === 'MXN' ? 0 : 2) }}
+                  </span>
+                  <span class="text-gray-600 dark:text-gray-400 ml-2">/year</span>
+                  <div v-if="getPlanPrice(plan, 'monthly') > 0 && getPlanPrice(plan, 'yearly') > 0" class="text-sm text-green-600 dark:text-green-400 mt-1 font-medium">
+                    Save {{ Math.round((1 - getPlanPrice(plan, 'yearly') / (getPlanPrice(plan, 'monthly') * 12)) * 100) }}% vs monthly
+                  </div>
                 </div>
               </div>
 
@@ -162,12 +199,13 @@
             </h4>
             <ul class="space-y-3">
               <li
-                v-for="feature in plan.features"
+                v-for="feature in getSortedFeatures(plan)"
                 :key="feature.id"
                 class="flex items-start"
               >
+                <!-- Green Checkmark for included features -->
                 <svg
-                  v-if="feature.booleanValue === true || feature.limitValue"
+                  v-if="isFeatureIncluded(feature)"
                   class="flex-shrink-0 h-5 w-5 text-green-500 dark:text-green-400 mt-0.5"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -175,19 +213,20 @@
                 >
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
+                <!-- Red X for excluded features -->
                 <svg
                   v-else
-                  class="flex-shrink-0 h-5 w-5 text-gray-400 dark:text-gray-500 mt-0.5"
+                  class="flex-shrink-0 h-5 w-5 text-red-500 dark:text-red-400 mt-0.5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-                <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                <span class="ml-3 text-sm" :class="isFeatureIncluded(feature) ? 'text-gray-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400 line-through'">
                   {{ feature.featureName }}
-                  <span v-if="feature.limitValue" class="text-gray-500 dark:text-gray-400">
-                    ({{ feature.limitValue }} {{ feature.unitType || 'items' }})
+                  <span v-if="isFeatureIncluded(feature) && feature.featureType === 'limit'" class="text-gray-500 dark:text-gray-400">
+                    ({{ feature.limitValue === null || feature.limitValue === undefined ? $t('subscription.unlimited', 'unlimited') : `${feature.limitValue} ${feature.unitType || 'items'}` }})
                   </span>
                 </span>
               </li>
@@ -240,6 +279,7 @@ const error = ref<string | null>(null);
 const successMessage = ref<string | null>(null);
 const selectedCurrency = ref<string>('USD');
 const availableCurrencies = ref<string[]>(['USD', 'EUR', 'MXN']);
+const selectedBillingInterval = ref<'monthly' | 'yearly'>('yearly');
 
 // Computed properties
 const isCurrentPlan = computed(() => (plan: SubscriptionPlan) => {
@@ -269,6 +309,26 @@ const getCurrencySymbol = (currency: string): string => {
     'JPY': '¥'
   };
   return symbols[currency] || currency;
+};
+
+const getSortedFeatures = (plan: SubscriptionPlan) => {
+  if (!plan.features) return [];
+
+  // Features are already sorted by the backend, but we ensure it here as well
+  return [...plan.features].sort((a, b) => {
+    if (a.sortOrder !== undefined && b.sortOrder !== undefined) {
+      return a.sortOrder - b.sortOrder;
+    }
+    return a.featureName.localeCompare(b.featureName);
+  });
+};
+
+const isFeatureIncluded = (feature: any): boolean => {
+  // Use the IsIncluded property from the backend
+  // The backend determines inclusion based on:
+  // - Limit features: limitValue > 0
+  // - Boolean/Access features: isActive === true
+  return feature.isIncluded === true;
 };
 
 const loadPlans = async () => {
@@ -321,7 +381,7 @@ const subscribeToPlan = async (plan: SubscriptionPlan) => {
         // User has existing subscription - use UPDATE endpoint
         const updateRequest = {
           newPlanCode: plan.code,
-          newBillingInterval: 'monthly' as const
+          newBillingInterval: selectedBillingInterval.value
         };
         const result = await subscriptionService.updateSubscription(updateRequest);
         if (!result.success || !result.subscription) {
@@ -332,7 +392,7 @@ const subscribeToPlan = async (plan: SubscriptionPlan) => {
         // No existing subscription - use CREATE endpoint
         const createRequest = {
           planCode: plan.code,
-          billingInterval: 'monthly' as const
+          billingInterval: selectedBillingInterval.value
         };
         const result = await subscriptionService.subscribe(createRequest);
         if (!result.success || !result.subscription) {
@@ -354,7 +414,7 @@ const subscribeToPlan = async (plan: SubscriptionPlan) => {
 
       const checkoutSession = await subscriptionService.createCheckoutSession(
         plan.code,
-        'monthly',
+        selectedBillingInterval.value,
         successUrl,
         cancelUrl,
         selectedCurrency.value

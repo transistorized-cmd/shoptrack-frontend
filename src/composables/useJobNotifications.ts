@@ -102,12 +102,18 @@ export const useJobNotifications = () => {
 
         // Lightweight poll for unread count first
         // Server caches this for 5 seconds, so rapid polls don't hit the database
-        const countResponse = await asyncJobsService.getUnreadCount();
+        // Only fetch receipt processing notifications
+        const countResponse = await asyncJobsService.getUnreadCount({
+          jobType: "receipt_processing"
+        });
         unreadCount.value = countResponse.count;
 
         // If we have unread notifications, fetch the full list
         if (countResponse.count > 0) {
-          const notifications = await fetchNotifications({ unreadOnly: true });
+          const notifications = await fetchNotifications({
+            unreadOnly: true,
+            jobType: "receipt_processing"
+          });
           if (notifications) {
             updateActiveJobsFromNotifications(notifications.notifications);
           }
@@ -145,6 +151,7 @@ export const useJobNotifications = () => {
     unreadOnly?: boolean;
     limit?: number;
     offset?: number;
+    jobType?: string;
   }) => {
     try {
       const response = await asyncJobsService.getNotifications(options);
@@ -362,8 +369,11 @@ export const useJobNotifications = () => {
 
     isInitialized.value = true;
 
-    // Initial fetch
-    fetchNotifications({ limit: 50 });
+    // Initial fetch - only receipt processing jobs
+    fetchNotifications({
+      limit: 50,
+      jobType: "receipt_processing"
+    });
 
     // Start polling for new notifications
     startPolling();

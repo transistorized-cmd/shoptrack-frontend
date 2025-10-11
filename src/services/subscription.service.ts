@@ -1,6 +1,7 @@
 import api from "@/services/api";
 import type {
   SubscriptionPlan,
+  PublicPlan,
   UserSubscription,
   CreateUserSubscriptionRequest,
   UpdateUserSubscriptionRequest,
@@ -313,6 +314,18 @@ class SubscriptionService {
       subscription: result.subscription ? this.normalizeSubscription(result.subscription) : null,
       message: result.message
     };
+  }
+
+  /**
+   * Get public subscription plans (Free and Trial) for registration
+   * No authentication required
+   */
+  async getPublicPlans(): Promise<{
+    plans: PublicPlan[];
+    count: number;
+  }> {
+    const response = await api.get('/public/subscription-plans');
+    return response.data;
   }
 }
 

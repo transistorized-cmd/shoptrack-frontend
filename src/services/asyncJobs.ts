@@ -194,6 +194,7 @@ export const asyncJobsService = {
     unreadOnly?: boolean;
     limit?: number;
     offset?: number;
+    jobType?: string;
   }): Promise<NotificationResponse> {
     try {
       const params = new URLSearchParams();
@@ -208,6 +209,10 @@ export const asyncJobsService = {
 
       if (options?.offset) {
         params.append("offset", options.offset.toString());
+      }
+
+      if (options?.jobType) {
+        params.append("jobType", options.jobType);
       }
 
       const response = await apiWithTimeout.fast.get(
@@ -227,10 +232,16 @@ export const asyncJobsService = {
   /**
    * Get unread notification count (lightweight)
    */
-  async getUnreadCount(): Promise<{ count: number }> {
+  async getUnreadCount(options?: { jobType?: string }): Promise<{ count: number }> {
     try {
+      const params = new URLSearchParams();
+
+      if (options?.jobType) {
+        params.append("jobType", options.jobType);
+      }
+
       const response = await apiWithTimeout.fast.get(
-        "/notifications/unread-count",
+        `/notifications/unread-count${params.toString() ? "?" + params.toString() : ""}`,
       );
       return response.data;
     } catch (error) {

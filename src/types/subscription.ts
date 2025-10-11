@@ -19,6 +19,20 @@ export interface SubscriptionPlan {
   updatedAt: string;
 }
 
+// Public plan type for registration (matches backend PublicPlanDto)
+export interface PublicPlan {
+  id: number;
+  code: string;
+  name: string;
+  description?: string;
+  isFree: boolean;
+  allowTrial: boolean;
+  trialDays: number;
+  features: PlanFeature[];
+  pricing: PlanPricing[];
+  sortOrder: number;
+}
+
 export interface PlanPricing {
   currency: string;
   monthlyPrice: number;
@@ -42,6 +56,7 @@ export interface PlanFeature {
   featureType: "limit" | "boolean" | "access";
   unitType?: string;
   sortOrder?: number;
+  isIncluded: boolean; // Backend-calculated property indicating if feature is included in plan
   createdAt: string;
   updatedAt: string;
 }

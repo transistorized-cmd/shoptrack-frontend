@@ -47,6 +47,11 @@ export interface RegisterRequest {
   confirmPassword: string;
   firstName?: string;
   lastName?: string;
+  phone?: string;
+  subscriptionPlanId: number;
+  currency: string;
+  languageCode: string;
+  timezone?: string;
   acceptTerms: boolean;
   recaptchaToken?: string;
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="currency-picker">
     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-      {{ $t('registration.selectCurrency', 'Select Currency') }}
+      {{ $t('registration.selectCurrency') }}
     </label>
 
     <!-- Currency Selection -->
@@ -23,7 +23,7 @@
 
     <!-- No Currencies Available -->
     <div v-if="availableCurrencies.length === 0" class="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
-      {{ $t('registration.noCurrenciesAvailable', 'No currencies available for this plan') }}
+      {{ $t('registration.noCurrenciesAvailable') }}
     </div>
   </div>
 </template>

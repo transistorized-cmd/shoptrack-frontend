@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import type { Receipt, ReceiptQuery, PagedResult } from "@/types/receipt";
 import type { ProcessingResult } from "@/types/plugin";
 import { receiptsService } from "@/services/receipts";
+import { generateIdempotencyKey } from "@/utils/idempotency";
 
 export const useReceiptsStore = defineStore("receipts", () => {
   // State
@@ -72,10 +73,14 @@ export const useReceiptsStore = defineStore("receipts", () => {
     loading.value = true;
     error.value = null;
 
+    // Generate idempotency key for this upload operation
+    const idempotencyKey = generateIdempotencyKey();
+
     try {
       const result: ProcessingResult = await receiptsService.uploadReceipt(
         file,
         pluginKey,
+        idempotencyKey,
       );
 
       if (result.success && !result.isDuplicate) {

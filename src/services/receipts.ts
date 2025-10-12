@@ -55,14 +55,22 @@ export const receiptsService = {
   async uploadReceipt(
     file: File,
     pluginKey?: string,
+    idempotencyKey?: string,
   ): Promise<ProcessingResult> {
     const formData = new FormData();
     formData.append("file", file);
 
+    const headers: Record<string, string> = {
+      "Content-Type": "multipart/form-data",
+    };
+
+    // Add idempotency key if provided
+    if (idempotencyKey) {
+      headers["Idempotency-Key"] = idempotencyKey;
+    }
+
     const response = await api.post("/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers,
       params: { pluginKey },
     });
     return response.data;

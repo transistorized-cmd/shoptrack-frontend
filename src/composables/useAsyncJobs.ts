@@ -5,6 +5,7 @@ import {
   type AsyncJobResult,
 } from "@/services/asyncJobs";
 import { useNotifications } from "./useNotifications";
+import { generateIdempotencyKey } from "@/utils/idempotency";
 
 interface JobTracker {
   jobId: string;
@@ -65,9 +66,13 @@ export const useAsyncJobs = () => {
     },
   ): Promise<string> => {
     try {
+      // Generate idempotency key for this upload
+      const idempotencyKey = generateIdempotencyKey();
+
       const result = await asyncJobsService.uploadAsync(file, {
         ...options,
         sessionId: sessionId.value,
+        idempotencyKey,
       });
 
       // Start tracking this job

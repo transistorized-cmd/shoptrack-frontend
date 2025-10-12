@@ -471,6 +471,45 @@ describe("receipts service", () => {
         "Upload failed",
       );
     });
+
+    it("should include idempotency key in headers when provided", async () => {
+      mockApi.post.mockResolvedValue({ data: mockProcessingResult });
+      const idempotencyKey = "550e8400-e29b-41d4-a716-446655440000";
+
+      const result = await receiptsService.uploadReceipt(
+        mockFile,
+        undefined,
+        idempotencyKey,
+      );
+
+      expect(mockApi.post).toHaveBeenCalledWith(
+        "/upload",
+        expect.any(FormData),
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "Idempotency-Key": idempotencyKey,
+          },
+          params: { pluginKey: undefined },
+        },
+      );
+      expect(result).toEqual(mockProcessingResult);
+    });
+
+    it("should not include idempotency key header when not provided", async () => {
+      mockApi.post.mockResolvedValue({ data: mockProcessingResult });
+
+      await receiptsService.uploadReceipt(mockFile);
+
+      expect(mockApi.post).toHaveBeenCalledWith(
+        "/upload",
+        expect.any(FormData),
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          params: { pluginKey: undefined },
+        },
+      );
+    });
   });
 
   describe("validateFile", () => {

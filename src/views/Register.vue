@@ -35,7 +35,7 @@
           >
             1
           </div>
-          <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">{{ t('registration.selectPlan', 'Select Plan') }}</span>
+          <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">{{ t('registration.selectPlan') }}</span>
         </div>
 
         <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -51,7 +51,7 @@
           >
             2
           </div>
-          <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">{{ t('registration.yourInfo', 'Your Info') }}</span>
+          <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">{{ t('registration.yourInfo') }}</span>
         </div>
       </div>
 
@@ -102,10 +102,10 @@
       <div v-if="!registrationSuccess && currentStep === 1" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 space-y-6">
         <div>
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            {{ t('registration.chooseYourPlan', 'Choose Your Plan') }}
+            {{ t('registration.chooseYourPlan') }}
           </h3>
           <p class="text-sm text-gray-600 dark:text-gray-400">
-            {{ t('registration.planDescription', 'Select a plan to get started. No credit card required.') }}
+            {{ t('registration.planDescription') }}
           </p>
         </div>
 
@@ -144,7 +144,7 @@
             :disabled="!isStep1Complete"
             class="px-6 py-3 bg-shoptrack-600 hover:bg-shoptrack-700 dark:bg-shoptrack-700 dark:hover:bg-shoptrack-800 text-white font-medium rounded-lg focus:ring-2 focus:ring-shoptrack-500 focus:ring-offset-2 dark:ring-offset-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
-            {{ t('common.next', 'Next') }}
+            {{ t('common.next') }}
             <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -159,16 +159,16 @@
           <div class="flex items-center justify-between">
             <div>
               <h4 class="font-semibold text-gray-900 dark:text-white">{{ selectedPlan.name }}</h4>
-              <p v-if="selectedPlan.isFree" class="text-sm text-green-600 dark:text-green-400">{{ t('registration.free', 'Free Forever') }}</p>
+              <p v-if="selectedPlan.isFree" class="text-sm text-green-600 dark:text-green-400">{{ t('registration.free') }}</p>
               <p v-else-if="selectedPlan.allowTrial" class="text-sm text-amber-600 dark:text-amber-400">
-                {{ selectedPlan.trialDays }} {{ t('registration.dayFreeTrial', 'day free trial') }}
+                {{ selectedPlan.trialDays }} {{ t('registration.dayFreeTrial') }}
               </p>
             </div>
             <button
               @click="goToPreviousStep"
               class="text-sm text-shoptrack-600 dark:text-shoptrack-400 hover:text-shoptrack-700 dark:hover:text-shoptrack-300"
             >
-              {{ t('registration.changePlan', 'Change Plan') }}
+              {{ t('registration.changePlan') }}
             </button>
           </div>
         </div>
@@ -427,7 +427,7 @@
               @click="goToPreviousStep"
               class="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-shoptrack-500 transition-colors"
             >
-              {{ t('common.back', 'Back') }}
+              {{ t('common.back') }}
             </button>
 
             <button
@@ -647,10 +647,10 @@ const availablePeriodOptions = computed((): PeriodOption[] => {
       : 0;
 
     const labels: Record<string, string> = {
-      Monthly: t('subscriptions.monthly', 'Monthly'),
-      Quarterly: t('subscriptions.quarterly', 'Quarterly'),
-      Biannual: t('subscriptions.biannual', 'Biannual'),
-      Yearly: t('subscriptions.yearly', 'Yearly')
+      Monthly: t('subscriptions.monthly'),
+      Quarterly: t('subscriptions.quarterly'),
+      Biannual: t('subscriptions.biannual'),
+      Yearly: t('subscriptions.yearly')
     };
 
     return {

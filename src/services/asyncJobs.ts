@@ -59,6 +59,7 @@ export const asyncJobsService = {
       priority?: number;
       webhookUrl?: string;
       sessionId?: string;
+      idempotencyKey?: string;
       onUploadProgress?: (progressEvent: any) => void;
     },
   ): Promise<AsyncJobResult> {
@@ -77,6 +78,11 @@ export const asyncJobsService = {
       const headers: Record<string, string> = {};
       if (options?.sessionId) {
         headers["X-Session-Id"] = options.sessionId;
+      }
+
+      // Add idempotency key if provided
+      if (options?.idempotencyKey) {
+        headers["Idempotency-Key"] = options.idempotencyKey;
       }
 
       try {

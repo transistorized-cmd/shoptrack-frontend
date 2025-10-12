@@ -376,7 +376,7 @@ import { useCategoriesStore } from "@/stores/categories";
 import LocalizedDateInput from "@/components/common/LocalizedDateInput.vue";
 import { getCurrentLocale } from "@/i18n";
 
-import axios from "axios";
+import api from "@/services/api";
 
 interface CategoryAnalytics {
   categoryId: number;
@@ -660,7 +660,7 @@ async function fetchCategoryData() {
     const locale = getCurrentLocale();
     params.append("locale", locale);
 
-    const response = await axios.get(`/api/analytics/categories?${params}`);
+    const response = await api.get(`/analytics/categories?${params}`);
     categoryData.value = extractArrayResponse<CategoryAnalytics>(
       response.data,
       "categories",
@@ -686,8 +686,8 @@ async function fetchItemData(categoryId: number, category?: string) {
     const locale = getCurrentLocale();
     params.append("locale", locale);
 
-    const response = await axios.get(
-      `/api/analytics/categories/items?${params}`,
+    const response = await api.get(
+      `/analytics/categories/items?${params}`,
     );
     itemData.value = extractArrayResponse<ItemAnalytics>(response.data, "items");
   } catch (error) {
@@ -716,8 +716,8 @@ async function fetchReceiptData(
     const locale = getCurrentLocale();
     params.append("locale", locale);
 
-    const response = await axios.get(
-      `/api/analytics/categories/items/receipts?${params}`,
+    const response = await api.get(
+      `/analytics/categories/items/receipts?${params}`,
     );
     receiptData.value = extractArrayResponse<ItemReceipt>(
       response.data,

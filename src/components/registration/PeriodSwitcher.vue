@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslation } from '@/composables/useTranslation';
 
 export interface PeriodOption {
   value: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual';
@@ -40,7 +40,7 @@ const emit = defineEmits<{
   'period-selected': [period: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual'];
 }>();
 
-const { t } = useI18n();
+const { t } = useTranslation();
 
 function selectPeriod(period: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual') {
   emit('period-selected', period);

@@ -3,7 +3,7 @@
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-shoptrack-600 dark:border-shoptrack-400"></div>
-      <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">{{ $t('common.loading', 'Loading plans...') }}</p>
+      <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">{{ $t('common.loading') }}</p>
     </div>
 
     <!-- Error State -->
@@ -49,7 +49,7 @@
           <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          {{ plan.trialDays }} {{ $t('registration.dayFreeTrial', 'day free trial') }}
+          {{ plan.trialDays }} {{ $t('registration.dayFreeTrial') }}
         </div>
 
         <!-- Free Badge -->
@@ -57,7 +57,7 @@
           <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
-          {{ $t('registration.free', 'Free Forever') }}
+          {{ $t('registration.free') }}
         </div>
 
         <!-- Pricing Display -->
@@ -71,7 +71,7 @@
             </span>
           </div>
           <p v-if="plan.allowTrial && plan.trialDays > 0" class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-            {{ $t('registration.afterTrial', 'after trial period') }}
+            {{ $t('registration.afterTrial') }}
           </p>
         </div>
 
@@ -138,7 +138,7 @@ const loadPlans = async () => {
     }
   } catch (err: any) {
     console.error('Failed to load public plans:', err);
-    error.value = err.response?.data?.message || t('registration.plansLoadError', 'Failed to load subscription plans');
+    error.value = err.response?.data?.message || t('registration.plansLoadError');
   } finally {
     loading.value = false;
   }
@@ -164,7 +164,7 @@ const getPricingForCurrency = (plan: PublicPlan, periodType?: 'Monthly' | 'Yearl
 };
 
 const formatPrice = (price: number, currency: string): string => {
-  if (price === 0) return t('registration.free', 'Free');
+  if (price === 0) return t('registration.free');
 
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -174,17 +174,17 @@ const formatPrice = (price: number, currency: string): string => {
 };
 
 const getPeriodLabel = (periodType: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual' | undefined | null): string => {
-  if (!periodType) return t('registration.month', 'month');
+  if (!periodType) return t('registration.month');
 
   const labels: Record<string, string> = {
-    Monthly: t('registration.month', 'month'),
-    Quarterly: t('registration.quarter', 'quarter'),
-    Biannual: t('registration.halfYear', '6 months'),
-    Yearly: t('registration.year', 'year')
+    Monthly: t('registration.month'),
+    Quarterly: t('registration.quarter'),
+    Biannual: t('registration.halfYear'),
+    Yearly: t('registration.year')
   };
 
   // Return the label if it exists, otherwise return the default
-  return labels[periodType] || t('registration.month', 'month');
+  return labels[periodType] || t('registration.month');
 };
 
 const formatFeature = (feature: PlanFeature): string => {

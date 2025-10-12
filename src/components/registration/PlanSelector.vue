@@ -97,11 +97,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslation } from '@/composables/useTranslation';
 import { subscriptionService } from '@/services/subscription.service';
 import type { PublicPlan, PlanFeature, PlanPricing } from '@/types/subscription';
 
-const { t } = useI18n();
+const { t } = useTranslation();
 
 const props = defineProps<{
   selectedPlanId?: number | null;

@@ -14,12 +14,12 @@
           </svg>
         </div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          {{ $t('auth.createYourAccount') }}
+          {{ t('auth.createYourAccount') }}
         </h2>
         <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-300">
-          {{ $t('common.or') }}
+          {{ t('common.or') }}
           <router-link to="/login" class="font-medium text-shoptrack-600 hover:text-shoptrack-500 dark:text-shoptrack-400 dark:hover:text-shoptrack-300">
-            {{ $t('auth.signInToExistingAccount') }}
+            {{ t('auth.signInToExistingAccount') }}
           </router-link>
         </p>
       </div>
@@ -35,7 +35,7 @@
           >
             1
           </div>
-          <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">{{ $t('registration.selectPlan', 'Select Plan') }}</span>
+          <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">{{ t('registration.selectPlan', 'Select Plan') }}</span>
         </div>
 
         <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -51,7 +51,7 @@
           >
             2
           </div>
-          <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">{{ $t('registration.yourInfo', 'Your Info') }}</span>
+          <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">{{ t('registration.yourInfo', 'Your Info') }}</span>
         </div>
       </div>
 
@@ -65,7 +65,7 @@
           </div>
           <div class="ml-3">
             <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
-              {{ $t('auth.registrationError') }}
+              {{ t('auth.registrationError') }}
             </h3>
             <div class="mt-2 text-sm text-red-700 dark:text-red-300">
               <ul v-if="authStore.error?.details" class="list-disc list-inside space-y-1">
@@ -89,7 +89,7 @@
           </div>
           <div class="ml-3">
             <h3 class="text-sm font-medium text-green-800 dark:text-green-200">
-              {{ $t('auth.accountCreatedSuccessfully') }}
+              {{ t('auth.accountCreatedSuccessfully') }}
             </h3>
             <div class="mt-2 text-sm text-green-700 dark:text-green-300">
               <p>{{ successMessage }}</p>
@@ -102,10 +102,10 @@
       <div v-if="!registrationSuccess && currentStep === 1" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 space-y-6">
         <div>
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            {{ $t('registration.chooseYourPlan', 'Choose Your Plan') }}
+            {{ t('registration.chooseYourPlan', 'Choose Your Plan') }}
           </h3>
           <p class="text-sm text-gray-600 dark:text-gray-400">
-            {{ $t('registration.planDescription', 'Select a plan to get started. No credit card required.') }}
+            {{ t('registration.planDescription', 'Select a plan to get started. No credit card required.') }}
           </p>
         </div>
 
@@ -133,7 +133,7 @@
             :disabled="!isStep1Complete"
             class="px-6 py-3 bg-shoptrack-600 hover:bg-shoptrack-700 dark:bg-shoptrack-700 dark:hover:bg-shoptrack-800 text-white font-medium rounded-lg focus:ring-2 focus:ring-shoptrack-500 focus:ring-offset-2 dark:ring-offset-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
-            {{ $t('common.next', 'Next') }}
+            {{ t('common.next', 'Next') }}
             <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -148,16 +148,16 @@
           <div class="flex items-center justify-between">
             <div>
               <h4 class="font-semibold text-gray-900 dark:text-white">{{ selectedPlan.name }}</h4>
-              <p v-if="selectedPlan.isFree" class="text-sm text-green-600 dark:text-green-400">{{ $t('registration.free', 'Free Forever') }}</p>
+              <p v-if="selectedPlan.isFree" class="text-sm text-green-600 dark:text-green-400">{{ t('registration.free', 'Free Forever') }}</p>
               <p v-else-if="selectedPlan.allowTrial" class="text-sm text-amber-600 dark:text-amber-400">
-                {{ selectedPlan.trialDays }} {{ $t('registration.dayFreeTrial', 'day free trial') }}
+                {{ selectedPlan.trialDays }} {{ t('registration.dayFreeTrial', 'day free trial') }}
               </p>
             </div>
             <button
               @click="goToPreviousStep"
               class="text-sm text-shoptrack-600 dark:text-shoptrack-400 hover:text-shoptrack-700 dark:hover:text-shoptrack-300"
             >
-              {{ $t('registration.changePlan', 'Change Plan') }}
+              {{ t('registration.changePlan', 'Change Plan') }}
             </button>
           </div>
         </div>
@@ -165,7 +165,7 @@
         <!-- OAuth Registration Options -->
         <div class="space-y-4">
           <div class="text-center text-sm text-gray-600 dark:text-gray-300">
-            {{ $t('auth.quickSignUpWith') }}
+            {{ t('auth.quickSignUpWith') }}
           </div>
 
           <div class="grid grid-cols-2 gap-3">
@@ -205,7 +205,7 @@
               <div class="w-full border-t border-gray-300 dark:border-gray-600" />
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">{{ $t('auth.orRegisterWithEmail') }}</span>
+              <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">{{ t('auth.orRegisterWithEmail') }}</span>
             </div>
           </div>
         </div>
@@ -216,7 +216,7 @@
           <!-- Name Fields -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label for="first-name" class="sr-only">{{ $t('auth.firstName') }}</label>
+              <label for="first-name" class="sr-only">{{ t('auth.firstName') }}</label>
               <input
                 id="first-name"
                 v-model="form.firstName"
@@ -224,12 +224,12 @@
                 type="text"
                 autocomplete="given-name"
                 class="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-shoptrack-500 focus:border-shoptrack-500 dark:focus:ring-shoptrack-400 dark:focus:border-shoptrack-400 focus:z-10 sm:text-sm transition-colors"
-                :placeholder="$t('auth.firstName')"
+                :placeholder="t('auth.firstName')"
                 :disabled="loading"
               />
             </div>
             <div>
-              <label for="last-name" class="sr-only">{{ $t('auth.lastName') }}</label>
+              <label for="last-name" class="sr-only">{{ t('auth.lastName') }}</label>
               <input
                 id="last-name"
                 v-model="form.lastName"
@@ -237,7 +237,7 @@
                 type="text"
                 autocomplete="family-name"
                 class="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-shoptrack-500 focus:border-shoptrack-500 dark:focus:ring-shoptrack-400 dark:focus:border-shoptrack-400 focus:z-10 sm:text-sm transition-colors"
-                :placeholder="$t('auth.lastName')"
+                :placeholder="t('auth.lastName')"
                 :disabled="loading"
               />
             </div>
@@ -245,7 +245,7 @@
 
           <!-- Email -->
           <div>
-            <label for="email-address" class="sr-only">{{ $t('auth.email') }}</label>
+            <label for="email-address" class="sr-only">{{ t('auth.email') }}</label>
             <input
               id="email-address"
               v-model="form.email"
@@ -257,7 +257,7 @@
               :class="{
                 'border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500': emailError
               }"
-              :placeholder="$t('auth.email')"
+              :placeholder="t('auth.email')"
               :disabled="loading"
             />
             <p v-if="emailError" class="mt-1 text-sm text-red-600">{{ emailError }}</p>
@@ -265,7 +265,7 @@
 
           <!-- Password -->
           <div class="relative">
-            <label for="password" class="sr-only">{{ $t('auth.password') }}</label>
+            <label for="password" class="sr-only">{{ t('auth.password') }}</label>
             <input
               id="password"
               v-model="form.password"
@@ -277,7 +277,7 @@
               :class="{
                 'border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500': passwordError
               }"
-              :placeholder="$t('auth.password')"
+              :placeholder="t('auth.password')"
               :disabled="loading"
               @input="validatePassword"
             />
@@ -354,7 +354,7 @@
                 'border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500': confirmPasswordError,
                 'border-green-300 dark:border-green-600 focus:ring-green-500 focus:border-green-500': form.confirmPassword && !confirmPasswordError
               }"
-              :placeholder="$t('auth.confirmPassword')"
+              :placeholder="t('auth.confirmPassword')"
               :disabled="loading"
             />
             <button
@@ -401,10 +401,10 @@
             </div>
             <div class="ml-3 text-sm">
               <label for="accept-terms" class="text-gray-600 dark:text-gray-300">
-                {{ $t('auth.iAgreeToThe') }}
-                <a href="/terms" target="_blank" rel="noopener noreferrer" class="text-shoptrack-600 dark:text-shoptrack-400 hover:text-shoptrack-500 dark:hover:text-shoptrack-300 transition-colors">{{ $t('auth.termsOfService') }}</a>
-                {{ $t('auth.and') }}
-                <a href="/privacy" target="_blank" rel="noopener noreferrer" class="text-shoptrack-600 dark:text-shoptrack-400 hover:text-shoptrack-500 dark:hover:text-shoptrack-300 transition-colors">{{ $t('auth.privacyPolicy') }}</a>
+                {{ t('auth.iAgreeToThe') }}
+                <a href="/terms" target="_blank" rel="noopener noreferrer" class="text-shoptrack-600 dark:text-shoptrack-400 hover:text-shoptrack-500 dark:hover:text-shoptrack-300 transition-colors">{{ t('auth.termsOfService') }}</a>
+                {{ t('auth.and') }}
+                <a href="/privacy" target="_blank" rel="noopener noreferrer" class="text-shoptrack-600 dark:text-shoptrack-400 hover:text-shoptrack-500 dark:hover:text-shoptrack-300 transition-colors">{{ t('auth.privacyPolicy') }}</a>
               </label>
             </div>
           </div>
@@ -416,7 +416,7 @@
               @click="goToPreviousStep"
               class="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-shoptrack-500 transition-colors"
             >
-              {{ $t('common.back', 'Back') }}
+              {{ t('common.back', 'Back') }}
             </button>
 
             <button
@@ -434,7 +434,7 @@
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                {{ $t('auth.creatingAccount') }}
+                {{ t('auth.creatingAccount') }}
               </span>
               <span v-else class="flex items-center">
                 <svg
@@ -445,7 +445,7 @@
                 >
                   <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
                 </svg>
-                {{ $t('auth.createAccount') }}
+                {{ t('auth.createAccount') }}
               </span>
             </button>
           </div>
@@ -458,7 +458,7 @@
           class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           @click="router.push('/login')"
         >
-          {{ $t('auth.continueToSignInButton') }}
+          {{ t('auth.continueToSignInButton') }}
         </button>
         <button
           v-if="needsEmailConfirmation"
@@ -466,13 +466,13 @@
           :disabled="loading"
           @click="resendConfirmation"
         >
-          {{ loading ? $t('auth.sending') : $t('auth.resendConfirmationEmail') }}
+          {{ loading ? t('auth.sending') : t('auth.resendConfirmationEmail') }}
         </button>
       </div>
 
       <!-- Security Notice -->
       <div class="mt-4 text-center text-xs text-gray-500">
-        <p>{{ $t('auth.securityNoticeRegistration') }}</p>
+        <p>{{ t('auth.securityNoticeRegistration') }}</p>
       </div>
     </div>
   </div>

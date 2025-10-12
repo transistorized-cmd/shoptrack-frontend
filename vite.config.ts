@@ -4,6 +4,8 @@ import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { visualizer } from "rollup-plugin-visualizer";
 import vueI18n from "@intlify/unplugin-vue-i18n/vite";
+// @ts-ignore - JavaScript plugin file
+import { vueI18nProductionFix } from "./scripts/vue-i18n-production-fix.js";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -50,6 +52,11 @@ export default defineConfig(({ mode }) => {
   });
   // The unplugin can return a single plugin or an array - normalize to array
   plugins.push(...(Array.isArray(i18nPlugin) ? i18nPlugin : [i18nPlugin]));
+
+  // Add vue-i18n production fix plugin
+  if (isProd) {
+    plugins.push(vueI18nProductionFix());
+  }
 
   // Bundle analyzer plugin - only enable when ANALYZE=true
   if (process.env.ANALYZE) {

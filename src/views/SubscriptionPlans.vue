@@ -79,7 +79,7 @@
             <div class="mb-6">
               <div class="flex items-baseline">
                 <span class="text-4xl font-bold text-gray-900">
-                  {{ formatPrice(billingInterval === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice) }}
+                  {{ formatPrice(getPriceForPeriod(plan.prices, 'USD', billingInterval === 'monthly' ? 'Monthly' : 'Yearly')) }}
                 </span>
                 <span class="text-gray-600 ml-2">
                   / {{ billingInterval === 'monthly' ? $t('subscriptions.month') : $t('subscriptions.year') }}
@@ -116,7 +116,7 @@
                   ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
                   : plan.code === 'premium'
                   ? 'bg-shoptrack-600 text-white hover:bg-shoptrack-700'
-                  : plan.monthlyPrice === 0
+                  : getPriceForPeriod(plan.prices, 'USD', 'Monthly') === 0
                   ? 'bg-gray-800 text-white hover:bg-gray-900'
                   : 'bg-shoptrack-100 text-shoptrack-700 hover:bg-shoptrack-200'
               ]"
@@ -124,7 +124,7 @@
               {{
                 isCurrentPlan(plan)
                   ? $t('subscriptions.currentPlan')
-                  : plan.monthlyPrice === 0
+                  : getPriceForPeriod(plan.prices, 'USD', 'Monthly') === 0
                   ? $t('subscriptions.getStarted')
                   : $t('subscriptions.subscribe')
               }}
@@ -159,6 +159,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import subscriptionService from '@/services/subscriptionService';
 import CheckoutModal from '@/components/subscriptions/CheckoutModal.vue';
+import { getPriceForPeriod } from '@/types/subscription';
 import type { SubscriptionPlan, UserSubscription } from '@/types/subscription';
 
 const { t } = useI18n();

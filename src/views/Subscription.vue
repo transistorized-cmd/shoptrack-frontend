@@ -264,6 +264,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import { useDateLocalization } from '@/composables/useDateLocalization';
 import { subscriptionService } from '@/services/subscription.service';
+import { getPriceForPeriod } from '@/types/subscription';
 import type { SubscriptionPlan, UserSubscription } from '@/types/subscription';
 
 const { t } = useTranslation();
@@ -287,12 +288,8 @@ const isCurrentPlan = computed(() => (plan: SubscriptionPlan) => {
 });
 
 const getPlanPrice = computed(() => (plan: SubscriptionPlan, interval: 'monthly' | 'yearly') => {
-  if (!plan.prices || !plan.prices[selectedCurrency.value]) {
-    // Fallback to default prices if currency pricing not available
-    return interval === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
-  }
-  const pricing = plan.prices[selectedCurrency.value];
-  return interval === 'monthly' ? pricing.monthlyPrice : pricing.yearlyPrice;
+  const periodType = interval === 'monthly' ? 'Monthly' : 'Yearly';
+  return getPriceForPeriod(plan.prices || [], selectedCurrency.value, periodType);
 });
 
 // Methods
@@ -368,7 +365,9 @@ const subscribeToPlan = async (plan: SubscriptionPlan) => {
     error.value = null;
 
     // Check if it's a free plan
-    const isFree = plan.monthlyPrice <= 0 && plan.yearlyPrice <= 0;
+    const monthlyPrice = getPriceForPeriod(plan.prices || [], 'USD', 'Monthly');
+    const yearlyPrice = getPriceForPeriod(plan.prices || [], 'USD', 'Yearly');
+    const isFree = monthlyPrice <= 0 && yearlyPrice <= 0;
 
     // Check if user already has a subscription
     const hasExistingSubscription = currentSubscription.value &&

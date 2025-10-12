@@ -103,11 +103,11 @@
                 <!-- Price -->
                 <div class="mb-4">
                   <span class="text-3xl font-bold text-gray-900 dark:text-white">
-                    ${{ plan.monthlyPrice.toFixed(2) }}
+                    ${{ getPriceForPeriod(plan.prices, 'USD', 'Monthly').toFixed(2) }}
                   </span>
                   <span class="text-gray-600 dark:text-gray-400 ml-1 text-sm">/month</span>
-                  <div v-if="plan.yearlyPrice > 0" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    ${{ plan.yearlyPrice.toFixed(2) }}/year (save {{ Math.round((1 - plan.yearlyPrice / (plan.monthlyPrice * 12)) * 100) }}%)
+                  <div v-if="getPriceForPeriod(plan.prices, 'USD', 'Yearly') > 0" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    ${{ getPriceForPeriod(plan.prices, 'USD', 'Yearly').toFixed(2) }}/year (save {{ Math.round((1 - getPriceForPeriod(plan.prices, 'USD', 'Yearly') / (getPriceForPeriod(plan.prices, 'USD', 'Monthly') * 12)) * 100) }}%)
                   </div>
                 </div>
 
@@ -208,6 +208,7 @@ import { ref, computed, watch } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import { useDateLocalization } from '@/composables/useDateLocalization';
 import { subscriptionService } from '@/services/subscription.service';
+import { getPriceForPeriod } from '@/types/subscription';
 import type { SubscriptionPlan, UserSubscription } from '@/types/subscription';
 
 const { t } = useTranslation();
@@ -280,7 +281,9 @@ const subscribeToPlan = async (plan: SubscriptionPlan) => {
     error.value = null;
 
     // Check if it's a free plan
-    const isFree = plan.monthlyPrice <= 0 && plan.yearlyPrice <= 0;
+    const monthlyPrice = getPriceForPeriod(plan.prices, 'USD', 'Monthly');
+    const yearlyPrice = getPriceForPeriod(plan.prices, 'USD', 'Yearly');
+    const isFree = monthlyPrice <= 0 && yearlyPrice <= 0;
 
     // Check if user already has a subscription
     const hasExistingSubscription = currentSubscription.value &&

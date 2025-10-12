@@ -64,10 +64,10 @@
         <div v-if="!plan.isFree && getPricingForCurrency(plan)" class="mb-4">
           <div class="flex items-baseline">
             <span class="text-3xl font-bold text-gray-900 dark:text-white">
-              {{ formatPrice(getPricingForCurrency(plan)!.monthlyPrice, getPricingForCurrency(plan)!.currency) }}
+              {{ formatPrice(getPricingForCurrency(plan)!.price, getPricingForCurrency(plan)!.currency) }}
             </span>
             <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
-              / {{ $t('registration.month', 'month') }}
+              / {{ getPeriodLabel(getPricingForCurrency(plan)?.periodType ? normalizePeriodType(getPricingForCurrency(plan)!.periodType) : undefined) }}
             </span>
           </div>
           <p v-if="plan.allowTrial && plan.trialDays > 0" class="text-xs text-gray-500 dark:text-gray-500 mt-1">
@@ -99,6 +99,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
 import { subscriptionService } from '@/services/subscription.service';
+import { normalizePeriodType } from '@/types/subscription';
 import type { PublicPlan, PlanFeature, PlanPricing } from '@/types/subscription';
 
 const { t } = useTranslation();
@@ -106,10 +107,12 @@ const { t } = useTranslation();
 const props = defineProps<{
   selectedPlanId?: number | null;
   selectedCurrency?: string;
+  selectedPeriod?: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual';
 }>();
 
 const emit = defineEmits<{
   'plan-selected': [plan: PublicPlan];
+  'plans-loaded': [plans: PublicPlan[]];
 }>();
 
 const plans = ref<PublicPlan[]>([]);
@@ -125,6 +128,9 @@ const loadPlans = async () => {
     const response = await subscriptionService.getPublicPlans();
     plans.value = response.plans;
 
+    // Emit loaded plans so parent can calculate available periods
+    emit('plans-loaded', plans.value);
+
     // Auto-select trial plan (paid plan with trial) if none selected
     if (plans.value.length > 0 && !selectedPlanId.value) {
       const trialPlan = plans.value.find(p => p.allowTrial && !p.isFree);
@@ -138,12 +144,23 @@ const loadPlans = async () => {
   }
 };
 
-// Get pricing for current currency
-const getPricingForCurrency = (plan: PublicPlan): PlanPricing | null => {
+// Get pricing for current currency and period type
+const getPricingForCurrency = (plan: PublicPlan, periodType?: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual'): PlanPricing | null => {
   if (!plan.pricing || plan.pricing.length === 0) return null;
 
   const currency = props.selectedCurrency || 'USD';
-  return plan.pricing.find(p => p.currency === currency) || plan.pricing[0];
+  const period = periodType || props.selectedPeriod || 'Monthly';
+
+  // First try to find exact match for currency and period (normalize backend enum values)
+  const exactMatch = plan.pricing.find(p => p.currency === currency && normalizePeriodType(p.periodType) === period);
+  if (exactMatch) return exactMatch;
+
+  // Fallback to any price for the currency
+  const currencyMatch = plan.pricing.find(p => p.currency === currency);
+  if (currencyMatch) return currencyMatch;
+
+  // Last resort: return first available price
+  return plan.pricing[0];
 };
 
 const formatPrice = (price: number, currency: string): string => {
@@ -154,6 +171,20 @@ const formatPrice = (price: number, currency: string): string => {
     currency: currency,
     minimumFractionDigits: 2,
   }).format(price);
+};
+
+const getPeriodLabel = (periodType: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual' | undefined | null): string => {
+  if (!periodType) return t('registration.month', 'month');
+
+  const labels: Record<string, string> = {
+    Monthly: t('registration.month', 'month'),
+    Quarterly: t('registration.quarter', 'quarter'),
+    Biannual: t('registration.halfYear', '6 months'),
+    Yearly: t('registration.year', 'year')
+  };
+
+  // Return the label if it exists, otherwise return the default
+  return labels[periodType] || t('registration.month', 'month');
 };
 
 const formatFeature = (feature: PlanFeature): string => {

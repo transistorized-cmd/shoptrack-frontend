@@ -109,11 +109,22 @@
           </p>
         </div>
 
+        <!-- Period Switcher -->
+        <div v-if="availablePeriodOptions.length > 0" class="mb-6">
+          <PeriodSwitcher
+            :available-periods="availablePeriodOptions"
+            :selected-period="selectedPeriod"
+            @period-selected="handlePeriodSelected"
+          />
+        </div>
+
         <!-- Plan Selector -->
         <PlanSelector
           :selected-plan-id="selectedPlan?.id"
           :selected-currency="selectedCurrency"
+          :selected-period="selectedPeriod"
           @plan-selected="handlePlanSelected"
+          @plans-loaded="handlePlansLoaded"
         />
 
         <!-- Currency Picker -->
@@ -487,9 +498,12 @@ import { useOAuth } from '@/composables/useOAuth';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import PlanSelector from '@/components/registration/PlanSelector.vue';
 import CurrencyPicker from '@/components/registration/CurrencyPicker.vue';
+import PeriodSwitcher from '@/components/registration/PeriodSwitcher.vue';
+import type { PeriodOption } from '@/components/registration/PeriodSwitcher.vue';
 import { getBrowserPreferences } from '@/utils/browserDetection';
+import { getAvailablePeriods, calculateSavings } from '@/types/subscription';
 import type { RegisterRequest } from '@/types/auth';
-import type { PublicPlan } from '@/types/subscription';
+import type { PublicPlan, PlanPricing } from '@/types/subscription';
 
 const router = useRouter();
 const { t } = useTranslation();
@@ -506,9 +520,11 @@ const needsEmailConfirmation = ref(false);
 // Step tracking
 const currentStep = ref(1);
 
-// Plan and currency state
+// Plan, currency, and period state
 const selectedPlan = ref<PublicPlan | null>(null);
 const selectedCurrency = ref<string>('USD');
+const selectedPeriod = ref<'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual'>('Monthly');
+const allPlans = ref<PublicPlan[]>([]);
 
 const form = reactive<RegisterRequest>({
   email: '',
@@ -614,6 +630,42 @@ onMounted(() => {
   selectedCurrency.value = browserPrefs.currency;
 });
 
+// Compute available period options from all plans
+const availablePeriodOptions = computed((): PeriodOption[] => {
+  if (allPlans.value.length === 0) return [];
+
+  // Collect all pricing from all plans
+  const allPricing: PlanPricing[] = allPlans.value.flatMap(plan => plan.pricing || []);
+
+  // Get unique periods
+  const periods = getAvailablePeriods(allPricing);
+
+  // Map to PeriodOption format with labels and savings
+  return periods.map(period => {
+    const savings = period !== 'Monthly'
+      ? calculateSavings(allPricing, selectedCurrency.value, period as 'Yearly' | 'Quarterly' | 'Biannual')
+      : 0;
+
+    const labels: Record<string, string> = {
+      Monthly: t('subscriptions.monthly', 'Monthly'),
+      Quarterly: t('subscriptions.quarterly', 'Quarterly'),
+      Biannual: t('subscriptions.biannual', 'Biannual'),
+      Yearly: t('subscriptions.yearly', 'Yearly')
+    };
+
+    return {
+      value: period,
+      label: labels[period] || period,
+      savings: savings > 0 ? savings : undefined
+    };
+  });
+});
+
+// Handle plans loaded event
+function handlePlansLoaded(plans: PublicPlan[]) {
+  allPlans.value = plans;
+}
+
 // Handle plan selection
 function handlePlanSelected(plan: PublicPlan) {
   selectedPlan.value = plan;
@@ -627,6 +679,13 @@ function handlePlanSelected(plan: PublicPlan) {
       selectedCurrency.value = availableCurrencies[0];
       form.currency = availableCurrencies[0];
     }
+
+    // Ensure selected period is available for this plan
+    const availablePeriods = getAvailablePeriods(plan.pricing);
+    if (!availablePeriods.includes(selectedPeriod.value)) {
+      // Auto-select first available period
+      selectedPeriod.value = availablePeriods[0] || 'Monthly';
+    }
   }
 }
 
@@ -634,6 +693,11 @@ function handlePlanSelected(plan: PublicPlan) {
 function handleCurrencySelected(currency: string) {
   selectedCurrency.value = currency;
   form.currency = currency;
+}
+
+// Handle period selection
+function handlePeriodSelected(period: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual') {
+  selectedPeriod.value = period;
 }
 
 // Step navigation

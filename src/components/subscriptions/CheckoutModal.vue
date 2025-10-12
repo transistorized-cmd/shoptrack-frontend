@@ -23,7 +23,7 @@
           <h3 class="font-semibold text-gray-900 mb-2">{{ plan.name }}</h3>
           <div class="flex justify-between items-baseline">
             <span class="text-2xl font-bold text-shoptrack-600">
-              {{ formatPrice(billingInterval === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice) }}
+              {{ formatPrice(getPriceForPeriod(plan.prices, 'USD', billingInterval === 'monthly' ? 'Monthly' : 'Yearly')) }}
             </span>
             <span class="text-gray-600">
               / {{ billingInterval === 'monthly' ? $t('subscriptions.month') : $t('subscriptions.year') }}
@@ -169,7 +169,7 @@
               <div class="border-t pt-2 mt-2 flex justify-between text-base">
                 <span class="font-medium text-gray-900">{{ $t('subscriptions.total') }}:</span>
                 <span class="font-bold text-shoptrack-600">
-                  {{ formatPrice(billingInterval === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice) }}
+                  {{ formatPrice(getPriceForPeriod(plan.prices, 'USD', billingInterval === 'monthly' ? 'Monthly' : 'Yearly')) }}
                 </span>
               </div>
             </div>
@@ -213,6 +213,7 @@ import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStripePayment } from '@/composables/useStripePayment';
 import subscriptionService from '@/services/subscriptionService';
+import { getPriceForPeriod } from '@/types/subscription';
 import type { SubscriptionPlan, PaymentMethod } from '@/types/subscription';
 
 const props = defineProps<{

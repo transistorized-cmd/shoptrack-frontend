@@ -76,7 +76,7 @@
 
             <!-- Pricing Display -->
             <div class="flex items-center text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              <span>${{ (currentSubscription.plan?.monthlyPrice || 0).toFixed(2) }}</span>
+              <span>${{ getPriceForPeriod(currentSubscription.plan?.prices || [], 'USD', 'Monthly').toFixed(2) }}</span>
               <span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">/month</span>
             </div>
 
@@ -120,7 +120,7 @@
             </button>
 
             <button
-              v-if="currentSubscription.status === 'active' && currentSubscription.plan?.monthlyPrice > 0 && !currentSubscription.cancelledAt"
+              v-if="currentSubscription.status === 'active' && getPriceForPeriod(currentSubscription.plan?.prices || [], 'USD', 'Monthly') > 0 && !currentSubscription.cancelledAt"
               @click="showCancelDialog = true"
               class="px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
             >
@@ -251,6 +251,7 @@ import { useTranslation } from '@/composables/useTranslation';
 import { useDateLocalization } from '@/composables/useDateLocalization';
 import { subscriptionService } from '@/services/subscription.service';
 import { getStatusBadgeClass, getUsageBarClass } from '@/utils/uiHelpers';
+import { getPriceForPeriod } from '@/types/subscription';
 import SubscriptionModal from './SubscriptionModal.vue';
 import type { UserSubscription, FeatureUsage, PlanFeature } from '@/types/subscription';
 

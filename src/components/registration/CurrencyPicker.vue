@@ -36,8 +36,8 @@ const { t } = useTranslation();
 
 interface PlanPricing {
   currency: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
+  price: number;
+  periodType: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual';
   isActive: boolean;
 }
 
@@ -56,10 +56,11 @@ const selectedCurrency = ref<string>(props.modelValue || '');
 
 // Computed properties
 const availableCurrencies = computed(() => {
-  return props.pricing
+  // Get unique currencies from pricing array (there will be multiple entries per currency for different periods)
+  const currencies = [...new Set(props.pricing
     .filter(p => p.isActive)
-    .map(p => p.currency)
-    .sort();
+    .map(p => p.currency))];
+  return currencies.sort();
 });
 
 // Watch for prop changes

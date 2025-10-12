@@ -3,8 +3,6 @@ export interface SubscriptionPlan {
   name: string;
   code: string;
   description?: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
   setupFee?: number;
   isActive: boolean;
   isPublic: boolean;
@@ -13,7 +11,7 @@ export interface SubscriptionPlan {
   sortOrder: number;
   currency: string;
   features: PlanFeature[];
-  prices?: { [currency: string]: PlanPricing };
+  prices: PlanPricing[]; // Changed from Dictionary to List
   availableCurrencies?: string[];
   createdAt: string;
   updatedAt: string;
@@ -35,11 +33,27 @@ export interface PublicPlan {
 
 export interface PlanPricing {
   currency: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  stripeMonthlyPriceId?: string;
-  stripeYearlyPriceId?: string;
+  price: number;
+  periodType: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual' | number; // Backend may send enum number or string
+  stripePriceId?: string;
   isActive: boolean;
+}
+
+// Enum mapping for backend period types
+// Backend sends: 1 = Monthly, 2 = Yearly, 3 = Quarterly, 4 = Biannual
+export const PeriodTypeMap: Record<number, 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual'> = {
+  1: 'Monthly',
+  2: 'Yearly',
+  3: 'Quarterly',
+  4: 'Biannual'
+};
+
+// Helper to normalize period type from backend
+export function normalizePeriodType(periodType: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual' | number): 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual' {
+  if (typeof periodType === 'number') {
+    return PeriodTypeMap[periodType] || 'Monthly';
+  }
+  return periodType;
 }
 
 export interface PlanFeature {
@@ -187,4 +201,66 @@ export interface PaymentTransaction {
   failureReason?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+// Helper functions to work with new pricing structure
+export function getPriceForPeriod(prices: PlanPricing[], currency: string, periodType: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual'): number {
+  const price = prices.find(p => p.currency === currency && normalizePeriodType(p.periodType) === periodType);
+  return price?.price ?? 0;
+}
+
+export function getMonthlyPrice(prices: PlanPricing[], currency: string = 'USD'): number {
+  return getPriceForPeriod(prices, currency, 'Monthly');
+}
+
+export function getYearlyPrice(prices: PlanPricing[], currency: string = 'USD'): number {
+  return getPriceForPeriod(prices, currency, 'Yearly');
+}
+
+export function getAvailableCurrencies(prices: PlanPricing[]): string[] {
+  return [...new Set(prices.map(p => p.currency))];
+}
+
+/**
+ * Get all unique period types available across all pricing entries
+ * Returns periods dynamically from the data (e.g., ['Monthly', 'Yearly', 'Quarterly'])
+ */
+export function getAvailablePeriods(prices: PlanPricing[]): Array<'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual'> {
+  // Normalize all period types from numbers to strings
+  const periods = [...new Set(prices.map(p => normalizePeriodType(p.periodType)))];
+  // Sort by typical duration: Monthly, Quarterly, Biannual, Yearly
+  const order: Record<string, number> = { Monthly: 1, Quarterly: 2, Biannual: 3, Yearly: 4 };
+  return periods.sort((a, b) => (order[a] || 999) - (order[b] || 999)) as Array<'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual'>;
+}
+
+/**
+ * Calculate savings percentage for a period compared to monthly pricing
+ * Returns the percentage saved (e.g., 20 for 20% savings)
+ */
+export function calculateSavings(
+  prices: PlanPricing[],
+  currency: string,
+  periodType: 'Yearly' | 'Quarterly' | 'Biannual',
+  basePeriod: 'Monthly' = 'Monthly'
+): number {
+  const basePrice = getPriceForPeriod(prices, currency, basePeriod);
+  const periodPrice = getPriceForPeriod(prices, currency, periodType);
+
+  if (basePrice === 0 || periodPrice === 0) return 0;
+
+  // Calculate what the period would cost if charged monthly
+  const periodMultipliers: Record<string, number> = {
+    Monthly: 1,
+    Quarterly: 3,
+    Biannual: 6,
+    Yearly: 12
+  };
+
+  const expectedCost = basePrice * periodMultipliers[periodType];
+  const actualCost = periodPrice;
+
+  if (expectedCost === 0) return 0;
+
+  const savings = ((expectedCost - actualCost) / expectedCost) * 100;
+  return Math.round(savings);
 }

@@ -27,10 +27,13 @@
           <div class="ml-5 w-0 flex-1">
             <dl>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                {{ t('home.totalReceipts') }}
+                {{ t('home.receiptsThisMonth') }}
               </dt>
               <dd class="text-lg font-medium text-gray-900 dark:text-white">
-                {{ receiptsStore.pagination.totalCount }}
+                {{ receiptsThisMonth }}
+              </dd>
+              <dd class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                {{ t('home.receiptsLastMonth') }}: {{ receiptsLastMonth }}
               </dd>
             </dl>
           </div>
@@ -43,16 +46,19 @@
             <div
               class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center"
             >
-              <span class="text-white font-semibold">⏳</span>
+              <span class="text-white font-semibold">💰</span>
             </div>
           </div>
           <div class="ml-5 w-0 flex-1">
             <dl>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                {{ t('home.pending') }}
+                {{ t('home.totalSpentThisMonth') }}
               </dt>
               <dd class="text-lg font-medium text-gray-900 dark:text-white">
-                {{ receiptsStore.pendingReceipts.length }}
+                ${{ totalSpentThisMonth.toFixed(2) }}
+              </dd>
+              <dd class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                {{ t('home.spentLastMonth') }}: ${{ totalSpentLastMonth.toFixed(2) }}
               </dd>
             </dl>
           </div>
@@ -271,6 +277,68 @@ const { t } = useTranslation();
 const { formatDate: formatDateSafe } = useDateLocalization();
 
 const recentReceipts = computed(() => receiptsStore.receipts.slice(0, 5));
+
+// Calculate receipts for current month (from first day of month to today)
+const receiptsThisMonth = computed(() => {
+  const now = new Date();
+  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  return receiptsStore.receipts.filter((receipt) => {
+    if (!receipt.receiptDate) return false;
+    const receiptDate = new Date(receipt.receiptDate);
+    return receiptDate >= firstDayOfMonth && receiptDate <= now;
+  }).length;
+});
+
+// Calculate total spent this month
+const totalSpentThisMonth = computed(() => {
+  const now = new Date();
+  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  return receiptsStore.receipts
+    .filter((receipt) => {
+      if (!receipt.receiptDate) return false;
+      const receiptDate = new Date(receipt.receiptDate);
+      return receiptDate >= firstDayOfMonth && receiptDate <= now;
+    })
+    .reduce((total, receipt) => {
+      if (!receipt.items) return total;
+      const receiptTotal = receipt.items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+      return total + receiptTotal;
+    }, 0);
+});
+
+// Calculate receipts for last month
+const receiptsLastMonth = computed(() => {
+  const now = new Date();
+  const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+  return receiptsStore.receipts.filter((receipt) => {
+    if (!receipt.receiptDate) return false;
+    const receiptDate = new Date(receipt.receiptDate);
+    return receiptDate >= firstDayOfLastMonth && receiptDate <= lastDayOfLastMonth;
+  }).length;
+});
+
+// Calculate total spent last month
+const totalSpentLastMonth = computed(() => {
+  const now = new Date();
+  const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+  return receiptsStore.receipts
+    .filter((receipt) => {
+      if (!receipt.receiptDate) return false;
+      const receiptDate = new Date(receipt.receiptDate);
+      return receiptDate >= firstDayOfLastMonth && receiptDate <= lastDayOfLastMonth;
+    })
+    .reduce((total, receipt) => {
+      if (!receipt.items) return total;
+      const receiptTotal = receipt.items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+      return total + receiptTotal;
+    }, 0);
+});
 
 const getStatusColor = (status: string) => {
   switch (status) {

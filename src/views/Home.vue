@@ -66,45 +66,120 @@
       </div>
 
       <div class="card p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div
-              class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center"
-            >
-              <span class="text-white font-semibold">✅</span>
+        <div class="flex flex-col h-full">
+          <div class="flex items-center mb-3">
+            <div class="flex-shrink-0">
+              <div
+                class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center"
+              >
+                <span class="text-white font-semibold">📊</span>
+              </div>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                {{ t('home.topCategories') }}
+              </h3>
             </div>
           </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                {{ t('home.completed') }}
-              </dt>
-              <dd class="text-lg font-medium text-gray-900 dark:text-white">
-                {{ receiptsStore.completedReceipts.length }}
-              </dd>
-            </dl>
+          <div v-if="topCategories.length > 0" class="space-y-2 flex-1">
+            <div
+              v-for="(category, index) in topCategories"
+              :key="category.category"
+              class="flex items-center justify-between"
+            >
+              <div class="flex items-center space-x-2 flex-1 min-w-0">
+                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500">
+                  {{ index + 1 }}.
+                </span>
+                <span class="text-sm font-medium text-gray-900 dark:text-white truncate capitalize">
+                  {{ category.category }}
+                </span>
+              </div>
+              <div class="text-right ml-2">
+                <div class="text-sm font-bold text-gray-900 dark:text-white">
+                  ${{ category.totalAmount.toFixed(2) }}
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ category.percentage.toFixed(1) }}%
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="flex-1 flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm">
+            {{ t('home.noDataThisMonth') }}
           </div>
         </div>
       </div>
 
       <div class="card p-6">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div
-              class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center"
-            >
-              <span class="text-white font-semibold">🔌</span>
+        <div class="flex flex-col h-full">
+          <div class="flex items-center mb-3">
+            <div class="flex-shrink-0">
+              <div
+                class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center"
+              >
+                <span class="text-white font-semibold">⏱️</span>
+              </div>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                {{ t('home.spendingPace') }}
+              </h3>
             </div>
           </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                {{ t('home.availablePlugins') }}
-              </dt>
-              <dd class="text-lg font-medium text-gray-900 dark:text-white">
-                {{ pluginsStore.receiptPlugins.length }}
-              </dd>
-            </dl>
+
+          <div v-if="spendingPace.hasSpending" class="flex-1">
+            <!-- Daily Average -->
+            <div class="text-2xl font-bold text-gray-900 dark:text-white">
+              ${{ spendingPace.dailyAverage.toFixed(2) }}<span class="text-base font-normal text-gray-500 dark:text-gray-400">/day</span>
+            </div>
+
+            <!-- Days Remaining -->
+            <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {{ spendingPace.daysRemaining }} {{ spendingPace.daysRemaining === 1 ? t('home.dayRemaining') : t('home.daysRemaining') }}
+            </div>
+
+            <!-- Projected Total -->
+            <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600 dark:text-gray-300">{{ t('home.projected') }}:</span>
+                <span class="text-lg font-semibold text-gray-900 dark:text-white">
+                  ${{ spendingPace.projectedTotal.toFixed(2) }}
+                </span>
+              </div>
+
+              <!-- Pace Comparison -->
+              <div v-if="Math.abs(spendingPace.paceChange) > 5" class="mt-2 text-xs">
+                <span :class="spendingPace.paceChange > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
+                  {{ spendingPace.paceChange > 0 ? '↑' : '↓' }}
+                  {{ Math.abs(spendingPace.paceChange).toFixed(1) }}%
+                  {{ spendingPace.paceChange > 0 ? t('home.fasterThanLastMonth') : t('home.slowerThanLastMonth') }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mt-3">
+              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div
+                  class="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all"
+                  :style="{ width: `${Math.min(spendingPace.progressPercent, 100)}%` }"
+                />
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {{ Math.round(spendingPace.progressPercent) }}% {{ t('home.throughTheMonth') }}
+              </div>
+            </div>
+
+            <!-- Early estimate warning -->
+            <div v-if="spendingPace.isEarlyEstimate" class="mt-2 text-xs text-amber-600 dark:text-amber-400 flex items-center">
+              <span class="mr-1">ℹ️</span>
+              <span>{{ t('home.earlyEstimate') }}</span>
+            </div>
+          </div>
+
+          <div v-else class="flex-1 flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm py-4">
+            {{ t('home.noSpendingYet') }}
           </div>
         </div>
       </div>
@@ -264,12 +339,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { onMounted, computed, ref } from "vue";
 import { useTranslation } from "@/composables/useTranslation";
 import { useDateLocalization } from "@/composables/useDateLocalization";
 import { RouterLink } from "vue-router";
 import { useReceiptsStore } from "@/stores/receipts";
 import { usePluginsStore } from "@/stores/plugins";
+import { api } from "@/services/api";
 
 const receiptsStore = useReceiptsStore();
 const pluginsStore = usePluginsStore();
@@ -278,66 +354,62 @@ const { formatDate: formatDateSafe } = useDateLocalization();
 
 const recentReceipts = computed(() => receiptsStore.receipts.slice(0, 5));
 
-// Calculate receipts for current month (from first day of month to today)
-const receiptsThisMonth = computed(() => {
+// Monthly data from backend analytics (respects subscription limits)
+const monthlySpendingThisMonth = ref(0);
+const monthlySpendingLastMonth = ref(0);
+const monthlyReceiptsThisMonth = ref(0);
+const monthlyReceiptsLastMonth = ref(0);
+
+// Top 3 categories for current month
+interface TopCategory {
+  category: string;
+  totalAmount: number;
+  percentage: number;
+}
+const topCategories = ref<TopCategory[]>([]);
+
+// Use backend analytics data for receipt count (respects subscription limits)
+const receiptsThisMonth = computed(() => monthlyReceiptsThisMonth.value);
+
+// Use backend analytics data for total spent (respects subscription limits)
+const totalSpentThisMonth = computed(() => monthlySpendingThisMonth.value);
+
+// Use backend analytics data for last month receipts (respects subscription limits)
+const receiptsLastMonth = computed(() => monthlyReceiptsLastMonth.value);
+
+// Use backend analytics data for last month (respects subscription limits)
+const totalSpentLastMonth = computed(() => monthlySpendingLastMonth.value);
+
+// Spending Pace Calculator
+const spendingPace = computed(() => {
   const now = new Date();
-  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-  return receiptsStore.receipts.filter((receipt) => {
-    if (!receipt.receiptDate) return false;
-    const receiptDate = new Date(receipt.receiptDate);
-    return receiptDate >= firstDayOfMonth && receiptDate <= now;
-  }).length;
-});
+  const daysElapsed = Math.floor((now - firstDay) / (1000 * 60 * 60 * 24)) + 1;
+  const daysRemaining = lastDay.getDate() - now.getDate();
+  const totalDays = lastDay.getDate();
 
-// Calculate total spent this month
-const totalSpentThisMonth = computed(() => {
-  const now = new Date();
-  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const dailyAvg = monthlySpendingThisMonth.value / daysElapsed;
+  const projected = dailyAvg * totalDays;
 
-  return receiptsStore.receipts
-    .filter((receipt) => {
-      if (!receipt.receiptDate) return false;
-      const receiptDate = new Date(receipt.receiptDate);
-      return receiptDate >= firstDayOfMonth && receiptDate <= now;
-    })
-    .reduce((total, receipt) => {
-      if (!receipt.items) return total;
-      const receiptTotal = receipt.items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
-      return total + receiptTotal;
-    }, 0);
-});
+  // Calculate progress percentage
+  const progressPercent = (daysElapsed / totalDays) * 100;
 
-// Calculate receipts for last month
-const receiptsLastMonth = computed(() => {
-  const now = new Date();
-  const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+  // Compare to last month
+  const lastMonthDays = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+  const lastMonthDailyAvg = lastMonthDays > 0 ? monthlySpendingLastMonth.value / lastMonthDays : 0;
+  const paceChange = lastMonthDailyAvg > 0 ? ((dailyAvg - lastMonthDailyAvg) / lastMonthDailyAvg) * 100 : 0;
 
-  return receiptsStore.receipts.filter((receipt) => {
-    if (!receipt.receiptDate) return false;
-    const receiptDate = new Date(receipt.receiptDate);
-    return receiptDate >= firstDayOfLastMonth && receiptDate <= lastDayOfLastMonth;
-  }).length;
-});
-
-// Calculate total spent last month
-const totalSpentLastMonth = computed(() => {
-  const now = new Date();
-  const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-
-  return receiptsStore.receipts
-    .filter((receipt) => {
-      if (!receipt.receiptDate) return false;
-      const receiptDate = new Date(receipt.receiptDate);
-      return receiptDate >= firstDayOfLastMonth && receiptDate <= lastDayOfLastMonth;
-    })
-    .reduce((total, receipt) => {
-      if (!receipt.items) return total;
-      const receiptTotal = receipt.items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
-      return total + receiptTotal;
-    }, 0);
+  return {
+    dailyAverage: dailyAvg,
+    daysRemaining: daysRemaining,
+    projectedTotal: projected,
+    paceChange: paceChange,
+    progressPercent: progressPercent,
+    isEarlyEstimate: daysElapsed <= 3,
+    hasSpending: monthlySpendingThisMonth.value > 0,
+  };
 });
 
 const getStatusColor = (status: string) => {
@@ -370,10 +442,95 @@ const getStatusIcon = (status: string) => {
   }
 };
 
+// Fetch monthly spending and receipt count data from backend
+const fetchMonthlySpending = async () => {
+  try {
+    // Get current month date range
+    const now = new Date();
+    const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startDateThisMonth = firstDayThisMonth.toISOString().split('T')[0];
+    const endDateThisMonth = now.toISOString().split('T')[0];
+
+    // Get last month date range
+    const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    const startDateLastMonth = firstDayLastMonth.toISOString().split('T')[0];
+    const endDateLastMonth = lastDayLastMonth.toISOString().split('T')[0];
+
+    // Fetch this month's spending data from analytics API
+    const thisMonthAnalyticsParams = new URLSearchParams({
+      startDate: startDateThisMonth,
+      endDate: endDateThisMonth,
+    });
+    const thisMonthAnalyticsResponse = await api.get(`/analytics/categories?${thisMonthAnalyticsParams}`);
+    const thisMonthData = Array.isArray(thisMonthAnalyticsResponse.data)
+      ? thisMonthAnalyticsResponse.data
+      : thisMonthAnalyticsResponse.data?.data || [];
+
+    // Calculate total spending for this month
+    monthlySpendingThisMonth.value = thisMonthData.reduce(
+      (sum: number, cat: { totalAmount: number }) => sum + cat.totalAmount,
+      0
+    );
+
+    // Get top 3 categories by spending for current month
+    topCategories.value = thisMonthData
+      .slice(0, 3) // Already sorted by totalAmount descending from backend
+      .map((cat: { category: string; totalAmount: number; percentage: number }) => ({
+        category: cat.category,
+        totalAmount: cat.totalAmount,
+        percentage: cat.percentage,
+      }));
+
+    // Fetch this month's receipt count from receipts API (respects subscription limits)
+    const thisMonthReceiptsParams = new URLSearchParams({
+      startDate: startDateThisMonth,
+      endDate: endDateThisMonth,
+      pageSize: '1', // We only need the totalCount from pagination metadata
+    });
+    const thisMonthReceiptsResponse = await api.get(`/receipts?${thisMonthReceiptsParams}`);
+    monthlyReceiptsThisMonth.value = thisMonthReceiptsResponse.data?.totalCount || 0;
+
+    // Fetch last month's spending data from analytics API
+    const lastMonthAnalyticsParams = new URLSearchParams({
+      startDate: startDateLastMonth,
+      endDate: endDateLastMonth,
+    });
+    const lastMonthAnalyticsResponse = await api.get(`/analytics/categories?${lastMonthAnalyticsParams}`);
+    const lastMonthData = Array.isArray(lastMonthAnalyticsResponse.data)
+      ? lastMonthAnalyticsResponse.data
+      : lastMonthAnalyticsResponse.data?.data || [];
+
+    // Calculate total spending for last month
+    monthlySpendingLastMonth.value = lastMonthData.reduce(
+      (sum: number, cat: { totalAmount: number }) => sum + cat.totalAmount,
+      0
+    );
+
+    // Fetch last month's receipt count from receipts API (respects subscription limits)
+    const lastMonthReceiptsParams = new URLSearchParams({
+      startDate: startDateLastMonth,
+      endDate: endDateLastMonth,
+      pageSize: '1', // We only need the totalCount from pagination metadata
+    });
+    const lastMonthReceiptsResponse = await api.get(`/receipts?${lastMonthReceiptsParams}`);
+    monthlyReceiptsLastMonth.value = lastMonthReceiptsResponse.data?.totalCount || 0;
+  } catch (error) {
+    console.error('Error fetching monthly spending data:', error);
+    // Fallback to 0 on error
+    monthlySpendingThisMonth.value = 0;
+    monthlySpendingLastMonth.value = 0;
+    monthlyReceiptsThisMonth.value = 0;
+    monthlyReceiptsLastMonth.value = 0;
+    topCategories.value = [];
+  }
+};
+
 onMounted(async () => {
   await Promise.all([
     receiptsStore.fetchReceipts({ pageSize: 10 }),
     pluginsStore.fetchAllPlugins(),
+    fetchMonthlySpending(),
   ]);
 });
 </script>

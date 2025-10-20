@@ -240,6 +240,7 @@ import { useCurrencyFormat } from "@/composables/useCurrencyFormat";
 import { useCategoriesStore } from "@/stores/categories";
 import { getCurrentLocale } from "@/i18n";
 import { getStatusColor, capitalizeFirst } from '@/utils/uiHelpers';
+import { getApiBaseUrl } from "@/services/api";
 
 const props = defineProps<{
   isOpen: boolean;
@@ -272,7 +273,7 @@ watch(
   () => props.isOpen,
   (isOpen) => {
     if (isOpen && props.receipt.id) {
-      imageUrl.value = `/api/receipts/${props.receipt.id}/image`;
+      imageUrl.value = `${getApiBaseUrl()}/receipts/${props.receipt.id}/image`;
     } else {
       imageUrl.value = null;
     }

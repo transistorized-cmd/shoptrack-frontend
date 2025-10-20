@@ -345,7 +345,7 @@ import { useDateLocalization } from "@/composables/useDateLocalization";
 import { RouterLink } from "vue-router";
 import { useReceiptsStore } from "@/stores/receipts";
 import { usePluginsStore } from "@/stores/plugins";
-import { api } from "@/services/api";
+import api from "@/services/api";
 
 const receiptsStore = useReceiptsStore();
 const pluginsStore = usePluginsStore();

@@ -81,6 +81,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: "/analytics/purchase-patterns",
+      name: "purchase-patterns",
+      component: () => import("@/views/PurchasePatterns.vue"),
+      meta: { requiresAuth: true },
+    },
+    {
       path: "/profile",
       name: "profile",
       component: () => import("@/views/Profile.vue"),

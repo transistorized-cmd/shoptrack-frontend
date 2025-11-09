@@ -179,18 +179,24 @@
         <div
           v-else-if="
             currentReports[plugin.key] &&
-            !['category-analytics', 'price-trends'].includes(plugin.key)
+            !['category-analytics', 'price-trends', 'purchase-patterns'].includes(plugin.key)
           "
           class="mt-6 space-y-4"
         >
-          <div class="border-t border-gray-200 pt-4">
-            <h4 class="text-sm font-medium text-gray-900 mb-3">
+          <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
+            <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
               {{ currentReports[plugin.key].title }}
             </h4>
 
+            <!-- Purchase Pattern Report Component -->
+            <PurchasePatternReport
+              v-if="plugin.key === 'purchase-patterns'"
+              :data="currentReports[plugin.key].data"
+            />
+
             <!-- Generic data display for other report types -->
-            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              <pre class="text-xs text-gray-600 whitespace-pre-wrap">{{
+            <div v-else class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <pre class="text-xs text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{{
                 JSON.stringify(currentReports[plugin.key].data, null, 2)
               }}</pre>
             </div>
@@ -222,6 +228,7 @@ import { usePluginLocalization } from "@/composables/usePluginLocalization";
 import LocalizedDateInput from "@/components/common/LocalizedDateInput.vue";
 import CategoryAnalyticsReport from "@/components/reports/CategoryAnalyticsReport.vue";
 import PriceTrendsReport from "@/components/reports/PriceTrendsReport.vue";
+import PurchasePatternReport from "@/components/reports/PurchasePatternReport.vue";
 import type { ReportPlugin } from "@/types/plugin";
 import type { ReportData, DateRange } from "@/types/report";
 
@@ -312,6 +319,14 @@ const generateReport = async (plugin: ReportPlugin) => {
     router.push({
       path: "/analytics/price-trends",
       query,
+    });
+    return;
+  }
+
+  // For purchase patterns, redirect to dedicated purchase patterns view
+  if (plugin.key === "purchase-patterns") {
+    router.push({
+      path: "/analytics/purchase-patterns",
     });
     return;
   }

@@ -745,5 +745,27 @@
       "notActivated": "Subscription activation is taking longer than expected. This usually means the webhook hasn't been received yet. Please refresh the page in a few moments or contact support if the issue persists.",
       "verifyFailed": "Failed to check subscription status"
     }
+  },
+  "score": {
+    "notification": {
+      "celebration": {
+        "title": "Amazing Progress!"
+      },
+      "improvement": {
+        "title": "Great Job!"
+      },
+      "maintained": {
+        "title": "Solid Work!"
+      },
+      "slow": {
+        "title": "Keep Going!"
+      },
+      "declining": {
+        "title": "Don't Give Up!"
+      },
+      "previous": "Previous",
+      "new": "New",
+      "awesome": "Awesome!"
+    }
   }
 }

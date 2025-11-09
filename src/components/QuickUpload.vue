@@ -444,23 +444,39 @@
         </div>
       </div>
     </div>
+
+    <!-- Score Notification Modal -->
+    <ScoreNotificationModal
+      v-if="scoreNotification"
+      :notification="scoreNotification"
+      :show="showScoreNotification"
+      @dismiss="handleScoreNotificationDismiss"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
 import { RouterLink } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { FILE_SIZE } from "@/constants/app";
 import { pluginsService, type PluginDetectionResult } from "@/services/plugins";
 import { useAsyncJobs } from "@/composables/useAsyncJobs";
 import { useJobNotifications } from "@/composables/useJobNotifications";
 import { featureService, type FeatureLimitCheckResult } from "@/services/featureService";
+import { analyticsService } from "@/services/analytics";
 import type { AsyncUploadResult, ReceiptPlugin } from "@/types/plugin";
+import type { ScoreNotification } from "@/types/scoreNotification";
+import { createScoreNotification } from "@/types/scoreNotification";
+import ScoreNotificationModal from "./ScoreNotificationModal.vue";
 import {
   validateFile,
   formatFileSize as formatSize,
   type FileValidationResult,
 } from "@/utils/fileValidation";
+
+// i18n
+const { locale } = useI18n();
 
 // Quick upload state
 const selectedFile = ref<File | null>(null);
@@ -474,6 +490,11 @@ const fileValidationResult = ref<FileValidationResult | null>(null);
 const showValidationErrors = ref(false);
 const uploadLimitResult = ref<FeatureLimitCheckResult | null>(null);
 const showLimitReached = ref(false);
+
+// Score notification state
+const scoreNotification = ref<ScoreNotification | null>(null);
+const showScoreNotification = ref(false);
+const previousScore = ref<number | null>(null);
 
 // Async job management
 const { 
@@ -615,9 +636,19 @@ const handleQuickUpload = async () => {
   uploadResult.value = null;
 
   try {
+    // Fetch score BEFORE upload (silent, don't show errors)
+    try {
+      const scoreBeforeUpload = await analyticsService.getExpenseVisibilityScore(locale.value);
+      previousScore.value = scoreBeforeUpload.totalScore;
+      console.log('Score before upload:', previousScore.value);
+    } catch (error) {
+      console.log('Could not fetch score before upload (non-blocking):', error);
+      // Don't block upload if score fetch fails
+    }
+
     // Store filename before clearing the file
     const filename = selectedFile.value.name;
-    
+
     // Use async upload with high priority for user-initiated uploads
     const jobId = await uploadFileAsync(selectedFile.value, {
       priority: 10, // High priority for immediate user uploads
@@ -627,10 +658,10 @@ const handleQuickUpload = async () => {
     });
 
     console.log('Upload started with job ID:', jobId);
-    
+
     // Clear the form after successful upload initiation
     clearQuickFile();
-    
+
     // Set success state for immediate feedback using stored filename
     uploadResult.value = {
       receipt: {} as any,
@@ -641,7 +672,29 @@ const handleQuickUpload = async () => {
       errors: [],
       jobId, // Store job ID for reference
     };
-    
+
+    // Fetch score AFTER upload and show notification
+    if (previousScore.value !== null) {
+      try {
+        // Wait a moment for backend to process
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        const scoreAfterUpload = await analyticsService.getExpenseVisibilityScore(locale.value);
+        console.log('Score after upload:', scoreAfterUpload.totalScore, 'Previous:', previousScore.value);
+
+        // Create and show notification
+        scoreNotification.value = createScoreNotification(
+          previousScore.value,
+          scoreAfterUpload.totalScore,
+          scoreAfterUpload.feedbackMessage || 'Great job tracking your expenses!'
+        );
+        showScoreNotification.value = true;
+      } catch (error) {
+        console.log('Could not fetch score after upload (non-blocking):', error);
+        // Don't show notification if score fetch fails
+      }
+    }
+
   } catch (error) {
     console.error("Quick upload failed:", error);
     
@@ -693,6 +746,12 @@ const clearUploadResult = () => {
 const clearLimitMessage = () => {
   showLimitReached.value = false;
   uploadLimitResult.value = null;
+};
+
+// Handle score notification dismiss
+const handleScoreNotificationDismiss = () => {
+  showScoreNotification.value = false;
+  scoreNotification.value = null;
 };
 
 // Get receipt ID from completed job

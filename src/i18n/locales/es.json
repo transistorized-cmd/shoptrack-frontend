@@ -626,5 +626,27 @@
       "canceled": "Cancelado",
       "expired": "Expirado"
     }
+  },
+  "score": {
+    "notification": {
+      "celebration": {
+        "title": "¡Progreso Increíble!"
+      },
+      "improvement": {
+        "title": "¡Buen Trabajo!"
+      },
+      "maintained": {
+        "title": "¡Sólido!"
+      },
+      "slow": {
+        "title": "¡Sigue Así!"
+      },
+      "declining": {
+        "title": "¡No Te Rindas!"
+      },
+      "previous": "Anterior",
+      "new": "Nuevo",
+      "awesome": "¡Genial!"
+    }
   }
 }

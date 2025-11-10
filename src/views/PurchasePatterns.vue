@@ -59,7 +59,7 @@
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           />
         </svg>
-        <span>Analyzing purchase patterns...</span>
+        <span>{{ progressMessage || 'Analyzing purchase patterns...' }}</span>
       </div>
     </div>
 
@@ -180,10 +180,12 @@ const reportsStore = useReportsStore();
 const loading = ref(false);
 const error = ref<string | null>(null);
 const reportData = ref<PatternReportData | null>(null);
+const progressMessage = ref<string>('');
 
 async function fetchPatterns() {
   loading.value = true;
   error.value = null;
+  progressMessage.value = '';
 
   try {
     const request = {
@@ -196,16 +198,20 @@ async function fetchPatterns() {
       }
     };
 
-    const result = await reportsStore.generateReport(request);
+    const result = await reportsStore.generateReport(request, (status: string) => {
+      progressMessage.value = status;
+    });
 
     if (result && result.data) {
       reportData.value = result.data as PatternReportData;
+      progressMessage.value = '';
     } else {
       error.value = "No data returned from the server";
     }
   } catch (err: any) {
     console.error("Failed to fetch purchase patterns:", err);
     error.value = err.response?.data?.message || err.message || "Failed to load purchase patterns";
+    progressMessage.value = '';
   } finally {
     loading.value = false;
   }

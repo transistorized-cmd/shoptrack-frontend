@@ -13,12 +13,13 @@ export const useReportsStore = defineStore("reports", () => {
   // Actions
   const generateReport = async (
     request: ReportRequest,
+    onProgress?: (status: string) => void,
   ): Promise<ReportData> => {
     loading.value = true;
     error.value = null;
 
     try {
-      const reportData = await reportsService.generateReport(request);
+      const reportData = await reportsService.generateReport(request, onProgress);
 
       // Cache the report
       const cacheKey = `${request.pluginKey}-${JSON.stringify(request.dateRange)}-${JSON.stringify(request.parameters)}`;

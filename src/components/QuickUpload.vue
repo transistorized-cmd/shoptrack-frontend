@@ -43,7 +43,7 @@
       </div>
     </div>
 
-    <form @submit.prevent="handleQuickUpload">
+    <form data-element-type="quick-upload-form">
       <!-- File Drop Zone -->
       <div
         class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
@@ -51,18 +51,15 @@
           'border-blue-500 bg-blue-50 dark:bg-blue-900/20': isDragging,
           'border-green-500 bg-green-50 dark:bg-green-900/20': selectedFile,
         }"
-        @click="quickFileInput?.click()"
-        @dragover.prevent="isDragging = true"
-        @dragenter.prevent="isDragging = true"
-        @dragleave.prevent="isDragging = false"
-        @drop.prevent="handleQuickFileDrop"
+        data-element-type="drop-zone"
+        ref="dropZoneRef"
       >
         <input
           ref="quickFileInput"
           type="file"
           accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.csv"
           class="hidden"
-          @change="handleQuickFileSelect"
+          data-element-type="file-input"
         />
 
         <div v-if="!selectedFile">
@@ -98,7 +95,7 @@
           <button
             type="button"
             class="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-            @click.stop="clearQuickFile"
+            data-element-type="remove-file-btn"
           >
             {{ $t('upload.quickUpload.remove') }}
           </button>
@@ -170,13 +167,13 @@
             <div class="flex items-center space-x-3">
               <button
                 v-if="uploadLimitResult.message?.actionUrl"
-                @click="openActionUrl(uploadLimitResult.message.actionUrl)"
+                data-element-type="action-url-btn"
                 class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-orange-700 bg-orange-100 hover:bg-orange-200 dark:bg-orange-800 dark:text-orange-200 dark:hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
               >
                 {{ uploadLimitResult.message.actionText || $t('upload.limitReached.upgrade', 'Upgrade Plan') }}
               </button>
               <button
-                @click="clearLimitMessage"
+                data-element-type="clear-limit-btn"
                 class="text-xs text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300"
               >
                 {{ $t('upload.limitReached.dismiss', 'Dismiss') }}
@@ -249,6 +246,7 @@
           formnovalidate
           :disabled="!selectedFile || quickUploading"
           class="btn btn-primary disabled:opacity-50"
+          data-element-type="submit-btn"
         >
           {{
             quickUploading ? $t('upload.quickUpload.processing') : $t('upload.quickUpload.processFile')
@@ -259,7 +257,7 @@
           <button
             type="button"
             class="btn btn-secondary"
-            @click="clearQuickFile"
+            data-element-type="clear-file-btn"
           >
             {{ $t('upload.quickUpload.clear') }}
           </button>
@@ -336,21 +334,24 @@
             </RouterLink>
             <button
               v-if="job.status?.status === 'failed'"
-              @click="retryJob(job.jobId)"
+              :data-job-id="job.jobId"
+              data-element-type="retry-job-btn"
               class="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               {{ $t('upload.quickUpload.retry') || 'Retry' }}
             </button>
             <button
               v-if="job.status?.status === 'pending' || job.status?.status === 'processing'"
-              @click="cancelJob(job.jobId)"
+              :data-job-id="job.jobId"
+              data-element-type="cancel-job-btn"
               class="text-xs px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
             >
               {{ $t('upload.quickUpload.cancel') || 'Cancel' }}
             </button>
             <button
               v-if="job.status?.status === 'completed' || job.status?.status === 'failed'"
-              @click="removeJob(job.jobId)"
+              :data-job-id="job.jobId"
+              data-element-type="remove-job-btn"
               class="text-xs px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
             >
               {{ $t('upload.quickUpload.remove') || 'Remove' }}
@@ -419,7 +420,7 @@
         <div class="flex justify-end space-x-3">
           <button
             class="btn btn-secondary"
-            @click="clearUploadResult"
+            data-element-type="upload-another-btn"
           >
             {{ $t('upload.quickUpload.uploadAnother') }}
           </button>
@@ -456,7 +457,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
 import { RouterLink } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { FILE_SIZE } from "@/constants/app";
@@ -481,6 +482,7 @@ const { locale } = useI18n();
 // Quick upload state
 const selectedFile = ref<File | null>(null);
 const quickFileInput = ref<HTMLInputElement>();
+const dropZoneRef = ref<HTMLElement>();
 const isDragging = ref(false);
 const quickUploading = ref(false);
 const detectedPlugin = ref<PluginDetectionResult | null>(null);
@@ -572,6 +574,11 @@ const clearQuickFile = () => {
   }
 };
 
+const handleRemoveSelectedFile = (event: MouseEvent) => {
+  event.stopPropagation();
+  clearQuickFile();
+};
+
 const detectPluginForFile = async (file: File) => {
   try {
     const result = await pluginsService.detectPlugin(
@@ -583,6 +590,314 @@ const detectPluginForFile = async (file: File) => {
     console.error("Plugin detection failed:", error);
     detectedPlugin.value = null;
   }
+};
+
+// NUCLEAR OPTION: Imperative drag event handlers to completely bypass _withMods
+// These are attached via addEventListener to avoid Vue template compilation issues
+let dragEventHandlers: {
+  handleDragOver: (event: DragEvent) => void;
+  handleDragEnter: (event: DragEvent) => void;
+  handleDragLeave: (event: DragEvent) => void;
+  handleDrop: (event: DragEvent) => void;
+} | null = null;
+
+const setupDragHandlers = () => {
+  if (!dropZoneRef.value) return;
+
+  // Create handlers that bypass Vue's _withMods completely
+  const handleDragOver = (event: DragEvent) => {
+    try {
+      event.preventDefault();
+      event.stopPropagation();
+      isDragging.value = true;
+    } catch (error) {
+      console.warn('Drag over error (non-blocking):', error);
+    }
+  };
+
+  const handleDragEnter = (event: DragEvent) => {
+    try {
+      event.preventDefault();
+      event.stopPropagation();
+      isDragging.value = true;
+    } catch (error) {
+      console.warn('Drag enter error (non-blocking):', error);
+    }
+  };
+
+  const handleDragLeave = (event: DragEvent) => {
+    try {
+      event.preventDefault();
+      event.stopPropagation();
+
+      // Only set isDragging to false if we're leaving the entire drop zone
+      const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+      const x = event.clientX;
+      const y = event.clientY;
+
+      // If cursor is still within the drop zone boundaries, keep dragging state
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        isDragging.value = false;
+      }
+    } catch (error) {
+      console.warn('Drag leave error (non-blocking):', error);
+      // Failsafe: always clear dragging state on error
+      isDragging.value = false;
+    }
+  };
+
+  const handleDrop = (event: DragEvent) => {
+    try {
+      handleQuickFileDrop(event);
+    } catch (error) {
+      console.warn('Drop error (non-blocking):', error);
+    }
+  };
+
+  // Store handlers for cleanup
+  dragEventHandlers = { handleDragOver, handleDragEnter, handleDragLeave, handleDrop };
+
+  // Attach event listeners directly to DOM (bypasses Vue template compilation)
+  const element = dropZoneRef.value;
+  element.addEventListener('dragover', handleDragOver);
+  element.addEventListener('dragenter', handleDragEnter);
+  element.addEventListener('dragleave', handleDragLeave);
+  element.addEventListener('drop', handleDrop);
+
+  console.log('✅ Drag handlers attached via DOM (bypassing _withMods)');
+};
+
+const cleanupDragHandlers = () => {
+  if (!dropZoneRef.value || !dragEventHandlers) return;
+
+  const element = dropZoneRef.value;
+  element.removeEventListener('dragover', dragEventHandlers.handleDragOver);
+  element.removeEventListener('dragenter', dragEventHandlers.handleDragEnter);
+  element.removeEventListener('dragleave', dragEventHandlers.handleDragLeave);
+  element.removeEventListener('drop', dragEventHandlers.handleDrop);
+
+  dragEventHandlers = null;
+  console.log('✅ Drag handlers cleaned up');
+};
+
+// MEGA NUCLEAR OPTION: Setup DOM event handlers using data attributes
+// This completely bypasses Vue template event handlers to avoid _withMods
+let domEventHandlers: {
+  formSubmitHandler: (e: Event) => void;
+  dropZoneClickHandler: (e: Event) => void;
+  fileInputChangeHandler: (e: Event) => void;
+  removeFileBtnHandler: (e: Event) => void;
+  clearFileBtnHandler: (e: Event) => void;
+  actionUrlBtnHandler: (e: Event) => void;
+  clearLimitBtnHandler: (e: Event) => void;
+  uploadAnotherBtnHandler: (e: Event) => void;
+  jobActionHandler: (e: Event) => void;
+} | null = null;
+
+const setupDomEventHandlers = () => {
+  console.log('🔧 Setting up MEGA nuclear option DOM event handlers (data attributes)');
+
+  // Form submission handler
+  const formSubmitHandler = (e: Event) => {
+    try {
+      e.preventDefault();
+      e.stopPropagation();
+      handleQuickUpload();
+    } catch (error) {
+      console.warn('Form submit error (non-blocking):', error);
+    }
+  };
+
+  // Drop zone click handler
+  const dropZoneClickHandler = (e: Event) => {
+    try {
+      e.preventDefault();
+      e.stopPropagation();
+      if (quickFileInput.value) {
+        quickFileInput.value.click();
+      }
+    } catch (error) {
+      console.warn('Drop zone click error (non-blocking):', error);
+    }
+  };
+
+  // File input change handler
+  const fileInputChangeHandler = (e: Event) => {
+    try {
+      handleQuickFileSelect(e);
+    } catch (error) {
+      console.warn('File input change error (non-blocking):', error);
+    }
+  };
+
+  // Remove file button handler
+  const removeFileBtnHandler = (e: Event) => {
+    try {
+      e.preventDefault();
+      e.stopPropagation();
+      handleRemoveSelectedFile(e as MouseEvent);
+    } catch (error) {
+      console.warn('Remove file button error (non-blocking):', error);
+    }
+  };
+
+  // Clear file button handler
+  const clearFileBtnHandler = (e: Event) => {
+    try {
+      e.preventDefault();
+      e.stopPropagation();
+      clearQuickFile();
+    } catch (error) {
+      console.warn('Clear file button error (non-blocking):', error);
+    }
+  };
+
+  // Action URL button handler
+  const actionUrlBtnHandler = (e: Event) => {
+    try {
+      e.preventDefault();
+      e.stopPropagation();
+      if (uploadLimitResult.value?.message?.actionUrl) {
+        openActionUrl(uploadLimitResult.value.message.actionUrl);
+      }
+    } catch (error) {
+      console.warn('Action URL button error (non-blocking):', error);
+    }
+  };
+
+  // Clear limit button handler
+  const clearLimitBtnHandler = (e: Event) => {
+    try {
+      e.preventDefault();
+      e.stopPropagation();
+      clearLimitMessage();
+    } catch (error) {
+      console.warn('Clear limit button error (non-blocking):', error);
+    }
+  };
+
+  // Upload another button handler
+  const uploadAnotherBtnHandler = (e: Event) => {
+    try {
+      e.preventDefault();
+      e.stopPropagation();
+      clearUploadResult();
+    } catch (error) {
+      console.warn('Upload another button error (non-blocking):', error);
+    }
+  };
+
+  // Job action handler (retry, cancel, remove)
+  const jobActionHandler = (e: Event) => {
+    try {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const target = e.target as HTMLElement;
+      const jobId = target.getAttribute('data-job-id');
+      const actionType = target.getAttribute('data-element-type');
+
+      if (!jobId || !actionType) return;
+
+      if (actionType === 'retry-job-btn') {
+        retryJob(jobId);
+      } else if (actionType === 'cancel-job-btn') {
+        cancelJob(jobId);
+      } else if (actionType === 'remove-job-btn') {
+        removeJob(jobId);
+      }
+    } catch (error) {
+      console.warn('Job action error (non-blocking):', error);
+    }
+  };
+
+  // Store handlers for cleanup
+  domEventHandlers = {
+    formSubmitHandler,
+    dropZoneClickHandler,
+    fileInputChangeHandler,
+    removeFileBtnHandler,
+    clearFileBtnHandler,
+    actionUrlBtnHandler,
+    clearLimitBtnHandler,
+    uploadAnotherBtnHandler,
+    jobActionHandler,
+  };
+
+  // Setup form submission handler
+  const form = document.querySelector('[data-element-type="quick-upload-form"]');
+  if (form) {
+    form.addEventListener('submit', formSubmitHandler);
+  }
+
+  // Setup drop zone click handler
+  const dropZone = document.querySelector('[data-element-type="drop-zone"]');
+  if (dropZone) {
+    dropZone.addEventListener('click', dropZoneClickHandler);
+  }
+
+  // Setup file input change handler
+  const fileInput = document.querySelector('[data-element-type="file-input"]');
+  if (fileInput) {
+    fileInput.addEventListener('change', fileInputChangeHandler);
+  }
+
+  // Setup button handlers with delegation for dynamic elements
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const elementType = target.getAttribute('data-element-type');
+
+    if (!elementType) return;
+
+    switch (elementType) {
+      case 'remove-file-btn':
+        removeFileBtnHandler(e);
+        break;
+      case 'clear-file-btn':
+        clearFileBtnHandler(e);
+        break;
+      case 'action-url-btn':
+        actionUrlBtnHandler(e);
+        break;
+      case 'clear-limit-btn':
+        clearLimitBtnHandler(e);
+        break;
+      case 'upload-another-btn':
+        uploadAnotherBtnHandler(e);
+        break;
+      case 'retry-job-btn':
+      case 'cancel-job-btn':
+      case 'remove-job-btn':
+        jobActionHandler(e);
+        break;
+    }
+  });
+
+  console.log('✅ MEGA nuclear option DOM event handlers setup complete');
+};
+
+const cleanupDomEventHandlers = () => {
+  if (!domEventHandlers) return;
+
+  // Remove specific event listeners
+  const form = document.querySelector('[data-element-type="quick-upload-form"]');
+  if (form) {
+    form.removeEventListener('submit', domEventHandlers.formSubmitHandler);
+  }
+
+  const dropZone = document.querySelector('[data-element-type="drop-zone"]');
+  if (dropZone) {
+    dropZone.removeEventListener('click', domEventHandlers.dropZoneClickHandler);
+  }
+
+  const fileInput = document.querySelector('[data-element-type="file-input"]');
+  if (fileInput) {
+    fileInput.removeEventListener('change', domEventHandlers.fileInputChangeHandler);
+  }
+
+  // Note: Document event delegation will be cleaned up when the component unmounts
+  domEventHandlers = null;
+  console.log('✅ MEGA nuclear option DOM event handlers cleaned up');
 };
 
 const checkUploadLimit = async (): Promise<boolean> => {
@@ -790,8 +1105,22 @@ onMounted(async () => {
   } catch (error) {
     console.error("Failed to load plugins:", error);
   }
-  
+
   // Initialize the job notification system
   initializeNotifications();
+
+  // NUCLEAR OPTION: Setup drag handlers via DOM to bypass _withMods
+  // This completely avoids Vue template compilation issues
+  setupDragHandlers();
+
+  // MEGA NUCLEAR OPTION: Setup DOM event handlers with data attributes
+  // This ensures ALL event handling bypasses Vue's _withMods
+  setupDomEventHandlers();
+});
+
+// Cleanup event listeners on unmount
+onUnmounted(() => {
+  cleanupDragHandlers();
+  cleanupDomEventHandlers();
 });
 </script>

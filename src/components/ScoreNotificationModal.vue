@@ -24,7 +24,7 @@
           <div
             v-if="show"
             class="relative max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
-            @click.stop
+            @click="handleInnerClick"
           >
             <!-- Animated Background Gradient -->
             <div
@@ -155,6 +155,10 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<Emits>()
+
+const handleInnerClick = (event: MouseEvent) => {
+  event.stopPropagation()
+}
 
 // Theme configuration
 const themeConfig = computed(() => getThemeConfig(props.notification.theme))

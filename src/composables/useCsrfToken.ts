@@ -45,7 +45,7 @@ class CsrfTokenManager {
     // Build URL from components for production
     const protocol = import.meta.env.VITE_API_PROTOCOL || "https";
     const host = import.meta.env.VITE_API_HOST || "localhost";
-    const port = import.meta.env.VITE_API_PORT || "5298";
+    const port = import.meta.env.VITE_API_PORT || "5201";
 
     return `${protocol}://${host}:${port}/api`;
   }

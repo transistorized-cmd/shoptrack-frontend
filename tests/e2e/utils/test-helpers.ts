@@ -1,4 +1,5 @@
-import { Page, expect, Locator } from "@playwright/test";
+import type { Page, Locator } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { promises as fs } from "fs";
 import path from "path";
 

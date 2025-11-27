@@ -717,7 +717,7 @@
     class="fixed inset-0 z-50 bg-black bg-opacity-75"
     @click="showImageModal = false"
   >
-    <div class="w-full h-full overflow-auto p-4" @click.stop>
+    <div class="w-full h-full overflow-auto p-4" @click="handleModalContentClick">
       <div class="min-h-full flex items-center justify-center">
         <div class="relative">
           <img
@@ -777,6 +777,10 @@ const error = ref<string | null>(null);
 const showDebugInfo = ref(false);
 const imageError = ref<string | null>(null);
 const showImageModal = ref(false);
+
+const handleModalContentClick = (event: MouseEvent) => {
+  event.stopPropagation();
+};
 
 // Editing state
 const editingStore = ref(false);

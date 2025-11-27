@@ -504,6 +504,10 @@
       "name": "Tendencias de Precios",
       "description": "Rastrea cambios de precios a lo largo del tiempo para tus artículos comprados frecuentemente"
     },
+    "prediction-insights": {
+      "name": "Predicciones de Compras",
+      "description": "Análisis inteligente de tus futuros patrones de compra y hábitos de gasto"
+    },
     "generic-receipt": {
       "name": "Procesador de Recibos Genérico",
       "description": "Procesamiento de recibos con IA para cualquier tienda o formato"
@@ -647,6 +651,163 @@
       "previous": "Anterior",
       "new": "Nuevo",
       "awesome": "¡Genial!"
+    }
+  },
+  "predictions": {
+    "title": "Predicciones de Compras",
+    "subtitle": "Análisis inteligente de tus futuros patrones de compra y hábitos de gasto",
+    "reportTypes": {
+      "accuracy": "Análisis de Precisión",
+      "newProducts": "Descubrimiento de Nuevos Productos",
+      "active": "Predicciones Activas"
+    },
+    "accuracy": {
+      "title": "Análisis de Precisión de Predicciones",
+      "subtitle": "Analiza qué tan bien coinciden nuestras predicciones de IA con tus compras reales",
+      "generateReport": "Generar Informe de Precisión",
+      "selectDateRange": "Selecciona el rango de fechas para el análisis de precisión",
+      "stats": {
+        "totalPredictions": "Predicciones Totales",
+        "accuratePredictions": "Predicciones Precisas",
+        "averageAccuracy": "Precisión Promedio",
+        "confidenceScore": "Puntuación de Confianza"
+      },
+      "table": {
+        "item": "Artículo",
+        "predictedDate": "Fecha Predicha",
+        "actualDate": "Fecha Real",
+        "accuracy": "Precisión",
+        "confidence": "Confianza",
+        "status": "Estado"
+      },
+      "status": {
+        "accurate": "Preciso",
+        "early": "Temprano",
+        "late": "Tardío",
+        "notPurchased": "No Comprado"
+      },
+      "noData": "No hay datos de precisión de predicciones disponibles para el período seleccionado",
+      "needMoreData": "Genera predicciones y espera compras para analizar la precisión"
+    },
+    "newProducts": {
+      "title": "Descubrimiento de Nuevos Productos",
+      "subtitle": "Rastrea y analiza nuevos productos que has probado por primera vez",
+      "generateReport": "Generar Informe de Descubrimiento",
+      "selectDateRange": "Selecciona el rango de fechas para el análisis de nuevos productos",
+      "stats": {
+        "totalDiscovered": "Nuevos Productos Descubiertos",
+        "seasonalProducts": "Productos Estacionales",
+        "experimentalProducts": "Productos Experimentales",
+        "occasionalProducts": "Productos Ocasionales"
+      },
+      "table": {
+        "product": "Producto",
+        "category": "Categoría",
+        "firstPurchased": "Primera Compra",
+        "classification": "Clasificación",
+        "confidence": "Confianza",
+        "averagePrice": "Precio Promedio"
+      },
+      "classifications": {
+        "seasonal": "Estacional",
+        "experimental": "Experimental",
+        "occasional": "Ocasional"
+      },
+      "noData": "No se descubrieron nuevos productos en el período seleccionado",
+      "tryDifferentRange": "Prueba un rango de fechas diferente o sube más recibos"
+    },
+    "activePredictions": {
+      "title": "Predicciones Activas",
+      "subtitle": "Predicciones actuales de IA para tus próximas compras",
+      "generatePredictions": "Generar Nuevas Predicciones",
+      "predictionDays": "Días de Predicción",
+      "selectPredictionDays": "Número de días a predecir (1-180)",
+      "stats": {
+        "totalActive": "Predicciones Activas",
+        "highPriority": "Prioridad Alta",
+        "mediumPriority": "Prioridad Media",
+        "lowPriority": "Prioridad Baja"
+      },
+      "table": {
+        "item": "Artículo",
+        "category": "Categoría",
+        "predictedDate": "Fecha Predicha",
+        "confidence": "Confianza",
+        "priority": "Prioridad",
+        "expectedPrice": "Precio Esperado"
+      },
+      "priority": {
+        "high": "Alta",
+        "medium": "Media",
+        "low": "Baja"
+      },
+      "filters": {
+        "priority": "Prioridad",
+        "status": "Estado",
+        "allPriorities": "Todas las Prioridades",
+        "allStatuses": "Todos los Estados"
+      },
+      "noData": "No hay predicciones activas disponibles",
+      "generateFirst": "Genera tus primeras predicciones para ver análisis de compras futuras"
+    },
+    "filters": {
+      "startDate": "Fecha de Inicio",
+      "endDate": "Fecha de Fin",
+      "applyFilters": "Aplicar Filtros",
+      "resetFilters": "Reiniciar Filtros"
+    },
+    "common": {
+      "loading": "Cargando predicciones...",
+      "generating": "Generando predicciones...",
+      "retry": "Reintentar",
+      "export": "Exportar",
+      "viewDetails": "Ver Detalles",
+      "close": "Cerrar",
+      "confidence": "Confianza",
+      "category": "Categoría",
+      "date": "Fecha",
+      "price": "Precio"
+    },
+    "modal": {
+      "predictionDetails": "Detalles de Predicción",
+      "accuracyDetails": "Detalles de Precisión",
+      "productDetails": "Detalles del Producto",
+      "confidence": "Puntuación de Confianza",
+      "predictedDate": "Fecha Predicha",
+      "actualDate": "Fecha Real",
+      "dateVariance": "Variación de Fecha",
+      "accuracyScore": "Puntuación de Precisión",
+      "category": "Categoría",
+      "averagePrice": "Precio Promedio",
+      "totalQuantity": "Cantidad Total",
+      "firstSeen": "Primera Vez Visto",
+      "lastPurchased": "Última Compra",
+      "purchaseHistory": "Historial de Compras",
+      "basedOnPurchasePattern": "Basado en tu patrón de compras",
+      "days": "días",
+      "daysEarly": "días temprano",
+      "daysLate": "días tarde",
+      "classification": "Clasificación",
+      "classificationConfidence": "Confianza de Clasificación"
+    },
+    "export": {
+      "csv": "Exportar CSV",
+      "json": "Exportar JSON",
+      "exporting": "Exportando...",
+      "exportComplete": "Exportación completada exitosamente",
+      "exportFailed": "Error en la exportación"
+    },
+    "errors": {
+      "loadFailed": "Error al cargar datos de predicciones",
+      "generateFailed": "Error al generar predicciones",
+      "exportFailed": "Error al exportar datos",
+      "invalidDateRange": "Rango de fechas inválido seleccionado",
+      "networkError": "Error de red. Por favor verifica tu conexión."
+    },
+    "notifications": {
+      "predictionsGenerated": "Nuevas predicciones generadas exitosamente",
+      "reportGenerated": "Informe generado exitosamente",
+      "predictionDaysUpdated": "Días de predicción actualizados"
     }
   }
 }

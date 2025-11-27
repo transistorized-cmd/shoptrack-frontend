@@ -28,7 +28,8 @@ COPY .nvmrc ./
 COPY scripts/ scripts/
 
 # Install dependencies (use legacy peer deps to resolve Vite conflict)
-RUN npm ci --legacy-peer-deps
+# Generate fresh package-lock.json with platform-specific native modules for Alpine Linux
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .

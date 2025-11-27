@@ -5,6 +5,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Lock files (platform-specific, regenerated in Docker)
+package-lock.json
+yarn.lock
+
 # Production build artifacts
 dist
 build

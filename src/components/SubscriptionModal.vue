@@ -8,7 +8,7 @@
     <!-- Modal Content -->
     <div
       class="card rounded-xl max-w-6xl w-full max-h-[90vh] overflow-hidden"
-      @click.stop
+      @click="handleInnerClick"
     >
       <!-- Modal Header -->
       <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
@@ -250,6 +250,10 @@ const formatDate = (dateString: string) => {
 
 const closeModal = () => {
   emit('close');
+};
+
+const handleInnerClick = (event: MouseEvent) => {
+  event.stopPropagation();
 };
 
 const loadPlans = async () => {

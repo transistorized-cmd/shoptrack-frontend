@@ -7,7 +7,7 @@
     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 space-y-2 sm:space-y-0">
       <div class="flex-1 min-w-0">
         <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate">
-          {{ receipt.filename }}
+          {{ receipt.storeName || receipt.filename }}
         </h3>
         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
           {{
@@ -38,13 +38,13 @@
         <p class="text-lg font-semibold text-gray-900 dark:text-white">
           {{ receipt.totalItemsDetected }}
         </p>
-        <p class="text-xs text-gray-500 dark:text-gray-400">Items Detected</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Items</p>
       </div>
       <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
         <p class="text-lg font-semibold text-gray-900 dark:text-white">
-          {{ receipt.successfullyParsed }}
+          {{ formatAmountCompact(totalAmount, receipt.currency) }}
         </p>
-        <p class="text-xs text-gray-500 dark:text-gray-400">Successfully Parsed</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
       </div>
     </div>
 
@@ -96,6 +96,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import { useRouter } from "vue-router";
 import type { Receipt } from "@/types/receipt";
 import { useDateLocalization } from "@/composables/useDateLocalization";
@@ -113,6 +114,11 @@ defineEmits<{
   delete: [receiptId: number];
   view: [receiptId: number];
 }>();
+
+const totalAmount = computed(() => {
+  if (!props.receipt.items || props.receipt.items.length === 0) return 0;
+  return props.receipt.items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+});
 
 const handleCardClick = () => {
   router.push({ name: 'receipt-detail', params: { id: props.receipt.id.toString() } });

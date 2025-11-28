@@ -33,8 +33,9 @@ export const reportsService = {
       // Poll for job completion
       const result = await this.pollForJobCompletion(jobResponse.jobId, onProgress);
 
-      // Fetch the cached result
-      const cachedResponse = await api.get(`/reports/result/${jobResponse.cacheKey}`);
+      // Fetch the cached result (URL-encode the cache key since it contains colons)
+      const encodedCacheKey = encodeURIComponent(jobResponse.cacheKey);
+      const cachedResponse = await api.get(`/reports/result/${encodedCacheKey}`);
       return cachedResponse.data;
     }
 

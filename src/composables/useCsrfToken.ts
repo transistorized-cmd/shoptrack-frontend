@@ -42,12 +42,26 @@ class CsrfTokenManager {
       return import.meta.env.VITE_API_URL;
     }
 
+    // For production deployment, detect if we're on platform.shoptrack.app
+    // This must match the logic in api.ts to ensure session consistency
+    if (
+      typeof window !== "undefined" &&
+      window.location.hostname === "platform.shoptrack.app"
+    ) {
+      return "https://api.shoptrack.app/api";
+    }
+
     // Build URL from components for production
     const protocol = import.meta.env.VITE_API_PROTOCOL || "https";
-    const host = import.meta.env.VITE_API_HOST || "localhost";
-    const port = import.meta.env.VITE_API_PORT || "5201";
+    const host = import.meta.env.VITE_API_HOST || "api.shoptrack.app";
+    const port = import.meta.env.VITE_API_PORT;
 
-    return `${protocol}://${host}:${port}/api`;
+    // Only include port if it's specified and not standard (80/443)
+    if (port && port !== "80" && port !== "443") {
+      return `${protocol}://${host}:${port}/api`;
+    } else {
+      return `${protocol}://${host}/api`;
+    }
   }
 
   /**

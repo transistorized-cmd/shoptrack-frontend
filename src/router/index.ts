@@ -87,6 +87,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: "/analytics/predictions",
+      name: "prediction-insights",
+      component: () => import("@/views/PredictionInsights.vue"),
+      meta: { requiresAuth: true },
+    },
+    {
       path: "/profile",
       name: "profile",
       component: () => import("@/views/Profile.vue"),

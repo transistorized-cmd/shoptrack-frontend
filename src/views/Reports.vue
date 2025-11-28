@@ -179,7 +179,7 @@
         <div
           v-else-if="
             currentReports[plugin.key] &&
-            !['category-analytics', 'price-trends', 'purchase-patterns'].includes(plugin.key)
+            !['category-analytics', 'price-trends', 'purchase-patterns', 'prediction-insights'].includes(plugin.key)
           "
           class="mt-6 space-y-4"
         >
@@ -327,6 +327,14 @@ const generateReport = async (plugin: ReportPlugin) => {
   if (plugin.key === "purchase-patterns") {
     router.push({
       path: "/analytics/purchase-patterns",
+    });
+    return;
+  }
+
+  // For prediction insights, redirect to dedicated predictions view
+  if (plugin.key === "prediction-insights") {
+    router.push({
+      path: "/analytics/predictions",
     });
     return;
   }

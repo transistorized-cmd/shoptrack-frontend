@@ -5,6 +5,23 @@
 
 import { TestCategory } from "./categories";
 
+// Extend Performance interface for Chrome-specific memory API
+interface PerformanceMemory {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
+
+interface PerformanceWithMemory extends Performance {
+  memory?: PerformanceMemory;
+}
+
+// Extend globalThis for test metrics storage
+declare global {
+  // eslint-disable-next-line no-var
+  var testMetrics: PerformanceMetrics[] | undefined;
+}
+
 // Performance metrics interface
 export interface PerformanceMetrics {
   testName: string;
@@ -280,8 +297,9 @@ export class PerformanceMonitor {
 
   // Take memory usage snapshot
   private takeMemorySnapshot(): void {
-    if (performance.memory) {
-      this.memorySnapshots.push(performance.memory.usedJSHeapSize);
+    const perf = performance as PerformanceWithMemory;
+    if (perf.memory) {
+      this.memorySnapshots.push(perf.memory.usedJSHeapSize);
     }
   }
 

@@ -137,10 +137,13 @@ export class FeatureService {
       )
 
       return response.data
-    } catch (error) {
-      if (error.response?.status === 404) {
-        // Message not found is not an error - return null
-        return null
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number } }
+        if (axiosError.response?.status === 404) {
+          // Message not found is not an error - return null
+          return null
+        }
       }
       console.error(`Failed to get feature message for ${featureCode}/${messageType}:`, error)
       throw error

@@ -122,6 +122,24 @@ const router = createRouter({
       component: () => import("@/views/SubscriptionSuccess.vue"),
       meta: { requiresAuth: true },
     },
+    {
+      path: "/nfc-products",
+      name: "nfc-products",
+      component: () => import("@/views/NfcProducts.vue"),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/shopping-lists",
+      name: "shopping-lists",
+      component: () => import("@/views/ShoppingLists.vue"),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/shopping-lists/:id",
+      name: "shopping-list-detail",
+      component: () => import("@/views/ShoppingListDetail.vue"),
+      meta: { requiresAuth: true },
+    },
 
     // Error pages
     {

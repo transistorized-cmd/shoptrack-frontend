@@ -242,6 +242,11 @@
       </div>
     </div>
 
+    <!-- Shopping List Widget -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <ShoppingListWidget />
+    </div>
+
     <!-- Recent Receipts -->
     <div v-if="receiptsStore.hasReceipts" class="card p-4 sm:p-6">
       <div class="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:items-center sm:justify-between mb-4">
@@ -345,6 +350,7 @@ import { useDateLocalization } from "@/composables/useDateLocalization";
 import { RouterLink } from "vue-router";
 import { useReceiptsStore } from "@/stores/receipts";
 import { usePluginsStore } from "@/stores/plugins";
+import ShoppingListWidget from "@/components/shopping-list/ShoppingListWidget.vue";
 import api from "@/services/api";
 
 const receiptsStore = useReceiptsStore();
@@ -386,7 +392,7 @@ const spendingPace = computed(() => {
   const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-  const daysElapsed = Math.floor((now - firstDay) / (1000 * 60 * 60 * 24)) + 1;
+  const daysElapsed = Math.floor((now.getTime() - firstDay.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   const daysRemaining = lastDay.getDate() - now.getDate();
   const totalDays = lastDay.getDate();
 

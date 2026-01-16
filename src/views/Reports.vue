@@ -191,7 +191,7 @@
             <!-- Purchase Pattern Report Component -->
             <PurchasePatternReport
               v-if="plugin.key === 'purchase-patterns'"
-              :data="currentReports[plugin.key].data"
+              :data="currentReports[plugin.key].data as any"
             />
 
             <!-- Generic data display for other report types -->

@@ -87,7 +87,7 @@ class SettingsService {
   async updateDisplaySettings(
     displaySettings: Partial<UserSettings["display"]>,
   ): Promise<SettingsResponse> {
-    return this.updateSettings({ display: displaySettings });
+    return this.updateSettings({ display: displaySettings as UserSettings["display"] });
   }
 
   /**
@@ -96,7 +96,7 @@ class SettingsService {
   async updateNotificationSettings(
     notificationSettings: Partial<UserSettings["notifications"]>,
   ): Promise<SettingsResponse> {
-    return this.updateSettings({ notifications: notificationSettings });
+    return this.updateSettings({ notifications: notificationSettings as UserSettings["notifications"] });
   }
 
   /**
@@ -105,7 +105,7 @@ class SettingsService {
   async updatePrivacySettings(
     privacySettings: Partial<UserSettings["privacy"]>,
   ): Promise<SettingsResponse> {
-    return this.updateSettings({ privacy: privacySettings });
+    return this.updateSettings({ privacy: privacySettings as UserSettings["privacy"] });
   }
 
   /**
@@ -114,7 +114,7 @@ class SettingsService {
   async updateReceiptSettings(
     receiptSettings: Partial<UserSettings["receipts"]>,
   ): Promise<SettingsResponse> {
-    return this.updateSettings({ receipts: receiptSettings });
+    return this.updateSettings({ receipts: receiptSettings as UserSettings["receipts"] });
   }
 }
 

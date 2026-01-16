@@ -6,13 +6,26 @@ export const useCategoriesStore = defineStore("categories", () => {
   const byLocale = ref<Record<string, CategoryDto[]>>({});
   const loading = ref(false);
   const error = ref<string | null>(null);
-  let refreshInterval: NodeJS.Timeout | null = null;
+  let refreshInterval: ReturnType<typeof setInterval> | null = null;
 
   const nameByLocale = computed(() => {
     const out: Record<string, Record<number, string>> = {};
     for (const [loc, list] of Object.entries(byLocale.value)) {
       out[loc] = {} as Record<number, string>;
       for (const c of list) out[loc][c.id] = c.name;
+    }
+    return out;
+  });
+
+  // Map category key to translated name by locale
+  const nameByKey = computed(() => {
+    const out: Record<string, Record<string, string>> = {};
+    for (const [loc, list] of Object.entries(byLocale.value)) {
+      out[loc] = {} as Record<string, string>;
+      for (const c of list) {
+        // Store by lowercase key for case-insensitive lookup
+        out[loc][c.key.toLowerCase()] = c.name;
+      }
     }
     return out;
   });
@@ -25,6 +38,20 @@ export const useCategoriesStore = defineStore("categories", () => {
     // fallback to any available locale
     for (const map of Object.values(nameByLocale.value)) {
       if (map[id]) return map[id];
+    }
+    return undefined;
+  };
+
+  // Get translated category name by key (e.g., "bakery" -> "Panadería" in Spanish)
+  const getNameByKey = (key?: string, loc?: string): string | undefined => {
+    if (!key) return undefined;
+    const normalizedKey = key.toLowerCase();
+    if (loc && nameByKey.value[loc] && nameByKey.value[loc][normalizedKey]) {
+      return nameByKey.value[loc][normalizedKey];
+    }
+    // fallback to any available locale
+    for (const map of Object.values(nameByKey.value)) {
+      if (map[normalizedKey]) return map[normalizedKey];
     }
     return undefined;
   };
@@ -80,7 +107,9 @@ export const useCategoriesStore = defineStore("categories", () => {
   return {
     byLocale,
     nameByLocale,
+    nameByKey,
     getName,
+    getNameByKey,
     loading,
     error,
     fetchCategories,

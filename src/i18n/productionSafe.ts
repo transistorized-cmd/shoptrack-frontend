@@ -97,6 +97,12 @@ function getNestedValue(obj: any, path: string): unknown {
         // so it can be processed by the translation function with values
         return value;
       }
+      // Handle pluralization format: {t: 0, b: {t: 1, c: [...]}}
+      if (value.b.t === 1 && Array.isArray(value.b.c)) {
+        // This is a compiled pluralization message - return the raw structure
+        // so it can be processed by the translation function with values
+        return value;
+      }
     }
 
     // Check for other common build system formats
@@ -132,6 +138,7 @@ interface CompiledMessageBody {
   t?: number;
   i?: any[];
   s?: string;
+  c?: any[]; // choices for pluralization
 }
 
 interface CompiledMessage {
@@ -145,6 +152,74 @@ function hasCompiledInterpolation(value: unknown): value is CompiledMessage {
 
   const body = (value as CompiledMessage).b;
   return Boolean(body && body.t === 2 && Array.isArray(body.i));
+}
+
+function hasCompiledPluralization(value: unknown): value is CompiledMessage {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const body = (value as CompiledMessage).b;
+  return Boolean(body && body.t === 1 && Array.isArray(body.c));
+}
+
+// Process vue-i18n compiled pluralization messages
+function processCompiledPluralization(
+  choices: any[],
+  values: Record<string, any> = {},
+): string {
+  // Get the count value for pluralization
+  const count =
+    values.count !== undefined
+      ? Number(values.count)
+      : values.n !== undefined
+        ? Number(values.n)
+        : 1;
+
+  // Select the appropriate form based on count
+  // Vue I18n uses: 0, 1, 2+ format or just singular/plural
+  let selectedChoice: any;
+
+  if (choices.length === 3) {
+    // Format: [zero, one, many]
+    if (count === 0) {
+      selectedChoice = choices[0];
+    } else if (count === 1) {
+      selectedChoice = choices[1];
+    } else {
+      selectedChoice = choices[2];
+    }
+  } else if (choices.length === 2) {
+    // Format: [singular, plural]
+    selectedChoice = count === 1 ? choices[0] : choices[1];
+  } else if (choices.length === 1) {
+    selectedChoice = choices[0];
+  } else {
+    // Default to the last choice for any other case
+    selectedChoice = choices[choices.length - 1] || choices[0];
+  }
+
+  // Process the selected choice
+  if (!selectedChoice) {
+    return "";
+  }
+
+  // If the choice is a simple string
+  if (typeof selectedChoice === "string") {
+    return interpolate(selectedChoice, values);
+  }
+
+  // If the choice is a compiled interpolation message
+  if (
+    typeof selectedChoice === "object" &&
+    selectedChoice.t === 2 &&
+    Array.isArray(selectedChoice.i)
+  ) {
+    return processInterpolationInstructions(selectedChoice.i, values);
+  }
+
+  // If the choice is something else, try to stringify
+  return String(selectedChoice);
 }
 
 // Process vue-i18n compiled interpolation instructions
@@ -170,12 +245,60 @@ function processInterpolationInstructions(
   return result;
 }
 
+// Handle pluralization - Vue I18n uses | as separator
+// Format: "none | singular | plural" or "singular | plural"
+function handlePluralization(
+  template: string,
+  values: Record<string, any> = {},
+): string {
+  // Check if template uses pluralization (contains |)
+  if (!template.includes("|")) {
+    return template;
+  }
+
+  // Get the count value for pluralization
+  const count =
+    values.count !== undefined
+      ? Number(values.count)
+      : values.n !== undefined
+        ? Number(values.n)
+        : 1;
+
+  // Split by | and trim each part
+  const forms = template.split("|").map((s) => s.trim());
+
+  let selectedForm: string;
+
+  if (forms.length === 3) {
+    // Format: "none | singular | plural"
+    if (count === 0) {
+      selectedForm = forms[0];
+    } else if (count === 1) {
+      selectedForm = forms[1];
+    } else {
+      selectedForm = forms[2];
+    }
+  } else if (forms.length === 2) {
+    // Format: "singular | plural"
+    selectedForm = count === 1 ? forms[0] : forms[1];
+  } else {
+    // Just one form, use it
+    selectedForm = forms[0];
+  }
+
+  return selectedForm;
+}
+
 // Simple interpolation without eval - only handles {name} placeholders
 function interpolate(
   template: string,
   values: Record<string, any> = {},
 ): string {
-  return template.replace(/\{([^}]+)\}/g, (match, key) => {
+  // First handle pluralization
+  const selectedTemplate = handlePluralization(template, values);
+
+  // Then handle interpolation
+  return selectedTemplate.replace(/\{([^}]+)\}/g, (match, key) => {
     const value = values[key];
     return value !== undefined ? String(value) : match;
   });
@@ -191,6 +314,11 @@ export function t(key: string, values?: Record<string, any>): string {
       return interpolate(message, values);
     }
 
+    // Handle vue-i18n compiled pluralization format
+    if (hasCompiledPluralization(message)) {
+      return processCompiledPluralization(message.b!.c!, values);
+    }
+
     // Handle vue-i18n compiled interpolation format
     if (hasCompiledInterpolation(message)) {
       return processInterpolationInstructions(message.b!.i!, values);
@@ -204,6 +332,11 @@ export function t(key: string, values?: Record<string, any>): string {
   if (fallbackMessage !== undefined) {
     if (typeof fallbackMessage === "string") {
       return interpolate(fallbackMessage, values);
+    }
+
+    // Handle vue-i18n compiled pluralization format for fallback
+    if (hasCompiledPluralization(fallbackMessage)) {
+      return processCompiledPluralization(fallbackMessage.b!.c!, values);
     }
 
     // Handle vue-i18n compiled interpolation format for fallback
@@ -232,6 +365,11 @@ export const reactiveT = computed(() => {
         return interpolate(message, values);
       }
 
+      // Handle vue-i18n compiled pluralization format
+      if (hasCompiledPluralization(message)) {
+        return processCompiledPluralization(message.b!.c!, values);
+      }
+
       // Handle vue-i18n compiled interpolation format
       if (hasCompiledInterpolation(message)) {
         return processInterpolationInstructions(message.b!.i!, values);
@@ -245,6 +383,11 @@ export const reactiveT = computed(() => {
     if (fallbackMessage !== undefined) {
       if (typeof fallbackMessage === "string") {
         return interpolate(fallbackMessage, values);
+      }
+
+      // Handle vue-i18n compiled pluralization format for fallback
+      if (hasCompiledPluralization(fallbackMessage)) {
+        return processCompiledPluralization(fallbackMessage.b!.c!, values);
       }
 
       // Handle vue-i18n compiled interpolation format for fallback

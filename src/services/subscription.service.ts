@@ -14,8 +14,10 @@ import { generateIdempotencyKey } from "@/utils/idempotency";
 class SubscriptionService {
   private sortFeatures(features: PlanFeature[] = []): PlanFeature[] {
     return [...features].sort((a, b) => {
-      if (a.sortOrder !== b.sortOrder) {
-        return a.sortOrder - b.sortOrder;
+      const aSortOrder = a.sortOrder ?? 0;
+      const bSortOrder = b.sortOrder ?? 0;
+      if (aSortOrder !== bSortOrder) {
+        return aSortOrder - bSortOrder;
       }
       return a.featureName.localeCompare(b.featureName);
     });

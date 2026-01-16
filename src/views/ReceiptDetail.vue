@@ -555,7 +555,7 @@
                 >
                   <div
                     v-for="(suggestion, index) in itemSuggestions[item.id]?.category?.options ?? []"
-                    :key="suggestion.id || suggestion"
+                    :key="typeof suggestion === 'string' ? suggestion : suggestion.id"
                     class="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white"
                     :class="{
                       'bg-blue-100 dark:bg-blue-900':
@@ -563,7 +563,7 @@
                     }"
                     @mousedown="selectCategorySuggestion(item.id, suggestion)"
                   >
-                    {{ suggestion.name || suggestion }}
+                    {{ typeof suggestion === 'string' ? suggestion : suggestion.name }}
                   </div>
                 </div>
               </div>
@@ -723,7 +723,7 @@
           <img
             v-if="imageUrl && !imageError"
             :src="imageUrl"
-            :alt="receipt.filename"
+            :alt="receipt?.filename ?? 'Receipt'"
             class="max-w-full h-auto"
           />
           <!-- Close button - fixed position -->
@@ -797,12 +797,17 @@ const editedReceiptDate = ref("");
 // Receipt item editing
 const editingItems = ref({} as Record<number, boolean>);
 const editedItems = ref({} as Record<number, any>);
+// Category suggestion type for autocomplete
+interface CategorySuggestion {
+  id: number;
+  name: string;
+}
 const itemSuggestions = ref(
   {} as Record<
     number,
     {
       itemName?: { show: boolean; options: string[]; selectedIndex: number };
-      category?: { show: boolean; options: string[]; selectedIndex: number };
+      category?: { show: boolean; options: (string | CategorySuggestion)[]; selectedIndex: number };
       unit?: { show: boolean; options: string[]; selectedIndex: number };
     }
   >,
@@ -1325,11 +1330,13 @@ const hideItemSuggestions = (
 const selectSuggestion = (
   itemId: number,
   field: "itemName" | "category" | "unit",
-  suggestion: string,
+  suggestion: string | CategorySuggestion,
 ) => {
   const item = editedItems.value[itemId];
   if (item && itemSuggestions.value[itemId]?.[field]) {
-    item[field] = suggestion;
+    // Extract string value from suggestion (handle both string and CategorySuggestion)
+    const suggestionValue = typeof suggestion === 'string' ? suggestion : suggestion.name;
+    item[field] = suggestionValue;
     itemSuggestions.value[itemId][field]!.show = false;
 
     if (field === "itemName" || field === "category") {

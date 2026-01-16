@@ -155,14 +155,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslation } from '@/composables/useTranslation';
 import { useRouter } from 'vue-router';
 import subscriptionService from '@/services/subscriptionService';
 import CheckoutModal from '@/components/subscriptions/CheckoutModal.vue';
 import { getPriceForPeriod } from '@/types/subscription';
 import type { SubscriptionPlan, UserSubscription } from '@/types/subscription';
 
-const { t } = useI18n();
+const { t } = useTranslation();
 const router = useRouter();
 
 const plans = ref<SubscriptionPlan[]>([]);

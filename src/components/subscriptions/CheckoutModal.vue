@@ -210,7 +210,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslation } from '@/composables/useTranslation';
 import { useStripePayment } from '@/composables/useStripePayment';
 import subscriptionService from '@/services/subscriptionService';
 import { getPriceForPeriod } from '@/types/subscription';
@@ -226,7 +226,7 @@ const emit = defineEmits<{
   success: [];
 }>();
 
-const { t } = useI18n();
+const { t } = useTranslation();
 const {
   mountCardElement,
   collectPaymentMethod,

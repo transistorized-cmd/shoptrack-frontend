@@ -369,7 +369,7 @@
 
           <!-- Expected Next Purchase -->
           <div
-            v-if="pattern.expectedNextPurchase"
+            v-if="pattern.expectedNextPurchase && pattern.daysUntilNextExpected !== null"
             class="bg-blue-50 border border-blue-200 rounded-lg p-3"
           >
             <div class="flex items-center justify-between">

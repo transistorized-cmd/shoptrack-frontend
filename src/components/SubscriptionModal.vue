@@ -266,7 +266,7 @@ const loadPlans = async () => {
       subscriptionService.getMySubscription()
     ]);
 
-    plans.value = plansData;
+    plans.value = plansData.plans;
     currentSubscription.value = subscriptionData;
   } catch (err: any) {
     console.error('Failed to load subscription data:', err);

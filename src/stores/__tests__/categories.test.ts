@@ -390,6 +390,170 @@ describe("Categories Store", () => {
     });
   });
 
+  describe("nameByKey computed", () => {
+    it("should create key-based name lookup map for single locale", async () => {
+      vi.mocked(categoriesService.getCategories).mockResolvedValue(
+        mockCategoriesEN,
+      );
+      await store.fetchCategories("en");
+
+      const expected = {
+        en: {
+          food: "Food",
+          beverages: "Beverages",
+          electronics: "Electronics",
+        },
+      };
+
+      expect(store.nameByKey).toEqual(expected);
+    });
+
+    it("should create key-based name lookup maps for multiple locales", async () => {
+      vi.mocked(categoriesService.getCategories).mockImplementation(
+        (locale) => {
+          if (locale === "en") return Promise.resolve(mockCategoriesEN);
+          if (locale === "es") return Promise.resolve(mockCategoriesES);
+          return Promise.resolve([]);
+        },
+      );
+
+      await store.fetchAllLocales(["en", "es"]);
+
+      const expected = {
+        en: {
+          food: "Food",
+          beverages: "Beverages",
+          electronics: "Electronics",
+        },
+        es: {
+          food: "Comida",
+          beverages: "Bebidas",
+          electronics: "Electrónicos",
+        },
+      };
+
+      expect(store.nameByKey).toEqual(expected);
+    });
+
+    it("should normalize keys to lowercase", async () => {
+      const mixedCaseCategories = [
+        {
+          id: 1,
+          key: "FOOD",
+          name: "Food",
+          parentId: null,
+          icon: "🍕",
+          color: "#FF6B6B",
+          sortOrder: 1,
+        },
+        {
+          id: 2,
+          key: "Beverages",
+          name: "Beverages",
+          parentId: null,
+          icon: "🥤",
+          color: "#4ECDC4",
+          sortOrder: 2,
+        },
+      ];
+
+      vi.mocked(categoriesService.getCategories).mockResolvedValue(
+        mixedCaseCategories,
+      );
+      await store.fetchCategories("en");
+
+      expect(store.nameByKey.en.food).toBe("Food");
+      expect(store.nameByKey.en.beverages).toBe("Beverages");
+      expect(store.nameByKey.en.FOOD).toBeUndefined();
+      expect(store.nameByKey.en.Beverages).toBeUndefined();
+    });
+
+    it("should handle empty categories array", async () => {
+      vi.mocked(categoriesService.getCategories).mockResolvedValue([]);
+      await store.fetchCategories("en");
+
+      expect(store.nameByKey).toEqual({ en: {} });
+    });
+  });
+
+  describe("getNameByKey function", () => {
+    beforeEach(async () => {
+      vi.mocked(categoriesService.getCategories).mockImplementation(
+        (locale) => {
+          if (locale === "en") return Promise.resolve(mockCategoriesEN);
+          if (locale === "es") return Promise.resolve(mockCategoriesES);
+          if (locale === "fr") return Promise.resolve(mockCategoriesFR);
+          return Promise.resolve([]);
+        },
+      );
+
+      await store.fetchAllLocales(["en", "es", "fr"]);
+    });
+
+    it("should return category name for specific locale by key", () => {
+      expect(store.getNameByKey("food", "en")).toBe("Food");
+      expect(store.getNameByKey("food", "es")).toBe("Comida");
+      expect(store.getNameByKey("food", "fr")).toBe("Nourriture");
+    });
+
+    it("should handle case-insensitive key lookup", () => {
+      expect(store.getNameByKey("FOOD", "en")).toBe("Food");
+      expect(store.getNameByKey("Food", "en")).toBe("Food");
+      expect(store.getNameByKey("fOoD", "en")).toBe("Food");
+    });
+
+    it("should return undefined for undefined key", () => {
+      expect(store.getNameByKey(undefined, "en")).toBeUndefined();
+    });
+
+    it("should return undefined for empty key", () => {
+      expect(store.getNameByKey("", "en")).toBeUndefined();
+    });
+
+    it("should return undefined for non-existent key", () => {
+      expect(store.getNameByKey("nonexistent", "en")).toBeUndefined();
+    });
+
+    it("should return undefined for invalid locale when no fallback available", () => {
+      const freshPinia = createPinia();
+      setActivePinia(freshPinia);
+      const freshStore = useCategoriesStore();
+      expect(freshStore.getNameByKey("food", "de")).toBeUndefined();
+    });
+
+    it("should fallback to any available locale when specific locale not found", () => {
+      const name = store.getNameByKey("food", "de"); // German not loaded
+      expect(["Food", "Comida", "Nourriture"]).toContain(name);
+    });
+
+    it("should fallback to any available locale when no locale specified", () => {
+      const name = store.getNameByKey("food");
+      expect(["Food", "Comida", "Nourriture"]).toContain(name);
+    });
+
+    it("should return undefined when key not found in any locale", () => {
+      expect(store.getNameByKey("nonexistent")).toBeUndefined();
+    });
+
+    it("should return undefined when no categories loaded", () => {
+      const freshPinia = createPinia();
+      setActivePinia(freshPinia);
+      const emptyStore = useCategoriesStore();
+      expect(emptyStore.getNameByKey("food", "en")).toBeUndefined();
+    });
+
+    it("should handle key missing from specific locale but present in others", () => {
+      // "electronics" key exists in en and es, but not in fr mock data
+      const frenchName = store.getNameByKey("electronics", "fr");
+      // Should fallback to a name from another locale
+      expect(["Electronics", "Electrónicos"]).toContain(frenchName);
+
+      // Direct lookups should work for locales that have the key
+      expect(store.getNameByKey("electronics", "en")).toBe("Electronics");
+      expect(store.getNameByKey("electronics", "es")).toBe("Electrónicos");
+    });
+  });
+
   describe("getName function", () => {
     beforeEach(async () => {
       vi.mocked(categoriesService.getCategories).mockImplementation(

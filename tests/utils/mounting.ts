@@ -379,7 +379,8 @@ export function mountComponent<T extends Component>(
   component: T,
   options: TestMountingOptions<T> = {},
 ): VueWrapper {
-  return mount(component, getDefaultMountingOptions(options));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return mount(component as any, getDefaultMountingOptions(options) as any);
 }
 
 /**
@@ -399,7 +400,8 @@ export function shallowMountComponent<T extends Component>(
     ...options,
   });
 
-  return shallowMount(component, mountingOptions);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return shallowMount(component as any, mountingOptions as any);
 }
 
 /**
@@ -407,11 +409,11 @@ export function shallowMountComponent<T extends Component>(
  */
 export function mountForProps<T extends Component>(
   component: T,
-  props: Record<string, any> = {},
+  props: Record<string, unknown> = {},
   options: TestMountingOptions<T> = {},
 ): VueWrapper {
   return shallowMountComponent(component, {
-    props,
+    props: props as TestMountingOptions<T>["props"],
     ...options,
   });
 }

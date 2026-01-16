@@ -31,15 +31,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useTranslation } from '@/composables/useTranslation';
+import type { PlanPricing } from '@/types/subscription';
 
 const { t } = useTranslation();
-
-interface PlanPricing {
-  currency: string;
-  price: number;
-  periodType: 'Monthly' | 'Yearly' | 'Quarterly' | 'Biannual';
-  isActive: boolean;
-}
 
 const props = defineProps<{
   pricing: PlanPricing[];

@@ -25,12 +25,15 @@
     "uploadAnother": "Subir otro",
     "hello": "Hola, {name}",
     "or": "O",
-    "dismiss": "Descartar"
+    "dismiss": "Descartar",
+    "create": "Crear",
+    "creating": "Creando..."
   },
   "navigation": {
     "dashboard": "Panel",
     "receipts": "Recibos",
     "reports": "Informes",
+    "shoppingLists": "Listas de Compras",
     "profile": "Perfil",
     "settings": "Configuración",
     "logout": "Cerrar sesión",
@@ -808,6 +811,107 @@
       "predictionsGenerated": "Nuevas predicciones generadas exitosamente",
       "reportGenerated": "Informe generado exitosamente",
       "predictionDaysUpdated": "Días de predicción actualizados"
+    }
+  },
+  "shoppingList": {
+    "title": "Listas de Compras",
+    "description": "Administra tus listas de compras y controla lo que necesitas comprar",
+    "card": {
+      "progress": "Progreso",
+      "items": "{count} artículos"
+    },
+    "widget": {
+      "title": "Lista de Compras",
+      "noActiveList": "Sin lista de compras activa",
+      "createNew": "Crear Nueva Lista",
+      "viewAll": "Ver Todas las Listas",
+      "itemsLeft": "{count} artículos restantes",
+      "allDone": "¡Todo listo!",
+      "progress": "{checked} de {total} artículos",
+      "continueShipping": "Continuar Comprando",
+      "markComplete": "Marcar Completada"
+    },
+    "filter": {
+      "all": "Todas",
+      "active": "Activas",
+      "completed": "Completadas"
+    },
+    "create": {
+      "title": "Crear Lista de Compras",
+      "placeholder": "Nombre de la lista (ej: Compras Semanales)"
+    },
+    "delete": {
+      "title": "Eliminar Lista de Compras",
+      "message": "¿Estás seguro de que quieres eliminar \"{name}\"? Esta acción no se puede deshacer."
+    },
+    "detail": {
+      "untitled": "Lista Sin Título",
+      "itemsLeft": "{count} artículos restantes | {count} artículo restante | {count} artículos restantes",
+      "empty": {
+        "title": "Tu lista está vacía",
+        "description": "Agrega artículos para comenzar tu lista de compras"
+      }
+    },
+    "empty": {
+      "title": "Sin listas de compras",
+      "description": "Crea tu primera lista de compras para comenzar"
+    },
+    "actions": {
+      "create": "Nueva Lista",
+      "createFirst": "Crea Tu Primera Lista",
+      "addItem": "Agregar Artículo",
+      "addFirstItem": "Agrega Tu Primer Artículo",
+      "quickStart": "Inicio Rápido",
+      "complete": "Completar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "toggleAll": "Marcar Todos",
+      "uncheckAll": "Desmarcar Todos",
+      "selectAll": "Seleccionar Todos"
+    },
+    "quickStart": {
+      "added": "{count} favorito agregado | {count} favoritos agregados",
+      "noFavorites": "No se encontraron favoritos. ¡Marca productos como favoritos primero!"
+    },
+    "sync": {
+      "synced": "Sincronizado",
+      "syncing": "Sincronizando...",
+      "offline": "Sin conexión",
+      "pending": "{count} pendientes",
+      "pendingChanges": "{count} pendientes | {count} pendiente | {count} pendientes",
+      "errors": "{count} errores",
+      "errorDetails": "Errores de Sincronización",
+      "errorGeneric": "Algunos artículos no se pudieron sincronizar",
+      "retrySync": "Reintentar Sincronización",
+      "lastSync": "Última sync {time}",
+      "lastSynced": "Última sincronización {time}",
+      "syncNow": "Sincronizar ahora",
+      "syncError": "Error de sincronización",
+      "tapToRetry": "Toca para reintentar"
+    },
+    "addItem": {
+      "title": "Agregar Artículo",
+      "searchPlaceholder": "Buscar productos...",
+      "quantity": "Cantidad",
+      "addToList": "Agregar a Lista",
+      "adding": "Agregando...",
+      "noResults": "No se encontraron productos",
+      "recentProducts": "Productos Recientes",
+      "favorites": "Favoritos",
+      "searchResults": "Resultados de Búsqueda",
+      "createCustom": "Agregar artículo personalizado"
+    },
+    "item": {
+      "checked": "Marcado",
+      "unchecked": "Sin marcar",
+      "quantity": "Cant: {qty}",
+      "swipeToDelete": "Desliza para eliminar",
+      "swipeToToggle": "Desliza para marcar"
+    },
+    "category": {
+      "uncategorized": "Sin categoría",
+      "collapse": "Colapsar",
+      "expand": "Expandir"
     }
   }
 }

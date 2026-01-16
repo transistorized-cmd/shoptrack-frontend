@@ -37,6 +37,20 @@
                 >
                   📊 {{ t('navigation.reports') }}
                 </RouterLink>
+                <RouterLink
+                  to="/nfc-products"
+                  class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap"
+                  :class="{ 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400': $route.name === 'nfc-products' }"
+                >
+                  📱 NFC
+                </RouterLink>
+                <RouterLink
+                  to="/shopping-lists"
+                  class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap"
+                  :class="{ 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400': $route.name === 'shopping-lists' || $route.name === 'shopping-list-detail' }"
+                >
+                  🛒 {{ t('navigation.shoppingLists') }}
+                </RouterLink>
               </nav>
 
               <!-- Search (Desktop only) -->
@@ -135,6 +149,12 @@
               <RouterLink to="/reports" class="block px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors" :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20': $route.name === 'reports' }" @click="mobileMenuOpen = false">
                 📊 {{ t('navigation.reports') }}
               </RouterLink>
+              <RouterLink to="/nfc-products" class="block px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors" :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20': $route.name === 'nfc-products' }" @click="mobileMenuOpen = false">
+                📱 NFC Products
+              </RouterLink>
+              <RouterLink to="/shopping-lists" class="block px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors" :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20': $route.name === 'shopping-lists' || $route.name === 'shopping-list-detail' }" @click="mobileMenuOpen = false">
+                🛒 {{ t('navigation.shoppingLists') }}
+              </RouterLink>
             </div>
           </div>
         </div>
@@ -164,10 +184,12 @@ import SearchInput from '@/components/SearchInput.vue';
 import { useAuthStore } from '@/stores/auth';
 import { safeImageUrl } from '@/utils/urlSanitizer';
 import { useCategoriesStore } from '@/stores/categories';
+import { useShoppingListStore } from '@/stores/shoppingList';
 import { availableLocales } from '@/i18n';
 import type { SearchResultItem } from '@/types/search';
 
 const authStore = useAuthStore();
+const shoppingListStore = useShoppingListStore();
 const { t } = useTranslation();
 const router = useRouter();
 const mobileMenuOpen = ref(false);
@@ -207,11 +229,16 @@ onMounted(() => {
   if (authStore.isAuthenticated) {
     const categoriesStore = useCategoriesStore();
     categoriesStore.fetchAllLocales(availableLocales.map(l => l.code));
+
+    // Initialize WebSocket for real-time shopping list updates
+    shoppingListStore.initWebSocket();
   }
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
+  // Disconnect WebSocket when app unmounts
+  shoppingListStore.disconnectWebSocket();
 });
 </script>
 

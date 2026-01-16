@@ -246,6 +246,13 @@ export default defineConfig(({ mode }) => {
           secure: false, // allow self-signed dev cert from Kestrel
           credentials: true, // Forward cookies for authentication
         },
+        // SignalR WebSocket hub proxy
+        "/hubs": {
+          target: env.VITE_API_TARGET || "https://localhost:5201",
+          changeOrigin: true,
+          secure: false, // allow self-signed dev cert from Kestrel
+          ws: true, // Enable WebSocket proxying
+        },
       },
     },
   };

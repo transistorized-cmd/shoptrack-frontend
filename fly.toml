@@ -4,11 +4,11 @@
 #
 
 app = 'shoptrack-frontend'
-primary_region = 'fra'
+primary_region = 'ams'
 
 [build]
   [build.args]
-    VITE_API_HOST = 'api.shoptrack.app'
+    VITE_API_HOST = 'shoptrack-api.fly.dev'
     VITE_API_PORT = '443'
     VITE_API_PROTOCOL = 'https'
     VITE_ENABLE_DEVTOOLS = 'true'

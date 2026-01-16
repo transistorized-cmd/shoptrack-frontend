@@ -161,11 +161,11 @@ export class PluginSandbox {
       },
 
       // Utilities
-      setTimeout: (callback: () => void, delay: number) => {
+      setTimeout: (callback: () => void, delay: number): number => {
         if (delay > 30000) {
           throw new Error("Timeout delay too long (max 30s)");
         }
-        return setTimeout(callback, delay);
+        return setTimeout(callback, delay) as unknown as number;
       },
     };
 

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { csrfManager } from "@/composables/useCsrfToken";
+import { tokenManager } from "./tokenManager";
 
 // Timeout configurations for different operation types - reduced to under 10s
 export const TIMEOUT_CONFIG = Object.freeze({
@@ -78,12 +79,19 @@ const api = axios.create({
   withCredentials: true, // Send cookies with all requests for authentication
 });
 
-// Request interceptor - Add common security headers and CSRF tokens
+// Request interceptor - Add common security headers, CSRF tokens, and Authorization
 api.interceptors.request.use(
   async (config) => {
     try {
       // Add common security headers
       config.headers["X-Requested-With"] = "XMLHttpRequest";
+
+      // Add Authorization header for cross-origin scenarios (fly.dev domains)
+      // This is needed because cookies can't be shared on public suffix domains
+      const accessToken = tokenManager.getAccessToken();
+      if (accessToken) {
+        config.headers["Authorization"] = `Bearer ${accessToken}`;
+      }
 
       // Add CSRF token for state-changing operations
       const method = config.method?.toUpperCase();

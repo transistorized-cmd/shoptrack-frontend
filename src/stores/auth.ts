@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { tokenManager } from "@/services/tokenManager";
 import type {
   User,
   AuthTokens,
@@ -335,6 +336,9 @@ export const useAuthStore = defineStore("auth", () => {
       // Authentication cookies are cleared by the backend automatically
       sessionExpired.value = false;
       clearError();
+
+      // Clear stored tokens for cross-origin scenarios (fly.dev domains)
+      tokenManager.clearTokens();
 
       // Clear CSRF tokens on logout
       try {
@@ -822,6 +826,7 @@ export const useAuthStore = defineStore("auth", () => {
     confirmEmail,
     resendEmailConfirmation,
     clearError,
+    setError,
     updateLastActivity,
     setSessionExpired,
     setOnSessionExpiredCallback,

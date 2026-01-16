@@ -213,8 +213,12 @@ const formatBillingAddress = () => {
 }
 
 // Click outside directive
+interface ClickOutsideElement extends HTMLElement {
+  clickOutsideEvent?: (event: Event) => void
+}
+
 const vClickOutside = {
-  mounted(el: HTMLElement, binding: any) {
+  mounted(el: ClickOutsideElement, binding: { value: () => void }) {
     el.clickOutsideEvent = (event: Event) => {
       if (!(el === event.target || el.contains(event.target as Node))) {
         binding.value()
@@ -222,7 +226,7 @@ const vClickOutside = {
     }
     document.addEventListener('click', el.clickOutsideEvent)
   },
-  unmounted(el: HTMLElement & { clickOutsideEvent?: (event: Event) => void }) {
+  unmounted(el: ClickOutsideElement) {
     if (el.clickOutsideEvent) {
       document.removeEventListener('click', el.clickOutsideEvent)
     }

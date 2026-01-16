@@ -1,4 +1,5 @@
 import api, { apiWithoutAutoLogout } from "@/services/api";
+import { tokenManager } from "./tokenManager";
 import type { AxiosResponse } from "axios";
 import type {
   AuthResponse,
@@ -41,8 +42,15 @@ class AuthService {
       request,
     );
 
-    // Authentication tokens are now set as secure HTTP-only cookies by the backend
-    // No need to manually handle tokens on the frontend
+    // Store tokens for cross-origin scenarios (fly.dev public suffix domains)
+    // Cookies can't be shared on these domains, so we use Bearer tokens instead
+    if (response.data.success && response.data.accessToken) {
+      tokenManager.setTokens(
+        response.data.accessToken,
+        response.data.refreshToken || '',
+        response.data.expiresAt || new Date(Date.now() + 15 * 60 * 1000) // 15 min default
+      );
+    }
 
     return response.data;
   }
@@ -61,7 +69,14 @@ class AuthService {
       request,
     );
 
-    // Authentication tokens are now set as secure HTTP-only cookies by the backend
+    // Store tokens for cross-origin scenarios (fly.dev public suffix domains)
+    if (response.data.success && response.data.accessToken) {
+      tokenManager.setTokens(
+        response.data.accessToken,
+        response.data.refreshToken || '',
+        response.data.expiresAt || new Date(Date.now() + 15 * 60 * 1000)
+      );
+    }
 
     return response.data;
   }
@@ -72,7 +87,9 @@ class AuthService {
     } catch (error) {
       console.warn("Logout API call failed:", error);
     } finally {
-      // Cookies are cleared by the backend logout endpoint
+      // Clear stored tokens for cross-origin scenarios
+      tokenManager.clearTokens();
+      // Cookies are also cleared by the backend logout endpoint
     }
   }
 
@@ -155,7 +172,14 @@ class AuthService {
   async loginWithPasskey(request: PasskeyLoginRequest): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>("/passkey/verify", request);
 
-    // Authentication tokens are now set as secure HTTP-only cookies by the backend
+    // Store tokens for cross-origin scenarios (fly.dev public suffix domains)
+    if (response.data.success && response.data.accessToken) {
+      tokenManager.setTokens(
+        response.data.accessToken,
+        response.data.refreshToken || '',
+        response.data.expiresAt || new Date(Date.now() + 15 * 60 * 1000)
+      );
+    }
 
     return response.data;
   }

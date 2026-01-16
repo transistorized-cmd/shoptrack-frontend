@@ -459,7 +459,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from "vue";
 import { RouterLink } from "vue-router";
-import { useI18n } from "vue-i18n";
+import { useTranslation } from "@/composables/useTranslation";
 import { FILE_SIZE } from "@/constants/app";
 import { pluginsService, type PluginDetectionResult } from "@/services/plugins";
 import { useAsyncJobs } from "@/composables/useAsyncJobs";
@@ -477,7 +477,7 @@ import {
 } from "@/utils/fileValidation";
 
 // i18n
-const { locale } = useI18n();
+const { locale } = useTranslation();
 
 // Quick upload state
 const selectedFile = ref<File | null>(null);

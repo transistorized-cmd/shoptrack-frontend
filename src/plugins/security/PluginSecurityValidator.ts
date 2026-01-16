@@ -238,7 +238,7 @@ export class PluginSecurityValidator {
    * Validate supported file types
    */
   private static validateFileTypes(
-    fileTypes: string[],
+    fileTypes: readonly string[],
     errors: string[],
     warnings: string[],
   ): void {

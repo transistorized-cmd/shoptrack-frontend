@@ -149,10 +149,10 @@
             />
             <div>
               <p class="font-medium text-blue-900">
-                Will use: {{ detectedPlugin.pluginName || detectedPlugin.name }}
+                Will use: {{ detectedPlugin.pluginName || detectedPlugin.plugin?.name }}
               </p>
               <p class="text-sm text-blue-700">
-                {{ detectedPlugin.pluginDescription || detectedPlugin.description }}
+                {{ detectedPlugin.pluginDescription || detectedPlugin.plugin?.description }}
               </p>
             </div>
           </div>
@@ -303,12 +303,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { useTranslation } from "@/composables/useTranslation";
+import { useAsyncJobs } from "@/composables/useAsyncJobs";
 import { featureService, type FeatureLimitCheckResult, type FeatureMessage } from "@/services/featureService";
 import { pluginsService, type PluginDetectionResult } from "@/services/plugins";
 import SubscriptionModal from "@/components/SubscriptionModal.vue";
-import type { ProcessingResult, ReceiptPlugin } from "@/types/plugin";
+import type { ReceiptPlugin } from "@/types/plugin";
 import { FILE_SIZE } from "@/constants/app";
 import {
   validateFile,
@@ -317,6 +318,8 @@ import {
 } from "@/utils/fileValidation";
 
 const { t, locale } = useTranslation();
+const router = useRouter();
+const { uploadFileAsync, activeJobs, hasActiveJobs, getJob } = useAsyncJobs();
 
 // File upload state
 const selectedFile = ref<File | null>(null);
@@ -332,8 +335,27 @@ const showValidationErrors = ref(false);
 const detectedPlugin = ref<PluginDetectionResult | null>(null);
 const availablePlugins = ref<ReceiptPlugin[]>([]);
 
-// Upload results
-const uploadResult = ref<ProcessingResult | null>(null);
+// Upload results - using a flexible type for async upload
+interface UploadResultDisplay {
+  success: boolean;
+  receipt: {
+    id: string | number;
+    fileName: string;
+    originalFileName: string;
+    filePath: string;
+    itemsDetected: number;
+    confidence: number;
+    successfullyParsed: number;
+    processingStatus: string;
+    pluginUsed: string;
+    uploadedAt: string;
+    processingTime: number;
+  };
+  errors: string[];
+  warnings: string[];
+  message?: string;
+}
+const uploadResult = ref<UploadResultDisplay | null>(null);
 
 // Limit checking
 const uploadLimitResult = ref<FeatureLimitCheckResult | null>(null);
@@ -461,33 +483,33 @@ const handleUpload = async () => {
   uploadResult.value = null;
 
   try {
-    const formData = new FormData();
-    formData.append("file", selectedFile.value);
+    // Use the real async upload API
+    const jobId = await uploadFileAsync(selectedFile.value, {
+      onUploadProgress: (progressEvent: any) => {
+        // Could add progress tracking here if needed
+        console.debug('Upload progress:', progressEvent);
+      },
+    });
 
-    if (detectedPlugin.value) {
-      formData.append("plugin", detectedPlugin.value.pluginKey || detectedPlugin.value.name);
-    }
-
-    // Mock upload for now - replace with actual API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
+    // Upload started successfully - the job is now being processed
     uploadResult.value = {
       success: true,
       receipt: {
-        id: Math.random().toString(36).substr(2, 9),
+        id: jobId,
         fileName: selectedFile.value.name,
         originalFileName: selectedFile.value.name,
-        filePath: `/uploads/${selectedFile.value.name}`,
-        itemsDetected: Math.floor(Math.random() * 10) + 1,
-        confidence: Math.floor(Math.random() * 30) + 70,
-        successfullyParsed: Math.floor(Math.random() * 5) + 1,
-        processingStatus: "completed",
-        pluginUsed: detectedPlugin.value?.pluginKey || "generic",
+        filePath: '',
+        itemsDetected: 0,
+        confidence: 0,
+        successfullyParsed: 0,
+        processingStatus: 'processing',
+        pluginUsed: detectedPlugin.value?.pluginKey || 'generic',
         uploadedAt: new Date().toISOString(),
-        processingTime: Math.floor(Math.random() * 5000) + 1000,
+        processingTime: 0,
       },
       errors: [],
       warnings: [],
+      message: `File uploaded successfully. Job ID: ${jobId}. Processing in background...`,
     };
 
     // Clear the form after successful upload

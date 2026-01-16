@@ -97,7 +97,7 @@ const isLoading = ref(false);
 const showResults = ref(false);
 const selectedIndex = ref(-1);
 const searchResults = ref<SearchResultItem[]>([]);
-const debounceTimeout = ref<number | null>(null);
+const debounceTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 
 // Computed properties
 const hasQuery = computed(() => searchQuery.value.length >= config.value.minQueryLength);

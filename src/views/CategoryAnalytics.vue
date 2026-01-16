@@ -858,7 +858,7 @@ function initializeFromUrl() {
     selectedItemId.value = itemId;
     currentView.value = "receipts";
     if (categoryId) {
-      fetchReceiptData(categoryId, itemId, category);
+      fetchReceiptData(categoryId, itemId, category ?? undefined);
     }
   } else if (category || categoryId) {
     // We have category, load items
@@ -866,7 +866,7 @@ function initializeFromUrl() {
     selectedCategoryId.value = categoryId;
     currentView.value = "items";
     if (categoryId) {
-      fetchItemData(categoryId, category);
+      fetchItemData(categoryId, category ?? undefined);
     }
   } else {
     // Default view, load categories

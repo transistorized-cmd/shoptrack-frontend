@@ -7,9 +7,9 @@ export interface IPlugin {
   color: string;
   gradientFrom: string;
   gradientTo: string;
-  fileTypes: string[];
+  fileTypes: readonly string[];
   maxFileSize: number;
-  features: string[];
+  features: readonly string[];
   uploadEndpoint: string;
   hasManualEntry?: boolean;
   manualEntryRoute?: string;

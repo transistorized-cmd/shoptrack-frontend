@@ -6,7 +6,7 @@
  * and provides global access to memory monitoring functionality.
  */
 
-import type { App } from "vue";
+import { inject, type App } from "vue";
 import { memoryMonitoringService } from "@/services/memoryMonitoring.service";
 import { useMemoryMonitoringStore } from "@/stores/memoryMonitoring.store";
 import { getFinalConfig } from "@/config/memoryMonitoring.config";
@@ -122,8 +122,10 @@ function registerPiniaStores(app: App, memoryStore: any) {
     }
 
     // Register all existing stores
-    const storeCount = pinia._s.size;
-    pinia._s.forEach((store: any, key: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const piniaInternal = pinia as any;
+    const storeCount = piniaInternal._s?.size ?? 0;
+    piniaInternal._s?.forEach((store: any, key: string) => {
       try {
         memoryStore.registerStore(key, store);
       } catch (error) {
@@ -152,7 +154,8 @@ function setupAutomaticStoreRegistration(app: App, memoryStore: any) {
       const result = originalUseStore.call(this, plugin);
 
       // Register any new stores
-      this._s.forEach((store: any, key: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this as any)._s?.forEach((store: any, key: string) => {
         if (!memoryStore.storeInfo.has(key)) {
           try {
             memoryStore.registerStore(key, store);
@@ -302,7 +305,8 @@ function addDevelopmentHelpers(
   const shouldIntegrateDevTools =
     import.meta.env.DEV || (import.meta.env.PROD && isChromeBrowser());
 
-  if (shouldIntegrateDevTools && app.config.devtools) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (shouldIntegrateDevTools && (app.config as any).devtools) {
     try {
       // Register memory monitoring data with Vue devtools
       app.config.globalProperties.__VUE_DEVTOOLS_MEMORY_MONITORING__ = {
@@ -322,8 +326,6 @@ function addDevelopmentHelpers(
  * Composable to inject memory monitoring from anywhere in the app
  */
 export function useGlobalMemoryMonitoring() {
-  const inject = require("vue").inject;
-
   const memoryMonitoring = inject("memoryMonitoring", null);
 
   if (!memoryMonitoring) {

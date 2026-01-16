@@ -25,12 +25,15 @@
     "uploadAnother": "Upload Another",
     "hello": "Hello, {name}",
     "or": "Or",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "create": "Create",
+    "creating": "Creating..."
   },
   "navigation": {
     "dashboard": "Dashboard",
     "receipts": "Receipts",
     "reports": "Reports",
+    "shoppingLists": "Shopping Lists",
     "profile": "Profile",
     "settings": "Settings",
     "logout": "Sign Out",
@@ -927,6 +930,107 @@
       "predictionsGenerated": "New predictions generated successfully",
       "reportGenerated": "Report generated successfully",
       "predictionDaysUpdated": "Prediction days updated"
+    }
+  },
+  "shoppingList": {
+    "title": "Shopping Lists",
+    "description": "Manage your shopping lists and track what you need to buy",
+    "card": {
+      "progress": "Progress",
+      "items": "{count} items"
+    },
+    "widget": {
+      "title": "Shopping List",
+      "noActiveList": "No active shopping list",
+      "createNew": "Create New List",
+      "viewAll": "View All Lists",
+      "itemsLeft": "{count} items left",
+      "allDone": "All done!",
+      "progress": "{checked} of {total} items",
+      "continueShipping": "Continue Shopping",
+      "markComplete": "Mark Complete"
+    },
+    "filter": {
+      "all": "All",
+      "active": "Active",
+      "completed": "Completed"
+    },
+    "create": {
+      "title": "Create Shopping List",
+      "placeholder": "List name (e.g., Weekly Groceries)"
+    },
+    "delete": {
+      "title": "Delete Shopping List",
+      "message": "Are you sure you want to delete \"{name}\"? This action cannot be undone."
+    },
+    "detail": {
+      "untitled": "Untitled List",
+      "itemsLeft": "{count} items remaining | {count} item remaining | {count} items remaining",
+      "empty": {
+        "title": "Your list is empty",
+        "description": "Add items to start your shopping list"
+      }
+    },
+    "empty": {
+      "title": "No shopping lists",
+      "description": "Create your first shopping list to get started"
+    },
+    "actions": {
+      "create": "New List",
+      "createFirst": "Create Your First List",
+      "addItem": "Add Item",
+      "addFirstItem": "Add Your First Item",
+      "quickStart": "Quick Start",
+      "complete": "Complete",
+      "delete": "Delete",
+      "edit": "Edit",
+      "toggleAll": "Toggle All",
+      "uncheckAll": "Uncheck All",
+      "selectAll": "Select All"
+    },
+    "quickStart": {
+      "added": "{count} favorite added | {count} favorites added",
+      "noFavorites": "No favorites found. Mark products as favorites first!"
+    },
+    "sync": {
+      "synced": "Synced",
+      "syncing": "Syncing...",
+      "offline": "Offline",
+      "pending": "{count} pending",
+      "pendingChanges": "{count} pending | {count} pending | {count} pending",
+      "errors": "{count} errors",
+      "errorDetails": "Sync Errors",
+      "errorGeneric": "Some items failed to sync",
+      "retrySync": "Retry Sync",
+      "lastSync": "Last sync {time}",
+      "lastSynced": "Last synced {time}",
+      "syncNow": "Sync now",
+      "syncError": "Sync error",
+      "tapToRetry": "Tap to retry"
+    },
+    "addItem": {
+      "title": "Add Item",
+      "searchPlaceholder": "Search products...",
+      "quantity": "Quantity",
+      "addToList": "Add to List",
+      "adding": "Adding...",
+      "noResults": "No products found",
+      "recentProducts": "Recent Products",
+      "favorites": "Favorites",
+      "searchResults": "Search Results",
+      "createCustom": "Add custom item"
+    },
+    "item": {
+      "checked": "Checked",
+      "unchecked": "Unchecked",
+      "quantity": "Qty: {qty}",
+      "swipeToDelete": "Swipe to delete",
+      "swipeToToggle": "Swipe to toggle"
+    },
+    "category": {
+      "uncategorized": "Uncategorized",
+      "collapse": "Collapse",
+      "expand": "Expand"
     }
   }
 }

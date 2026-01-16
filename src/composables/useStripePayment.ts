@@ -4,7 +4,7 @@ import type { Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-j
 import subscriptionService from '@/services/subscriptionService';
 
 // Stripe publishable key (should be in env variables)
-const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
+const STRIPE_PUBLISHABLE_KEY = (import.meta.env as unknown as Record<string, string | undefined>).VITE_STRIPE_PUBLISHABLE_KEY || '';
 
 /**
  * Composable for Stripe payment integration

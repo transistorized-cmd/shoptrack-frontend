@@ -853,6 +853,7 @@
     "detail": {
       "untitled": "Lista Sin Título",
       "itemsLeft": "{count} artículos restantes | {count} artículo restante | {count} artículos restantes",
+      "inCart": "En el carrito",
       "empty": {
         "title": "Tu lista está vacía",
         "description": "Agrega artículos para comenzar tu lista de compras"

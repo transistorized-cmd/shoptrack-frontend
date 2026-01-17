@@ -37,6 +37,52 @@ import {
   type ShoppingListItemsToggledAllEvent,
 } from "@/services/websocket.service";
 
+// API response types (different from frontend types - has nested Product)
+interface ApiShoppingListItem {
+  id: number;
+  product: {
+    id: number;
+    itemNameOriginal: string;
+    nombre: string;
+    emoji: string;
+    tagUuid?: string;
+    category?: string;
+    hasNfc: boolean;
+    isFavorite: boolean;
+  };
+  quantity?: number;
+  isChecked: boolean;
+  checkedAt?: string;
+  sortOrder: number;
+  lastPrice?: number;
+  lastPriceDate?: string;
+}
+
+// Map API item (nested Product) to frontend ShoppingListItem (flat structure)
+// Handles both API format (nested product) and already-flat format (local items)
+function mapApiItemToFrontend(apiItem: ApiShoppingListItem | ShoppingListItem): ShoppingListItem {
+  // Check if item already has flat structure (local item or already mapped)
+  if ('name' in apiItem && typeof apiItem.name === 'string') {
+    return apiItem as ShoppingListItem;
+  }
+
+  // API format with nested product
+  const nestedItem = apiItem as ApiShoppingListItem;
+  return {
+    id: nestedItem.id,
+    productId: nestedItem.product.id,
+    name: nestedItem.product.nombre,
+    emoji: nestedItem.product.emoji,
+    category: nestedItem.product.category,
+    quantity: nestedItem.quantity,
+    isChecked: nestedItem.isChecked,
+    checkedAt: nestedItem.checkedAt,
+    sortOrder: nestedItem.sortOrder,
+    lastPrice: nestedItem.lastPrice,
+    lastPriceDate: nestedItem.lastPriceDate,
+  };
+}
+
 export const useShoppingListStore = defineStore("shoppingList", () => {
   // State
   const lists = ref<LocalShoppingList[]>([]);
@@ -101,6 +147,8 @@ export const useShoppingListStore = defineStore("shoppingList", () => {
           isChecked: item.isChecked,
           checkedAt: item.checkedAt,
           sortOrder: item.sortOrder,
+          lastPrice: item.lastPrice,
+          lastPriceDate: item.lastPriceDate,
         })),
       });
     }
@@ -235,9 +283,9 @@ export const useShoppingListStore = defineStore("shoppingList", () => {
         currentLocalList.value = updatedLocal;
         await saveLocalList(updatedLocal);
 
-        // Map server items to local format
+        // Map server items to local format (flatten nested Product structure)
         const serverItems: ShoppingListItem[] = serverList.categories.flatMap(
-          (cat) => cat.items
+          (cat) => cat.items.map((item) => mapApiItemToFrontend(item as ApiShoppingListItem | ShoppingListItem))
         );
 
         const resolvedItems = resolveItems(
@@ -802,19 +850,22 @@ export const useShoppingListStore = defineStore("shoppingList", () => {
     // Only update if we're viewing this list
     if (currentLocalList.value?.id !== event.listId) return;
 
+    // Map from API format (nested Product) to frontend format (flat)
+    const mappedItem = mapApiItemToFrontend(event.item as ApiShoppingListItem | ShoppingListItem);
+
     // Check if we already have this item (local optimistic create)
     const existingIndex = currentItems.value.findIndex((i) => i.id === event.itemId);
     if (existingIndex !== -1) {
       // Update existing with server data
       currentItems.value[existingIndex] = {
         ...currentItems.value[existingIndex],
-        ...event.item,
+        ...mappedItem,
         syncStatus: "synced",
       };
     } else {
       // New item from another client
       const newItem: LocalShoppingListItem = {
-        ...event.item,
+        ...mappedItem,
         localId: `server_${event.itemId}`,
         localListId: currentLocalList.value.localId,
         syncStatus: "synced",
@@ -827,7 +878,7 @@ export const useShoppingListStore = defineStore("shoppingList", () => {
         currentLocalList.value = {
           ...currentLocalList.value,
           totalItems: currentLocalList.value.totalItems + 1,
-          checkedItems: event.item.isChecked
+          checkedItems: mappedItem.isChecked
             ? currentLocalList.value.checkedItems + 1
             : currentLocalList.value.checkedItems,
         };
@@ -838,11 +889,14 @@ export const useShoppingListStore = defineStore("shoppingList", () => {
   const handleItemUpdated = async (event: ShoppingListItemUpdatedEvent) => {
     if (currentLocalList.value?.id !== event.listId) return;
 
+    // Map from API format (nested Product) to frontend format (flat)
+    const mappedItem = mapApiItemToFrontend(event.item as ApiShoppingListItem | ShoppingListItem);
+
     const index = currentItems.value.findIndex((i) => i.id === event.itemId);
     if (index !== -1) {
       currentItems.value[index] = {
         ...currentItems.value[index],
-        ...event.item,
+        ...mappedItem,
         syncStatus: "synced",
       };
       await saveLocalItem(currentItems.value[index]);

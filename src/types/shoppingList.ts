@@ -22,6 +22,8 @@ export interface ShoppingListItem {
   isChecked: boolean;
   checkedAt?: string;
   sortOrder: number;
+  lastPrice?: number;
+  lastPriceDate?: string;
 }
 
 export interface ShoppingListDetail extends ShoppingList {

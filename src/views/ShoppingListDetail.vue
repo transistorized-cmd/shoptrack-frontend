@@ -8,7 +8,7 @@ import ShoppingListItemGroup from "@/components/shopping-list/ShoppingListItemGr
 import SyncStatusIndicator from "@/components/shopping-list/SyncStatusIndicator.vue";
 import AddItemModal from "@/components/shopping-list/AddItemModal.vue";
 
-const { t } = useTranslation();
+const { t, locale } = useTranslation();
 const route = useRoute();
 const router = useRouter();
 const store = useShoppingListStore();
@@ -43,6 +43,21 @@ const progressPercent = computed(() => {
 const uncheckedCount = computed(() => {
   if (!currentList.value) return 0;
   return Math.max(0, currentList.value.totalItems - currentList.value.checkedItems);
+});
+
+// Calculate total price of checked items (items in cart)
+const checkedTotal = computed(() => {
+  return store.currentItems
+    .filter((item) => item.isChecked && item.lastPrice)
+    .reduce((sum, item) => sum + (item.lastPrice! * (item.quantity || 1)), 0);
+});
+
+const formattedCheckedTotal = computed(() => {
+  if (checkedTotal.value === 0) return null;
+  return new Intl.NumberFormat(locale.value, {
+    style: "currency",
+    currency: "EUR",
+  }).format(checkedTotal.value);
 });
 
 const handleBack = () => {
@@ -259,6 +274,13 @@ const handleToggleAll = async () => {
                 class="h-full bg-green-500 rounded-full transition-all duration-300"
                 :style="{ width: `${progressPercent}%` }"
               ></div>
+            </div>
+            <!-- Checked items total -->
+            <div
+              v-if="formattedCheckedTotal"
+              class="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400"
+            >
+              {{ t("shoppingList.detail.inCart") }}: {{ formattedCheckedTotal }}
             </div>
           </div>
 

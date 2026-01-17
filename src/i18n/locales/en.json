@@ -972,6 +972,7 @@
     "detail": {
       "untitled": "Untitled List",
       "itemsLeft": "{count} items remaining | {count} item remaining | {count} items remaining",
+      "inCart": "In cart",
       "empty": {
         "title": "Your list is empty",
         "description": "Add items to start your shopping list"

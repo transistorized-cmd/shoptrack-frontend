@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useTranslation } from "@/composables/useTranslation";
 import type { ShoppingListItem } from "@/types/shoppingList";
+
+const { locale } = useTranslation();
 
 const props = defineProps<{
   item: ShoppingListItem;
@@ -23,6 +26,15 @@ const displayName = computed(() => {
 const quantityText = computed(() => {
   if (!props.item.quantity) return null;
   return `x${props.item.quantity}`;
+});
+
+const priceText = computed(() => {
+  if (!props.item.lastPrice) return null;
+  const total = props.item.lastPrice * (props.item.quantity || 1);
+  return new Intl.NumberFormat(locale.value, {
+    style: "currency",
+    currency: "EUR",
+  }).format(total);
 });
 
 const handleToggle = () => {
@@ -78,13 +90,13 @@ const handleDelete = (e: Event) => {
       </span>
     </div>
 
-    <!-- Quantity -->
-    <span
-      v-if="quantityText"
-      class="flex-shrink-0 text-sm text-gray-500 dark:text-gray-400"
-    >
-      {{ quantityText }}
-    </span>
+    <!-- Quantity and Price -->
+    <div class="flex-shrink-0 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+      <span v-if="quantityText">{{ quantityText }}</span>
+      <span v-if="priceText" class="text-emerald-600 dark:text-emerald-400 font-medium">
+        {{ priceText }}
+      </span>
+    </div>
 
     <!-- Delete button -->
     <button

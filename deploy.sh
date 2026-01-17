@@ -2,36 +2,45 @@
 set -e
 
 # ShopTrack Frontend Deployment Script
-# Deploys to Hetzner server
-
-SERVER="transistorized-cmd"
-REMOTE_PATH="/var/www/shoptrack.app/platform"
-LOCAL_DIST="./dist"
+# Deploys to platform.shoptrack.app
 
 echo "=== ShopTrack Frontend Deployment ==="
-echo ""
 
-# Step 1: Ensure correct Node version
-echo "[1/3] Checking Node version..."
-if command -v nvm &> /dev/null; then
-    source ~/.nvm/nvm.sh
-    nvm use 22
-elif [[ $(node -v) != v22* ]]; then
-    echo "Warning: Node v22 required. Current: $(node -v)"
-    echo "Run 'nvm use 22' first or install Node 22"
+# Load nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Switch to Node 22
+echo "Switching to Node 22..."
+nvm use 22
+
+# Verify Node version
+NODE_VERSION=$(node -v)
+if [[ ! $NODE_VERSION == v22* ]]; then
+    echo "Error: Node 22 required, but found $NODE_VERSION"
+    exit 1
+fi
+echo "Using Node $NODE_VERSION"
+
+# Build
+echo "Building production bundle..."
+npm run build
+
+if [ $? -ne 0 ]; then
+    echo "Build failed!"
     exit 1
 fi
 
-# Step 2: Build
-echo ""
-echo "[2/3] Building..."
-npm run build
+echo "Build successful!"
 
-# Step 3: Deploy with rsync
-echo ""
-echo "[3/3] Deploying to server..."
-rsync -avz --delete "$LOCAL_DIST/" "$SERVER:$REMOTE_PATH/"
+# Deploy
+echo "Deploying to platform.shoptrack.app..."
+rsync -avz --delete dist/ transistorized-cmd:/var/www/shoptrack.app/platform/
 
-echo ""
-echo "=== Deployment Complete ==="
-echo "Frontend deployed to: https://platform.shoptrack.app"
+if [ $? -ne 0 ]; then
+    echo "Deployment failed!"
+    exit 1
+fi
+
+echo "=== Deployment complete! ==="
+echo "Site: https://platform.shoptrack.app"

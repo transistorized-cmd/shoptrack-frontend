@@ -1,5 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 import type { ShoppingList, ShoppingListItem } from "@/types/shoppingList";
+import { getApiBaseUrl } from "@/services/api";
 
 export type ConnectionState = "disconnected" | "connecting" | "connected" | "reconnecting";
 
@@ -69,9 +70,9 @@ class WebSocketService {
   private baseUrl: string;
 
   constructor() {
-    // Use the API base URL from environment or default
-    const apiUrl = import.meta.env.VITE_API_URL || "";
-    this.baseUrl = apiUrl ? `${apiUrl}/hubs/shopping-lists` : "/hubs/shopping-lists";
+    // Use the same API base URL as other services for consistency
+    const apiBase = getApiBaseUrl();
+    this.baseUrl = `${apiBase}/hubs/shopping-lists`;
   }
 
   get state(): ConnectionState {

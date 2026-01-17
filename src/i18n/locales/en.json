@@ -24,6 +24,7 @@
     "tryAgain": "Try Again",
     "uploadAnother": "Upload Another",
     "hello": "Hello, {name}",
+    "signedInAs": "Signed in as",
     "or": "Or",
     "dismiss": "Dismiss",
     "create": "Create",
@@ -38,6 +39,9 @@
     "settings": "Settings",
     "logout": "Sign Out",
     "login": "Sign In"
+  },
+  "settings": {
+    "theme": "Theme"
   },
   "auth": {
     "signIn": "Sign In",
@@ -1018,7 +1022,14 @@
       "recentProducts": "Recent Products",
       "favorites": "Favorites",
       "searchResults": "Search Results",
-      "createCustom": "Add custom item"
+      "createCustom": "Add custom item",
+      "addCustom": "Add as new product",
+      "customHint": "This will create a new product that can be matched with future receipts",
+      "optional": "optional",
+      "hint": "Type at least 2 characters to search",
+      "uncategorized": "Uncategorized",
+      "favorite": "Favorite",
+      "hasNfc": "Has NFC tag"
     },
     "item": {
       "checked": "Checked",

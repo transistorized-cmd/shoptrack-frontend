@@ -37,7 +37,7 @@
     >
       <div
         v-if="isOpen"
-        class="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50"
+        class="fixed sm:absolute inset-x-4 sm:inset-x-auto top-16 sm:top-full sm:mt-2 sm:right-0 sm:w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50"
       >
         <!-- Header -->
         <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">

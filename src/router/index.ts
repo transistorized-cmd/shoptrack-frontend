@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { featureFlags } from "@/config/featureFlags";
 import Home from "@/views/Home.vue";
 
 const router = createRouter({
@@ -126,7 +127,7 @@ const router = createRouter({
       path: "/nfc-products",
       name: "nfc-products",
       component: () => import("@/views/NfcProducts.vue"),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresFeature: 'nfcProducts' as const },
     },
     {
       path: "/shopping-lists",
@@ -181,6 +182,13 @@ router.beforeEach(async (to, from, next) => {
     const requiresGuest = to.matched.some(
       (record) => record.meta.requiresGuest,
     );
+    const requiredFeature = to.matched.find((record) => record.meta.requiresFeature)?.meta.requiresFeature as keyof typeof featureFlags | undefined;
+
+    // Check feature flag
+    if (requiredFeature && !featureFlags[requiredFeature]) {
+      next("/404");
+      return;
+    }
 
     if (requiresAuth && !isAuthenticated) {
       // Redirect to login with return URL

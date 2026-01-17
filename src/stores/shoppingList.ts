@@ -422,6 +422,26 @@ export const useShoppingListStore = defineStore("shoppingList", () => {
     return newItem;
   };
 
+  // Add custom item (creates product if needed, then adds to list)
+  const addCustomItem = async (
+    listLocalId: string,
+    itemName: string,
+    quantity?: number
+  ) => {
+    error.value = null;
+
+    try {
+      // Create/normalize the product first (this will create it if it doesn't exist)
+      const product = await shoppingListService.createProduct(itemName);
+
+      // Now add the item using the existing addItem function
+      return await addItem(listLocalId, product, quantity);
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : "Failed to add custom item";
+      throw err;
+    }
+  };
+
   // Toggle item (optimistic)
   const toggleItem = async (listLocalId: string, itemLocalId: string) => {
     error.value = null;
@@ -941,6 +961,7 @@ export const useShoppingListStore = defineStore("shoppingList", () => {
     updateList,
     deleteList,
     addItem,
+    addCustomItem,
     toggleItem,
     toggleAllItems,
     removeItem,

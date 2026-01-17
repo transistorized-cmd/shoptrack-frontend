@@ -16,8 +16,7 @@ const { t } = useTranslation();
 
 const progressPercent = computed(() => {
   if (props.list.totalItems === 0) return 0;
-  const unchecked = props.list.totalItems - props.list.checkedItems;
-  return Math.round((unchecked / props.list.totalItems) * 100);
+  return Math.round((props.list.checkedItems / props.list.totalItems) * 100);
 });
 
 const progressText = computed(() => {
@@ -111,7 +110,7 @@ const handleDelete = (e: Event) => {
       </div>
       <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
         <div
-          class="h-full bg-primary-500 rounded-full transition-all duration-300"
+          class="h-full bg-green-500 rounded-full transition-all duration-300"
           :style="{ width: `${progressPercent}%` }"
         ></div>
       </div>

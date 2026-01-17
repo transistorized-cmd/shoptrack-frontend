@@ -253,67 +253,100 @@
       </form>
     </div>
 
-    <!-- Active Job Progress -->
-    <div v-if="currentJobId && currentJobTracker" class="card p-6 mb-8">
+    <!-- Active Jobs Queue -->
+    <div v-if="hasActiveJobs" class="card p-6 mb-8">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-          Processing Receipt
+          {{ $t('upload.processingQueue') || 'Processing Queue' }}
         </h3>
-        <span
-          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-          :class="jobStatusClass"
-        >
-          {{ jobStatusText }}
+        <span class="text-sm text-gray-500 dark:text-gray-400">
+          {{ activeJobs.length }} {{ activeJobs.length === 1 ? 'file' : 'files' }}
         </span>
       </div>
 
-      <!-- Progress Bar -->
-      <div class="mb-4">
-        <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
-          <span>{{ currentJobTracker.status?.filename || 'Processing...' }}</span>
-          <span>{{ jobProgress }}%</span>
-        </div>
-        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-          <div
-            class="h-2.5 rounded-full transition-all duration-300"
-            :class="jobProgressBarClass"
-            :style="{ width: `${jobProgress}%` }"
-          />
-        </div>
-      </div>
-
-      <!-- Status Message -->
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        {{ jobStatusMessage }}
-      </p>
-
-      <!-- Error Display -->
-      <div v-if="currentJobTracker.status?.status === 'failed'" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-        <p class="text-sm text-red-700 dark:text-red-300">
-          {{ currentJobTracker.status?.errorMessage || 'Processing failed' }}
-        </p>
-      </div>
-
-      <!-- Actions -->
-      <div class="flex justify-end space-x-3">
-        <button
-          @click="clearCurrentJob"
-          class="btn btn-secondary"
+      <div class="space-y-3">
+        <div
+          v-for="job in activeJobs"
+          :key="job.jobId"
+          class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
         >
-          {{ currentJobTracker.status?.status === 'completed' || currentJobTracker.status?.status === 'failed' ? 'Upload Another' : 'Dismiss' }}
-        </button>
-        <RouterLink
-          v-if="currentJobTracker.status?.status === 'completed' && completedReceiptId"
-          :to="`/receipts/${completedReceiptId}`"
-          class="btn btn-primary"
-        >
-          View Receipt
-        </RouterLink>
+          <div class="flex items-center space-x-4 flex-1 min-w-0">
+            <!-- Status Icon -->
+            <div class="flex-shrink-0">
+              <div
+                v-if="job.status?.status === 'processing'"
+                class="w-4 h-4 bg-blue-500 rounded-full animate-pulse"
+              />
+              <div
+                v-else-if="job.status?.status === 'completed'"
+                class="w-4 h-4 bg-green-500 rounded-full"
+              />
+              <div
+                v-else-if="job.status?.status === 'failed'"
+                class="w-4 h-4 bg-red-500 rounded-full"
+              />
+              <div
+                v-else
+                class="w-4 h-4 bg-yellow-500 rounded-full animate-pulse"
+              />
+            </div>
+
+            <!-- Job Info -->
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                {{ job.status?.filename || 'Processing...' }}
+              </p>
+              <div class="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+                <span class="capitalize">{{ job.status?.status || 'pending' }}</span>
+                <span>•</span>
+                <span>{{ getJobDuration(job.jobId) }}</span>
+              </div>
+              <!-- Error message for failed jobs -->
+              <p v-if="job.status?.status === 'failed' && job.status?.errorMessage" class="text-xs text-red-600 dark:text-red-400 mt-1 truncate">
+                {{ job.status.errorMessage }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center space-x-2 ml-4 flex-shrink-0">
+            <RouterLink
+              v-if="job.status?.status === 'completed' && getReceiptIdFromJob(job)"
+              :to="`/receipts/${getReceiptIdFromJob(job)}`"
+              class="btn btn-sm btn-primary"
+            >
+              View
+            </RouterLink>
+            <button
+              v-if="job.status?.status === 'failed'"
+              @click="retryJob(job.jobId)"
+              class="btn btn-sm btn-secondary"
+            >
+              Retry
+            </button>
+            <button
+              v-if="job.status?.status === 'pending' || job.status?.status === 'processing'"
+              @click="cancelJob(job.jobId)"
+              class="btn btn-sm text-red-600 hover:text-red-800 dark:text-red-400"
+            >
+              Cancel
+            </button>
+            <button
+              v-if="job.status?.status === 'completed' || job.status?.status === 'failed' || job.status?.status === 'cancelled'"
+              @click="removeJob(job.jobId)"
+              class="btn btn-sm text-gray-500 hover:text-gray-700 dark:text-gray-400"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Upload Result (for errors that happen before job creation) -->
-    <div v-if="uploadResult && !uploadResult.success && !currentJobId" class="card p-6">
+    <div v-if="uploadResult && !uploadResult.success" class="card p-6">
       <h3 class="text-lg font-medium mb-4 text-red-900 dark:text-red-400">
         Upload Failed
       </h3>
@@ -368,7 +401,7 @@ import {
 
 const { t, locale } = useTranslation();
 const router = useRouter();
-const { uploadFileAsync, activeJobs, hasActiveJobs, getJob } = useAsyncJobs();
+const { uploadFileAsync, activeJobs, hasActiveJobs, getJob, removeJob, cancelJob, retryJob, getJobDuration } = useAsyncJobs();
 
 // File upload state
 const selectedFile = ref<File | null>(null);
@@ -415,89 +448,26 @@ const globalReceiptLimitReached = ref(false);
 const globalUpgradeMessage = ref<FeatureMessage | null>(null);
 const showSubscriptionModal = ref(false);
 
-// Current job tracking
-const currentJobId = ref<string | null>(null);
+// Helper to extract receipt ID from a job
+const getReceiptIdFromJob = (job: any): string | null => {
+  try {
+    const resultData = job.status?.resultData;
+    if (!resultData) return null;
 
-// Computed properties for job tracking
-const currentJobTracker = computed(() => {
-  if (!currentJobId.value) return null;
-  return getJob(currentJobId.value);
-});
+    // Try different possible paths for the receipt ID
+    const receiptId =
+      resultData.receipt_id ||
+      resultData.receiptId ||
+      resultData.id ||
+      resultData.receipt?.id ||
+      resultData.receipt?.receipt_id ||
+      resultData.receipt?.receiptId;
 
-const completedReceiptId = computed(() => {
-  const tracker = currentJobTracker.value;
-  if (tracker?.status?.status === 'completed' && tracker.status.resultData) {
-    return tracker.status.resultData.receiptId || tracker.status.resultData.id;
+    return receiptId ? String(receiptId) : null;
+  } catch (error) {
+    console.error('Failed to extract receipt ID from job:', error);
+    return null;
   }
-  return null;
-});
-
-const jobProgress = computed(() => {
-  const tracker = currentJobTracker.value;
-  if (!tracker?.status) return 0;
-
-  switch (tracker.status.status) {
-    case 'pending': return 10;
-    case 'processing': return tracker.status.progress || 50;
-    case 'completed': return 100;
-    case 'failed': return 100;
-    case 'cancelled': return 0;
-    default: return 0;
-  }
-});
-
-const jobStatusClass = computed(() => {
-  const status = currentJobTracker.value?.status?.status;
-  switch (status) {
-    case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
-    case 'processing': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
-    case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-    case 'failed': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
-    case 'cancelled': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
-    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
-  }
-});
-
-const jobProgressBarClass = computed(() => {
-  const status = currentJobTracker.value?.status?.status;
-  switch (status) {
-    case 'pending': return 'bg-yellow-500';
-    case 'processing': return 'bg-blue-500';
-    case 'completed': return 'bg-green-500';
-    case 'failed': return 'bg-red-500';
-    default: return 'bg-gray-500';
-  }
-});
-
-const jobStatusText = computed(() => {
-  const status = currentJobTracker.value?.status?.status;
-  switch (status) {
-    case 'pending': return 'Pending';
-    case 'processing': return 'Processing';
-    case 'completed': return 'Completed';
-    case 'failed': return 'Failed';
-    case 'cancelled': return 'Cancelled';
-    default: return 'Unknown';
-  }
-});
-
-const jobStatusMessage = computed(() => {
-  const tracker = currentJobTracker.value;
-  if (!tracker?.status) return 'Initializing...';
-
-  switch (tracker.status.status) {
-    case 'pending': return 'Your receipt is queued for processing...';
-    case 'processing': return 'AI is analyzing your receipt and extracting items...';
-    case 'completed': return 'Receipt processed successfully! Click "View Receipt" to see the details.';
-    case 'failed': return 'Processing failed. You can try uploading again.';
-    case 'cancelled': return 'Processing was cancelled.';
-    default: return 'Processing...';
-  }
-});
-
-const clearCurrentJob = () => {
-  currentJobId.value = null;
-  uploadResult.value = null;
 };
 
 // File handling methods
@@ -620,17 +590,14 @@ const handleUpload = async () => {
   const fileName = selectedFile.value.name;
 
   try {
-    // Use the real async upload API
-    const jobId = await uploadFileAsync(selectedFile.value, {
+    // Use the real async upload API - job is automatically tracked by useAsyncJobs
+    await uploadFileAsync(selectedFile.value, {
       onUploadProgress: (progressEvent: any) => {
         console.debug('Upload progress:', progressEvent);
       },
     });
 
-    // Track this job for progress display
-    currentJobId.value = jobId;
-
-    // Clear the file selection (but not the job tracking)
+    // Clear the file selection (job tracking is handled by useAsyncJobs composable)
     selectedFile.value = null;
     detectedPlugin.value = null;
     fileValidationResult.value = null;

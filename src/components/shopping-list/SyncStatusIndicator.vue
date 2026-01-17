@@ -125,7 +125,7 @@ const toggleErrorDetails = () => {
     <!-- Error details dropdown -->
     <div
       v-if="showErrorDetails && errorMessages.length > 0"
-      class="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+      class="fixed sm:absolute inset-x-4 sm:inset-x-auto sm:right-0 sm:left-auto top-32 sm:top-full sm:mt-2 sm:w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
     >
       <div class="p-3">
         <div class="flex items-center justify-between mb-2">

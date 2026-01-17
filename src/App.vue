@@ -5,56 +5,19 @@
     :max-retries="3"
   >
     <div class="bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-300">
-      <!-- Navigation -->
-      <nav v-if="authStore.isAuthenticated" class="bg-white dark:bg-gray-800 shadow-md transition-colors duration-300">
+      <!-- Main Header -->
+      <header v-if="authStore.isAuthenticated" class="bg-white dark:bg-gray-800 shadow-sm transition-colors duration-300">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex justify-between items-center py-3 sm:py-4">
-            <div class="flex items-center flex-1">
-              <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex-shrink-0">
-                <RouterLink to="/">ShopTrack</RouterLink>
-              </h1>
+          <div class="flex justify-between items-center py-2 sm:py-3">
+            <!-- Logo -->
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex-shrink-0">
+              <RouterLink to="/">ShopTrack</RouterLink>
+            </h1>
 
-              <!-- Desktop Navigation -->
-              <nav class="hidden md:flex space-x-6 lg:space-x-8 ml-6 lg:ml-8">
-                <RouterLink
-                  to="/upload"
-                  class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap"
-                  :class="{ 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400': $route.name === 'upload' }"
-                >
-                  📤 {{ t('common.upload') }}
-                </RouterLink>
-                <RouterLink
-                  to="/receipts"
-                  class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap"
-                  :class="{ 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400': $route.name === 'receipts' }"
-                >
-                  🧾 {{ t('navigation.receipts') }}
-                </RouterLink>
-                <RouterLink
-                  to="/reports"
-                  class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap"
-                  :class="{ 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400': $route.name === 'reports' }"
-                >
-                  📊 {{ t('navigation.reports') }}
-                </RouterLink>
-                <RouterLink
-                  to="/nfc-products"
-                  class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap"
-                  :class="{ 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400': $route.name === 'nfc-products' }"
-                >
-                  📱 NFC
-                </RouterLink>
-                <RouterLink
-                  to="/shopping-lists"
-                  class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap"
-                  :class="{ 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400': $route.name === 'shopping-lists' || $route.name === 'shopping-list-detail' }"
-                >
-                  🛒 {{ t('navigation.shoppingLists') }}
-                </RouterLink>
-              </nav>
-
-              <!-- Search (Desktop only) -->
-              <div class="hidden lg:flex ml-4 lg:ml-6">
+            <!-- Right side: Search + Utilities -->
+            <div class="flex items-center space-x-2 sm:space-x-4">
+              <!-- Search (Desktop) -->
+              <div class="hidden md:flex">
                 <SearchInput
                   :config="{
                     placeholder: t('search.placeholder'),
@@ -65,29 +28,20 @@
                 />
               </div>
 
-              <!-- Mobile Menu Button -->
+              <!-- Search Icon (Mobile) -->
               <button
-                class="md:hidden ml-auto mr-2 p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                @click="mobileMenuOpen = !mobileMenuOpen"
+                class="md:hidden p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                @click="mobileSearchOpen = !mobileSearchOpen"
               >
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                  <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
-            </div>
 
-            <!-- User Menu -->
-            <div class="flex items-center space-x-2 sm:space-x-4">
               <div class="hidden sm:block">
                 <LanguageSwitcher />
               </div>
-              <ThemeToggle simple />
               <NotificationMenu />
-
-              <div class="hidden lg:flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
-                <span class="truncate max-w-32">{{ t('common.hello', { name: displayName }) }}</span>
-              </div>
 
               <!-- User Menu Dropdown -->
               <div class="relative" ref="userMenuRef">
@@ -108,7 +62,11 @@
                   </div>
                 </button>
                 <transition enter-active-class="transition ease-out duration-200" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
-                  <div v-show="userMenuOpen" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-700 focus:outline-none z-10">
+                  <div v-show="userMenuOpen" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-700 focus:outline-none z-50">
+                    <div class="px-4 py-3">
+                      <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('common.signedInAs') }}</p>
+                      <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ displayName }}</p>
+                    </div>
                     <div class="py-1">
                       <RouterLink to="/profile" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" @click="userMenuOpen = false">
                         <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,6 +80,15 @@
                         </svg>
                         {{ t('billing.title') }}
                       </RouterLink>
+                      <button class="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer" @click="toggleTheme">
+                        <span class="flex items-center">
+                          <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                          </svg>
+                          {{ t('settings.theme') }}
+                        </span>
+                        <ThemeToggle simple />
+                      </button>
                     </div>
                     <div class="py-1">
                       <button class="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" @click="handleLogout">
@@ -136,24 +103,130 @@
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Mobile Navigation Menu -->
-          <div v-show="mobileMenuOpen" class="md:hidden border-t border-gray-200 dark:border-gray-700">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-              <RouterLink to="/upload" class="block px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors" :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20': $route.name === 'upload' }" @click="mobileMenuOpen = false">
-                📤 {{ t('common.upload') }}
+        <!-- Mobile Search Panel -->
+        <div
+          v-show="mobileSearchOpen"
+          class="md:hidden border-t border-gray-200 dark:border-gray-700 px-4 py-3"
+        >
+          <SearchInput
+            :config="{
+              placeholder: t('search.placeholder'),
+              minQueryLength: 2,
+              maxResults: 8
+            }"
+            @result-select="handleMobileSearchSelect"
+          />
+        </div>
+      </header>
+
+      <!-- Secondary Navigation -->
+      <nav v-if="authStore.isAuthenticated" class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <!-- Desktop Navigation -->
+          <div class="hidden md:flex items-center space-x-1 py-2">
+            <RouterLink
+              to="/upload"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors"
+              :class="$route.name === 'upload'
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'"
+            >
+              <span class="mr-2">📤</span>
+              {{ t('common.upload') }}
+            </RouterLink>
+            <RouterLink
+              to="/receipts"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors"
+              :class="$route.name === 'receipts' || $route.name === 'receipt-detail'
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'"
+            >
+              <span class="mr-2">🧾</span>
+              {{ t('navigation.receipts') }}
+            </RouterLink>
+            <RouterLink
+              to="/reports"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors"
+              :class="$route.name === 'reports'
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'"
+            >
+              <span class="mr-2">📊</span>
+              {{ t('navigation.reports') }}
+            </RouterLink>
+            <RouterLink
+              v-if="featureFlags.nfcProducts"
+              to="/nfc-products"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors"
+              :class="$route.name === 'nfc-products'
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'"
+            >
+              <span class="mr-2">📱</span>
+              NFC
+            </RouterLink>
+            <RouterLink
+              to="/shopping-lists"
+              class="flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors"
+              :class="$route.name === 'shopping-lists' || $route.name === 'shopping-list-detail'
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'"
+            >
+              <span class="mr-2">🛒</span>
+              {{ t('navigation.shoppingLists') }}
+            </RouterLink>
+          </div>
+
+          <!-- Mobile Navigation -->
+          <div class="md:hidden flex items-center justify-between py-2">
+            <div class="flex items-center space-x-1 overflow-x-auto scrollbar-hide">
+              <RouterLink
+                to="/upload"
+                class="flex items-center px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-colors"
+                :class="$route.name === 'upload'
+                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
+              >
+                📤
               </RouterLink>
-              <RouterLink to="/receipts" class="block px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors" :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20': $route.name === 'receipts' }" @click="mobileMenuOpen = false">
-                🧾 {{ t('navigation.receipts') }}
+              <RouterLink
+                to="/receipts"
+                class="flex items-center px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-colors"
+                :class="$route.name === 'receipts' || $route.name === 'receipt-detail'
+                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
+              >
+                🧾
               </RouterLink>
-              <RouterLink to="/reports" class="block px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors" :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20': $route.name === 'reports' }" @click="mobileMenuOpen = false">
-                📊 {{ t('navigation.reports') }}
+              <RouterLink
+                to="/reports"
+                class="flex items-center px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-colors"
+                :class="$route.name === 'reports'
+                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
+              >
+                📊
               </RouterLink>
-              <RouterLink to="/nfc-products" class="block px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors" :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20': $route.name === 'nfc-products' }" @click="mobileMenuOpen = false">
-                📱 NFC Products
+              <RouterLink
+                v-if="featureFlags.nfcProducts"
+                to="/nfc-products"
+                class="flex items-center px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-colors"
+                :class="$route.name === 'nfc-products'
+                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
+              >
+                📱
               </RouterLink>
-              <RouterLink to="/shopping-lists" class="block px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors" :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20': $route.name === 'shopping-lists' || $route.name === 'shopping-list-detail' }" @click="mobileMenuOpen = false">
-                🛒 {{ t('navigation.shoppingLists') }}
+              <RouterLink
+                to="/shopping-lists"
+                class="flex items-center px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-colors"
+                :class="$route.name === 'shopping-lists' || $route.name === 'shopping-list-detail'
+                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
+              >
+                🛒
               </RouterLink>
             </div>
           </div>
@@ -183,18 +256,21 @@ import NotificationMenu from '@/components/notifications/NotificationMenu.vue';
 import SearchInput from '@/components/SearchInput.vue';
 import { useAuthStore } from '@/stores/auth';
 import { safeImageUrl } from '@/utils/urlSanitizer';
+import { useDarkMode } from '@/composables/useDarkMode';
 import { useCategoriesStore } from '@/stores/categories';
 import { useShoppingListStore } from '@/stores/shoppingList';
 import { availableLocales } from '@/i18n';
 import type { SearchResultItem } from '@/types/search';
+import { featureFlags } from '@/config/featureFlags';
 
 const authStore = useAuthStore();
 const shoppingListStore = useShoppingListStore();
 const { t } = useTranslation();
 const router = useRouter();
-const mobileMenuOpen = ref(false);
+const { toggleMode: toggleTheme } = useDarkMode();
 const userMenuOpen = ref(false);
 const userMenuRef = ref<HTMLElement | null>(null);
+const mobileSearchOpen = ref(false);
 
 const displayName = computed(() => authStore.user?.firstName || authStore.user?.email || 'User');
 
@@ -215,12 +291,15 @@ async function handleLogout() {
 }
 
 function handleSearchResultSelect(result: SearchResultItem) {
-  // Close mobile menu if open
-  mobileMenuOpen.value = false;
-
   // Navigation is handled by SearchInput component
-  // This function can be used for additional tracking or actions
   console.log('Search result selected:', result);
+}
+
+function handleMobileSearchSelect(result: SearchResultItem) {
+  // Close mobile search panel
+  mobileSearchOpen.value = false;
+  // Navigation is handled by SearchInput component
+  console.log('Mobile search result selected:', result);
 }
 
 onMounted(() => {

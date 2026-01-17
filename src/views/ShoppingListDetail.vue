@@ -37,8 +37,7 @@ const currentList = computed(() => store.currentLocalList);
 
 const progressPercent = computed(() => {
   if (!currentList.value || currentList.value.totalItems === 0) return 0;
-  const unchecked = currentList.value.totalItems - currentList.value.checkedItems;
-  return Math.round((unchecked / currentList.value.totalItems) * 100);
+  return Math.round((currentList.value.checkedItems / currentList.value.totalItems) * 100);
 });
 
 const uncheckedCount = computed(() => {
@@ -244,19 +243,48 @@ const handleToggleAll = async () => {
         </div>
       </div>
 
-      <!-- Progress Card -->
-      <div v-else-if="currentList" class="card p-6 mb-6">
-        <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
-          <span class="font-medium">
-            {{ t("shoppingList.detail.itemsLeft", { count: uncheckedCount }) }}
-          </span>
-          <span>{{ progressPercent }}%</span>
-        </div>
-        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-          <div
-            class="h-full bg-primary-500 rounded-full transition-all duration-300"
-            :style="{ width: `${progressPercent}%` }"
-          ></div>
+      <!-- Progress Card with Actions -->
+      <div v-else-if="currentList" class="card p-4 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+          <!-- Progress section -->
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1.5">
+              <span class="font-medium">
+                {{ t("shoppingList.detail.itemsLeft", { count: uncheckedCount }) }}
+              </span>
+              <span>{{ progressPercent }}%</span>
+            </div>
+            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-green-500 rounded-full transition-all duration-300"
+                :style="{ width: `${progressPercent}%` }"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex gap-2 flex-shrink-0">
+            <button
+              @click="showAddModal = true"
+              class="px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium flex items-center gap-1.5"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <span class="hidden sm:inline">{{ t("shoppingList.actions.addItem") }}</span>
+            </button>
+            <button
+              v-if="store.categorizedItems.length > 0"
+              @click="handleToggleAll"
+              class="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium flex items-center gap-1.5"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path v-if="allItemsChecked" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="hidden sm:inline">{{ allItemsChecked ? t("shoppingList.actions.uncheckAll") : t("shoppingList.actions.selectAll") }}</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -351,58 +379,6 @@ const handleToggleAll = async () => {
         </div>
       </div>
 
-      <!-- Bottom actions -->
-      <div v-if="currentList && store.categorizedItems.length > 0" class="mt-6 flex flex-col sm:flex-row gap-3">
-        <button
-          @click="showAddModal = true"
-          class="flex-1 px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium flex items-center justify-center gap-2"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          {{ t("shoppingList.actions.addItem") }}
-        </button>
-
-        <button
-          @click="handleToggleAll"
-          class="px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium flex items-center justify-center gap-2"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              v-if="allItemsChecked"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-            <path
-              v-else
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          {{ allItemsChecked ? t("shoppingList.actions.uncheckAll") : t("shoppingList.actions.selectAll") }}
-        </button>
-      </div>
     </div>
 
     <!-- Add Item Modal -->

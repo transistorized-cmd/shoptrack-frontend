@@ -5,7 +5,6 @@ import { useTranslation } from "@/composables/useTranslation";
 import { useShoppingListStore } from "@/stores/shoppingList";
 import type { LocalShoppingList } from "@/types/shoppingList";
 import ShoppingListCard from "@/components/shopping-list/ShoppingListCard.vue";
-import SyncStatusIndicator from "@/components/shopping-list/SyncStatusIndicator.vue";
 
 const { t } = useTranslation();
 const router = useRouter();
@@ -81,23 +80,15 @@ import { computed } from "vue";
   <div class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:items-center sm:justify-between">
-      <div>
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-          {{ t("shoppingList.title") }}
-        </h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          {{ t("shoppingList.description") }}
-        </p>
-      </div>
-      <div class="flex items-center gap-3">
-        <SyncStatusIndicator />
-        <button
-          @click="showCreateModal = true"
-          class="btn btn-primary w-full sm:w-auto"
-        >
-          + {{ t("shoppingList.actions.create") }}
-        </button>
-      </div>
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+        {{ t("shoppingList.title") }}
+      </h1>
+      <button
+        @click="showCreateModal = true"
+        class="btn btn-primary w-full sm:w-auto text-center"
+      >
+        + {{ t("shoppingList.actions.create") }}
+      </button>
     </div>
 
     <!-- Filter tabs -->
@@ -146,16 +137,12 @@ import { computed } from "vue";
         v-else-if="filteredLists.length === 0"
         class="text-center py-12"
       >
-        <span class="text-6xl block mb-4">📝</span>
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          {{ t("shoppingList.empty.title") }}
-        </h2>
-        <p class="text-gray-500 dark:text-gray-400 mb-6">
+        <div class="text-gray-500 dark:text-gray-400 mb-4">
           {{ t("shoppingList.empty.description") }}
-        </p>
+        </div>
         <button
           @click="showCreateModal = true"
-          class="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+          class="btn btn-primary"
         >
           {{ t("shoppingList.actions.createFirst") }}
         </button>

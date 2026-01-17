@@ -13,6 +13,48 @@ This document contains important information for Claude to remember when working
 - **Charts**: Chart.js with vue-chartjs
 - **Type Safety**: Full TypeScript coverage
 
+## 🚩 Feature Flags
+
+Feature flags allow enabling/disabling features without code changes.
+
+### Configuration File:
+`src/config/featureFlags.ts`
+
+```typescript
+export const featureFlags = {
+  nfcProducts: false,        // NFC product scanning (disabled)
+  shoppingPredictions: true, // AI shopping predictions
+  priceTrends: true,         // Price trend analytics
+} as const;
+```
+
+### Usage:
+
+**In Vue components:**
+```typescript
+import { featureFlags } from '@/config/featureFlags';
+
+// In template
+<div v-if="featureFlags.nfcProducts">NFC Feature</div>
+```
+
+**In router (route protection):**
+```typescript
+{
+  path: "/nfc-products",
+  name: "nfc-products",
+  component: () => import("@/views/NfcProducts.vue"),
+  meta: { requiresAuth: true, requiresFeature: 'nfcProducts' as const },
+}
+```
+
+Routes with `requiresFeature` meta will redirect to 404 if the feature is disabled.
+
+### Adding New Feature Flags:
+1. Add the flag to `featureFlags` object in `src/config/featureFlags.ts`
+2. Use `v-if="featureFlags.flagName"` in templates to conditionally render
+3. Add `requiresFeature: 'flagName'` to route meta for route protection
+
 ## 🔧 Node Version Management
 
 **CRITICAL**: This project requires Node.js v22 and has automated version checking.

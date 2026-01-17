@@ -89,6 +89,36 @@ export const shoppingListService = {
     return res.data as ProductSearchResult[];
   },
 
+  // Create/normalize a product (creates if not found)
+  async createProduct(itemName: string, category?: string): Promise<ProductSearchResult> {
+    const res = await api.post("/products/normalize", { itemName, category });
+    const data = res.data as {
+      product: {
+        id: number;
+        itemNameOriginal: string;
+        nombre: string;
+        emoji: string;
+        tagUuid?: string;
+        category?: string;
+      };
+      normalizedName: string;
+      emoji?: string;
+      category?: string;
+      wasCreated: boolean;
+      matchSource: string;
+    };
+    // Convert normalize response to ProductSearchResult format
+    return {
+      id: data.product.id,
+      itemNameOriginal: data.product.itemNameOriginal,
+      nombre: data.product.nombre,
+      emoji: data.product.emoji || data.emoji || "📦",
+      category: data.product.category || data.category,
+      hasNfc: !!data.product.tagUuid,
+      isFavorite: false,
+    };
+  },
+
   // Favorites
   async getFavorites(): Promise<ProductSearchResult[]> {
     const res = await api.get("/user/favorites");

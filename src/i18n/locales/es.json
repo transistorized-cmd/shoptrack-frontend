@@ -24,6 +24,7 @@
     "tryAgain": "Intentar de nuevo",
     "uploadAnother": "Subir otro",
     "hello": "Hola, {name}",
+    "signedInAs": "Conectado como",
     "or": "O",
     "dismiss": "Descartar",
     "create": "Crear",
@@ -38,6 +39,9 @@
     "settings": "Configuración",
     "logout": "Cerrar sesión",
     "login": "Iniciar sesión"
+  },
+  "settings": {
+    "theme": "Tema"
   },
   "auth": {
     "signIn": "Iniciar sesión",
@@ -899,7 +903,14 @@
       "recentProducts": "Productos Recientes",
       "favorites": "Favoritos",
       "searchResults": "Resultados de Búsqueda",
-      "createCustom": "Agregar artículo personalizado"
+      "createCustom": "Agregar artículo personalizado",
+      "addCustom": "Agregar como nuevo producto",
+      "customHint": "Esto creará un nuevo producto que podrá ser asociado con futuros recibos",
+      "optional": "opcional",
+      "hint": "Escribe al menos 2 caracteres para buscar",
+      "uncategorized": "Sin categoría",
+      "favorite": "Favorito",
+      "hasNfc": "Tiene etiqueta NFC"
     },
     "item": {
       "checked": "Marcado",

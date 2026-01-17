@@ -13,10 +13,11 @@ const emit = defineEmits<{
 }>();
 
 const displayName = computed(() => {
+  const name = props.item.name || "(unnamed)";
   if (props.item.emoji) {
-    return `${props.item.emoji} ${props.item.name}`;
+    return `${props.item.emoji} ${name}`;
   }
-  return props.item.name;
+  return name;
 });
 
 const quantityText = computed(() => {

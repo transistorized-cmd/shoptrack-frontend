@@ -218,7 +218,9 @@
       "dateUpdated": "Fecha actualizada exitosamente",
       "itemUpdated": "Artículo actualizado exitosamente",
       "failedToDelete": "Error al eliminar recibo. Por favor intenta de nuevo.",
-      "orEnterNew": "O ingresa una nueva categoría"
+      "orEnterNew": "O ingresa una nueva categoría",
+      "addToFavorites": "Agregar a favoritos",
+      "removeFromFavorites": "Quitar de favoritos"
     }
   },
   "upload": {
@@ -910,7 +912,9 @@
       "hint": "Escribe al menos 2 caracteres para buscar",
       "uncategorized": "Sin categoría",
       "favorite": "Favorito",
-      "hasNfc": "Tiene etiqueta NFC"
+      "hasNfc": "Tiene etiqueta NFC",
+      "addToFavorites": "Agregar a favoritos",
+      "removeFromFavorites": "Quitar de favoritos"
     },
     "item": {
       "checked": "Marcado",

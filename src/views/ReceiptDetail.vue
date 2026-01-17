@@ -442,6 +442,22 @@
                   <span class="font-semibold text-gray-900 dark:text-white">{{
                     formatAmount(item.totalPrice, receipt.currency || 'USD')
                   }}</span>
+                  <!-- Favorite toggle button -->
+                  <button
+                    v-if="item.productId"
+                    class="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50"
+                    :disabled="togglingFavoriteItemId === item.id"
+                    :title="item.isFavorite ? $t('receipts.receiptDetail.removeFromFavorites') : $t('receipts.receiptDetail.addToFavorites')"
+                    @click="handleToggleItemFavorite(item)"
+                  >
+                    <span v-if="togglingFavoriteItemId === item.id" class="inline-block w-4 h-4">
+                      <svg class="animate-spin h-4 w-4 text-yellow-500" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                    </span>
+                    <span v-else class="text-base">{{ item.isFavorite ? '⭐' : '☆' }}</span>
+                  </button>
                   <button
                     class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-opacity"
                     @click="startEditingItem(item)"
@@ -753,6 +769,7 @@ import { useCategoriesStore } from "@/stores/categories";
 import LocalizedDateInput from "@/components/common/LocalizedDateInput.vue";
 import { getApiBaseUrl } from "@/services/api";
 import { receiptsService } from "@/services/receipts";
+import { shoppingListService } from "@/services/shoppingList.service";
 import { useNotifications } from "@/composables/useNotifications";
 import { useRouteValidation } from "@/utils/routeValidation";
 import { useDateLocalization } from "@/composables/useDateLocalization";
@@ -779,6 +796,7 @@ const error = ref<string | null>(null);
 const showDebugInfo = ref(false);
 const imageError = ref<string | null>(null);
 const showImageModal = ref(false);
+const togglingFavoriteItemId = ref<number | null>(null);
 
 const handleModalContentClick = (event: MouseEvent) => {
   event.stopPropagation();
@@ -1103,6 +1121,27 @@ const getStatusColor = (status: string) => {
 const capitalizeFirst = (str: string) => {
   if (!str) return str;
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
+// Toggle favorite for receipt item
+const handleToggleItemFavorite = async (item: any) => {
+  if (!item.productId || togglingFavoriteItemId.value !== null) return;
+
+  togglingFavoriteItemId.value = item.id;
+  try {
+    const currentState = item.isFavorite || false;
+    if (currentState) {
+      await shoppingListService.removeFavorite(item.productId);
+    } else {
+      await shoppingListService.addFavorite(item.productId);
+    }
+    // Update the local state
+    item.isFavorite = !currentState;
+  } catch (err) {
+    console.error("Failed to toggle favorite:", err);
+  } finally {
+    togglingFavoriteItemId.value = null;
+  }
 };
 
 // Receipt item editing methods

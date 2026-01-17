@@ -42,7 +42,7 @@ const progressPercent = computed(() => {
 
 const uncheckedCount = computed(() => {
   if (!currentList.value) return 0;
-  return currentList.value.totalItems - currentList.value.checkedItems;
+  return Math.max(0, currentList.value.totalItems - currentList.value.checkedItems);
 });
 
 const handleBack = () => {

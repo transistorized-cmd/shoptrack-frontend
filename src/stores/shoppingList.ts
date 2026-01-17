@@ -636,6 +636,39 @@ export const useShoppingListStore = defineStore("shoppingList", () => {
     searchResults.value = [];
   };
 
+  // Toggle favorite status for a product
+  const toggleFavorite = async (productId: number, currentState: boolean) => {
+    try {
+      if (currentState) {
+        await shoppingListService.removeFavorite(productId);
+      } else {
+        await shoppingListService.addFavorite(productId);
+      }
+
+      // Update search results if product is in there
+      const product = searchResults.value.find((p) => p.id === productId);
+      if (product) {
+        product.isFavorite = !currentState;
+      }
+
+      // Update cached products
+      if (navigator.onLine) {
+        const cachedProduct = await db.cachedProducts.get(productId);
+        if (cachedProduct) {
+          await db.cachedProducts.update(productId, {
+            isFavorite: !currentState,
+          });
+        }
+      }
+
+      return !currentState;
+    } catch (err) {
+      error.value =
+        err instanceof Error ? err.message : "Failed to toggle favorite";
+      throw err;
+    }
+  };
+
   // Clear current list
   const clearCurrentList = () => {
     currentList.value = null;
@@ -967,6 +1000,7 @@ export const useShoppingListStore = defineStore("shoppingList", () => {
     removeItem,
     searchProducts,
     clearSearch,
+    toggleFavorite,
     clearCurrentList,
     clearError,
     addFavoritesToList,

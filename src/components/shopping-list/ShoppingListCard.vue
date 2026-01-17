@@ -20,7 +20,7 @@ const progressPercent = computed(() => {
 });
 
 const progressText = computed(() => {
-  const unchecked = props.list.totalItems - props.list.checkedItems;
+  const unchecked = Math.max(0, props.list.totalItems - props.list.checkedItems);
   return `${unchecked}/${props.list.totalItems}`;
 });
 

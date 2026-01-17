@@ -219,7 +219,9 @@
       "dateUpdated": "Date updated successfully",
       "itemUpdated": "Item updated successfully",
       "failedToDelete": "Failed to delete receipt. Please try again.",
-      "orEnterNew": "Or enter new category"
+      "orEnterNew": "Or enter new category",
+      "addToFavorites": "Add to favorites",
+      "removeFromFavorites": "Remove from favorites"
     }
   },
   "upload": {
@@ -1029,7 +1031,9 @@
       "hint": "Type at least 2 characters to search",
       "uncategorized": "Uncategorized",
       "favorite": "Favorite",
-      "hasNfc": "Has NFC tag"
+      "hasNfc": "Has NFC tag",
+      "addToFavorites": "Add to favorites",
+      "removeFromFavorites": "Remove from favorites"
     },
     "item": {
       "checked": "Checked",

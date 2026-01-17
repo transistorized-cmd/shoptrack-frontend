@@ -39,6 +39,8 @@ export interface ReceiptItem {
   categoryRaw?: string;
   notes?: string;
   confidence?: "low" | "medium" | "high" | "manual";
+  productId?: number;
+  isFavorite?: boolean;
   createdAt: string;
   updatedAt: string;
 }

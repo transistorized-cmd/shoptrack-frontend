@@ -32,12 +32,13 @@ export const getApiBaseUrl = (): string => {
   }
 
   // For production deployment, detect if we're on platform.shoptrack.app
+  // Use same-origin /api which Caddy proxies to the backend
   if (
     typeof window !== "undefined" &&
     window.location.hostname === "platform.shoptrack.app"
   ) {
-    console.log("Platform hostname detected");
-    return "https://api.shoptrack.app/api";
+    console.log("Platform hostname detected, using same-origin /api");
+    return "/api";
   }
 
   // Build URL from components for production

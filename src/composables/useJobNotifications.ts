@@ -10,6 +10,7 @@ const hasActiveJobs = ref(false);
 const lastJobCheckTime = ref<number>(0);
 const pollCount = ref(0); // Track poll cycles for adaptive interval
 const isInitialized = ref(false); // Ensure we only initialize once globally
+const shownNotificationIds = new Set<string>(); // Track notifications already shown in UI to prevent duplicates
 
 export const useJobNotifications = () => {
   const { success, error, info, warning } = useNotifications();
@@ -25,14 +26,25 @@ export const useJobNotifications = () => {
   );
 
   /**
+   * Check if an error is a 429 rate limit error
+   */
+  const isRateLimitError = (err: unknown): boolean => {
+    if (err && typeof err === 'object' && 'response' in err) {
+      const response = (err as { response?: { status?: number } }).response;
+      return response?.status === 429;
+    }
+    return false;
+  };
+
+  /**
    * Check if there are any active/running jobs based on recent notification activity
    * This helps determine the appropriate polling interval
    */
   const checkActiveJobs = async (): Promise<boolean> => {
     const now = Date.now();
 
-    // Only check for active jobs every 30 seconds to reduce load
-    if (now - lastJobCheckTime.value < 30000) {
+    // Only check for active jobs every 60 seconds to reduce load
+    if (now - lastJobCheckTime.value < 60000) {
       return hasActiveJobs.value;
     }
 
@@ -51,6 +63,11 @@ export const useJobNotifications = () => {
 
       return hasActive;
     } catch (err) {
+      // Silently ignore 429 rate limit errors
+      if (isRateLimitError(err)) {
+        console.debug("Rate limited on check active jobs, will retry later");
+        return hasActiveJobs.value;
+      }
       console.error("Error checking active jobs:", err);
       // Default to assuming there might be active jobs on error
       return hasActiveJobs.value;
@@ -75,13 +92,10 @@ export const useJobNotifications = () => {
 
   /**
    * Start polling for job notifications with adaptive interval
-   * - Fast polling (5s): When there are unread notifications or active jobs
-   * - Slow polling (30s): When no activity (skips 5 out of 6 poll cycles)
-   *
-   * Benefits from 5-second server-side cache on unread-count endpoint.
-   * The cache ensures that even during fast polling, database load is minimal.
+   * - Fast polling (15s): When there are unread notifications or active jobs
+   * - Slow polling (60s): When no activity (skips 3 out of 4 poll cycles)
    */
-  const startPolling = (baseIntervalMs: number = 5000) => {
+  const startPolling = (baseIntervalMs: number = 15000) => {
     if (isPolling.value) return;
 
     isPolling.value = true;
@@ -94,14 +108,13 @@ export const useJobNotifications = () => {
         // Determine if we should poll this cycle
         const shouldUseFastPolling = hasActiveJobs.value || unreadCount.value > 0;
 
-        // Slow polling: only poll every 6th cycle (30 seconds if base is 5s)
-        // Fast polling: poll every cycle (5 seconds)
-        if (!shouldUseFastPolling && pollCount.value % 6 !== 0) {
+        // Slow polling: only poll every 4th cycle (60 seconds if base is 15s)
+        // Fast polling: poll every cycle (15 seconds)
+        if (!shouldUseFastPolling && pollCount.value % 4 !== 0) {
           return; // Skip this poll cycle
         }
 
         // Lightweight poll for unread count first
-        // Server caches this for 5 seconds, so rapid polls don't hit the database
         // Only fetch receipt processing notifications
         const countResponse = await asyncJobsService.getUnreadCount({
           jobType: "receipt_processing"
@@ -119,9 +132,14 @@ export const useJobNotifications = () => {
           }
         }
 
-        // Periodically check for active jobs (every 30 seconds)
+        // Periodically check for active jobs (every 60 seconds)
         await checkActiveJobs();
       } catch (err) {
+        // Silently ignore 429 rate limit errors
+        if (isRateLimitError(err)) {
+          console.debug("Rate limited on notification poll, will retry later");
+          return;
+        }
         console.error("Error polling job notifications:", err);
       }
     };
@@ -172,15 +190,21 @@ export const useJobNotifications = () => {
 
       unreadCount.value = response.unreadCount;
 
-      // Display new notifications in the UI
+      // Display new notifications in the UI (skip already shown ones)
       response.notifications
-        .filter((n) => !n.isRead && shouldShowInUI(n))
+        .filter((n) => !n.isRead && shouldShowInUI(n) && !shownNotificationIds.has(n.id))
         .forEach((notification) => {
+          shownNotificationIds.add(notification.id);
           showNotificationInUI(notification);
         });
 
       return response;
     } catch (err) {
+      // Silently ignore 429 rate limit errors
+      if (isRateLimitError(err)) {
+        console.debug("Rate limited on fetch notifications, will retry later");
+        return null;
+      }
       console.error("Failed to fetch job notifications:", err);
       error("Notification Error", "Failed to fetch notifications");
       return null;

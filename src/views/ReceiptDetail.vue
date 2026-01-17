@@ -116,6 +116,7 @@
                 v-if="imageUrl && !imageError"
                 :src="imageUrl"
                 :alt="receipt.filename"
+                crossorigin="use-credentials"
                 class="max-w-full max-h-full object-contain cursor-pointer hover:opacity-90 transition-opacity"
                 @error="handleImageError"
                 @click="showImageModal = true"
@@ -724,6 +725,7 @@
             v-if="imageUrl && !imageError"
             :src="imageUrl"
             :alt="receipt?.filename ?? 'Receipt'"
+            crossorigin="use-credentials"
             class="max-w-full h-auto"
           />
           <!-- Close button - fixed position -->

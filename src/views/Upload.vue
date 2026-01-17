@@ -253,13 +253,69 @@
       </form>
     </div>
 
-    <!-- Upload Result -->
-    <div v-if="uploadResult" class="card p-6">
-      <h3
-        class="text-lg font-medium mb-4"
-        :class="uploadResult.success ? 'text-green-900 dark:text-green-400' : 'text-red-900 dark:text-red-400'"
-      >
-        {{ uploadResult.success ? 'Upload Successful!' : 'Upload Failed' }}
+    <!-- Active Job Progress -->
+    <div v-if="currentJobId && currentJobTracker" class="card p-6 mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+          Processing Receipt
+        </h3>
+        <span
+          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+          :class="jobStatusClass"
+        >
+          {{ jobStatusText }}
+        </span>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="mb-4">
+        <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+          <span>{{ currentJobTracker.status?.filename || 'Processing...' }}</span>
+          <span>{{ jobProgress }}%</span>
+        </div>
+        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+          <div
+            class="h-2.5 rounded-full transition-all duration-300"
+            :class="jobProgressBarClass"
+            :style="{ width: `${jobProgress}%` }"
+          />
+        </div>
+      </div>
+
+      <!-- Status Message -->
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        {{ jobStatusMessage }}
+      </p>
+
+      <!-- Error Display -->
+      <div v-if="currentJobTracker.status?.status === 'failed'" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+        <p class="text-sm text-red-700 dark:text-red-300">
+          {{ currentJobTracker.status?.errorMessage || 'Processing failed' }}
+        </p>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end space-x-3">
+        <button
+          @click="clearCurrentJob"
+          class="btn btn-secondary"
+        >
+          {{ currentJobTracker.status?.status === 'completed' || currentJobTracker.status?.status === 'failed' ? 'Upload Another' : 'Dismiss' }}
+        </button>
+        <RouterLink
+          v-if="currentJobTracker.status?.status === 'completed' && completedReceiptId"
+          :to="`/receipts/${completedReceiptId}`"
+          class="btn btn-primary"
+        >
+          View Receipt
+        </RouterLink>
+      </div>
+    </div>
+
+    <!-- Upload Result (for errors that happen before job creation) -->
+    <div v-if="uploadResult && !uploadResult.success && !currentJobId" class="card p-6">
+      <h3 class="text-lg font-medium mb-4 text-red-900 dark:text-red-400">
+        Upload Failed
       </h3>
 
       <div class="space-y-4">
@@ -279,15 +335,8 @@
             @click="clearUploadResult"
             class="btn btn-secondary"
           >
-            Upload Another
+            Try Again
           </button>
-          <RouterLink
-            v-if="uploadResult.success"
-            to="/receipts"
-            class="btn btn-primary"
-          >
-            View Receipts
-          </RouterLink>
         </div>
       </div>
     </div>
@@ -365,6 +414,91 @@ const showLimitReached = ref(false);
 const globalReceiptLimitReached = ref(false);
 const globalUpgradeMessage = ref<FeatureMessage | null>(null);
 const showSubscriptionModal = ref(false);
+
+// Current job tracking
+const currentJobId = ref<string | null>(null);
+
+// Computed properties for job tracking
+const currentJobTracker = computed(() => {
+  if (!currentJobId.value) return null;
+  return getJob(currentJobId.value);
+});
+
+const completedReceiptId = computed(() => {
+  const tracker = currentJobTracker.value;
+  if (tracker?.status?.status === 'completed' && tracker.status.resultData) {
+    return tracker.status.resultData.receiptId || tracker.status.resultData.id;
+  }
+  return null;
+});
+
+const jobProgress = computed(() => {
+  const tracker = currentJobTracker.value;
+  if (!tracker?.status) return 0;
+
+  switch (tracker.status.status) {
+    case 'pending': return 10;
+    case 'processing': return tracker.status.progress || 50;
+    case 'completed': return 100;
+    case 'failed': return 100;
+    case 'cancelled': return 0;
+    default: return 0;
+  }
+});
+
+const jobStatusClass = computed(() => {
+  const status = currentJobTracker.value?.status?.status;
+  switch (status) {
+    case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+    case 'processing': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
+    case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+    case 'failed': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+    case 'cancelled': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
+  }
+});
+
+const jobProgressBarClass = computed(() => {
+  const status = currentJobTracker.value?.status?.status;
+  switch (status) {
+    case 'pending': return 'bg-yellow-500';
+    case 'processing': return 'bg-blue-500';
+    case 'completed': return 'bg-green-500';
+    case 'failed': return 'bg-red-500';
+    default: return 'bg-gray-500';
+  }
+});
+
+const jobStatusText = computed(() => {
+  const status = currentJobTracker.value?.status?.status;
+  switch (status) {
+    case 'pending': return 'Pending';
+    case 'processing': return 'Processing';
+    case 'completed': return 'Completed';
+    case 'failed': return 'Failed';
+    case 'cancelled': return 'Cancelled';
+    default: return 'Unknown';
+  }
+});
+
+const jobStatusMessage = computed(() => {
+  const tracker = currentJobTracker.value;
+  if (!tracker?.status) return 'Initializing...';
+
+  switch (tracker.status.status) {
+    case 'pending': return 'Your receipt is queued for processing...';
+    case 'processing': return 'AI is analyzing your receipt and extracting items...';
+    case 'completed': return 'Receipt processed successfully! Click "View Receipt" to see the details.';
+    case 'failed': return 'Processing failed. You can try uploading again.';
+    case 'cancelled': return 'Processing was cancelled.';
+    default: return 'Processing...';
+  }
+});
+
+const clearCurrentJob = () => {
+  currentJobId.value = null;
+  uploadResult.value = null;
+};
 
 // File handling methods
 const handleFileSelect = async (event: Event) => {
@@ -482,38 +616,28 @@ const handleUpload = async () => {
   uploading.value = true;
   uploadResult.value = null;
 
+  // Save filename before any async operations
+  const fileName = selectedFile.value.name;
+
   try {
     // Use the real async upload API
     const jobId = await uploadFileAsync(selectedFile.value, {
       onUploadProgress: (progressEvent: any) => {
-        // Could add progress tracking here if needed
         console.debug('Upload progress:', progressEvent);
       },
     });
 
-    // Upload started successfully - the job is now being processed
-    uploadResult.value = {
-      success: true,
-      receipt: {
-        id: jobId,
-        fileName: selectedFile.value.name,
-        originalFileName: selectedFile.value.name,
-        filePath: '',
-        itemsDetected: 0,
-        confidence: 0,
-        successfullyParsed: 0,
-        processingStatus: 'processing',
-        pluginUsed: detectedPlugin.value?.pluginKey || 'generic',
-        uploadedAt: new Date().toISOString(),
-        processingTime: 0,
-      },
-      errors: [],
-      warnings: [],
-      message: `File uploaded successfully. Job ID: ${jobId}. Processing in background...`,
-    };
+    // Track this job for progress display
+    currentJobId.value = jobId;
 
-    // Clear the form after successful upload
-    clearFile();
+    // Clear the file selection (but not the job tracking)
+    selectedFile.value = null;
+    detectedPlugin.value = null;
+    fileValidationResult.value = null;
+    showValidationErrors.value = false;
+    if (fileInput.value) {
+      fileInput.value.value = "";
+    }
 
   } catch (error) {
     console.error("Upload failed:", error);
@@ -530,8 +654,8 @@ const handleUpload = async () => {
       success: false,
       receipt: {
         id: '',
-        fileName: selectedFile.value.name,
-        originalFileName: selectedFile.value.name,
+        fileName: fileName,
+        originalFileName: fileName,
         filePath: '',
         itemsDetected: 0,
         confidence: 0,

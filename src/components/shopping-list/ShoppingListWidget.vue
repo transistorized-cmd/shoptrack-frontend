@@ -55,27 +55,30 @@ const goToAllLists = () => {
     <!-- Content -->
     <div class="p-4">
       <template v-if="activeList">
-        <!-- Active list info -->
-        <div class="mb-4">
+        <!-- Clickable active list info -->
+        <div
+          class="mb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 -mx-4 -mt-4 px-4 pt-4 pb-2 rounded-t-lg transition-colors"
+          @click="goToList"
+        >
           <h4 class="font-medium text-gray-900 dark:text-white mb-1">
             {{ activeList.name }}
           </h4>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             {{ t("shoppingList.widget.itemsLeft", { count: uncheckedCount }) }}
           </p>
-        </div>
 
-        <!-- Progress bar -->
-        <div class="mb-4">
-          <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div
-              class="h-full bg-primary-500 rounded-full transition-all duration-500"
-              :style="{ width: `${progressPercent}%` }"
-            ></div>
-          </div>
-          <div class="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
-            <span>{{ t("shoppingList.widget.progress") }}</span>
-            <span>{{ progressPercent }}%</span>
+          <!-- Progress bar -->
+          <div class="mt-3">
+            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-primary-500 rounded-full transition-all duration-500"
+                :style="{ width: `${progressPercent}%` }"
+              ></div>
+            </div>
+            <div class="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
+              <span>{{ t("shoppingList.widget.progress", { checked: activeList.checkedItems, total: activeList.totalItems }) }}</span>
+              <span>{{ progressPercent }}%</span>
+            </div>
           </div>
         </div>
 

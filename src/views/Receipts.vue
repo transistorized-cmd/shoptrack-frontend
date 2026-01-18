@@ -62,7 +62,20 @@
 
     <!-- Filters -->
     <div class="card p-4 sm:p-6">
-      <h2 class="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-4 sm:hidden">{{ $t('receipts.filters.title') }}</h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base sm:text-lg font-medium text-gray-900 dark:text-white">{{ $t('receipts.filters.title') }}</h2>
+        <button
+          v-if="hasActiveFilters"
+          type="button"
+          class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1"
+          @click="handleClearAllFilters"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          {{ $t('receipts.filters.clearAll') }}
+        </button>
+      </div>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div>
           <label
@@ -70,13 +83,26 @@
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >{{ $t('receipts.filters.startDate') }}</label
           >
-          <LocalizedDateInput
-            id="startDate"
-            v-model="filters.startDate"
-            class="input w-full"
-            :min-date="minAllowedDate"
-            @change="fetchReceipts"
-          />
+          <div class="relative">
+            <LocalizedDateInput
+              id="startDate"
+              v-model="filters.startDate"
+              class="input w-full"
+              :min-date="minAllowedDate"
+              @change="fetchReceipts"
+            />
+            <button
+              v-if="filters.startDate"
+              type="button"
+              class="absolute right-8 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              :title="$t('receipts.filters.clearStartDate')"
+              @click="handleClearFilter('startDate')"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div>
@@ -85,13 +111,26 @@
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >{{ $t('receipts.filters.endDate') }}</label
           >
-          <LocalizedDateInput
-            id="endDate"
-            v-model="filters.endDate"
-            class="input w-full"
-            :min-date="minAllowedDate"
-            @change="fetchReceipts"
-          />
+          <div class="relative">
+            <LocalizedDateInput
+              id="endDate"
+              v-model="filters.endDate"
+              class="input w-full"
+              :min-date="minAllowedDate"
+              @change="fetchReceipts"
+            />
+            <button
+              v-if="filters.endDate"
+              type="button"
+              class="absolute right-8 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              :title="$t('receipts.filters.clearEndDate')"
+              @click="handleClearFilter('endDate')"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="col-span-full sm:col-span-2 lg:col-span-1">
@@ -100,14 +139,27 @@
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >{{ $t('common.search') }}</label
           >
-          <input
-            id="search"
-            v-model="filters.search"
-            type="text"
-            :placeholder="$t('receipts.searchPlaceholder')"
-            class="input w-full"
-            @input="debouncedSearch"
-          />
+          <div class="relative">
+            <input
+              id="search"
+              v-model="filters.search"
+              type="text"
+              :placeholder="$t('receipts.searchPlaceholder')"
+              class="input w-full pr-8"
+              @input="debouncedSearch"
+            />
+            <button
+              v-if="filters.search"
+              type="button"
+              class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              :title="$t('receipts.filters.clearSearch')"
+              @click="handleClearFilter('search')"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -228,15 +280,13 @@ import LocalizedDateInput from "@/components/common/LocalizedDateInput.vue";
 import SubscriptionModal from "@/components/SubscriptionModal.vue";
 import { useDebounceFn } from "@vueuse/core";
 import { featureService, type FeatureMessage } from "@/services/featureService";
+import { useReceiptFilterPersistence, type ReceiptFilters } from "@/composables/useFilterPersistence";
 
 const { t, locale } = useTranslation();
 const receiptsStore = useReceiptsStore();
 
-const filters = ref({
-  startDate: "",
-  endDate: "",
-  search: "",
-});
+// Use persisted filters
+const { filters, hasActiveFilters, clearFilter, clearAllFilters } = useReceiptFilterPersistence();
 
 const receiptLimitReached = ref(false);
 const upgradeMessage = ref<FeatureMessage | null>(null);
@@ -268,6 +318,17 @@ const fetchReceipts = async () => {
 };
 
 const debouncedSearch = useDebounceFn(fetchReceipts, TIMEOUT.DEBOUNCE_SEARCH);
+
+// Filter clear handlers
+const handleClearFilter = (key: keyof ReceiptFilters) => {
+  clearFilter(key);
+  fetchReceipts();
+};
+
+const handleClearAllFilters = () => {
+  clearAllFilters();
+  fetchReceipts();
+};
 
 const nextPage = async () => {
   if (receiptsStore.pagination.page < receiptsStore.pagination.totalPages) {

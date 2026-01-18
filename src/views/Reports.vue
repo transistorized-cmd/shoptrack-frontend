@@ -69,36 +69,75 @@
 
         <!-- Date Range Selection (if required) -->
         <div v-if="plugin.requiresDateRange" class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >{{ $t('reports.dateRange') }}</label
-          >
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >{{ $t('reports.dateRange') }}</label
+            >
+            <button
+              v-if="hasActiveFilter(plugin.key)"
+              type="button"
+              class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1"
+              @click="handleClearDateRange(plugin.key)"
+            >
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              {{ $t('reports.clearDates') }}
+            </button>
+          </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <LocalizedDateInput
-              :model-value="dateRanges[plugin.key]?.startDate || ''"
-              :min-date="getMinDateForPlugin(plugin)"
-              :max-date="getMaxDateForPlugin(plugin)"
-              class="input text-sm"
-              @update:model-value="
-                updateDateRange(
-                  plugin.key,
-                  'startDate',
-                  $event,
-                )
-              "
-            />
-            <LocalizedDateInput
-              :model-value="dateRanges[plugin.key]?.endDate || ''"
-              :min-date="getMinDateForPlugin(plugin)"
-              :max-date="getMaxDateForPlugin(plugin)"
-              class="input text-sm"
-              @update:model-value="
-                updateDateRange(
-                  plugin.key,
-                  'endDate',
-                  $event,
-                )
-              "
-            />
+            <div class="relative">
+              <LocalizedDateInput
+                :model-value="getDateRange(plugin.key).startDate"
+                :min-date="getMinDateForPlugin(plugin)"
+                :max-date="getMaxDateForPlugin(plugin)"
+                class="input text-sm"
+                @update:model-value="
+                  handleUpdateDateRange(
+                    plugin.key,
+                    'startDate',
+                    $event,
+                  )
+                "
+              />
+              <button
+                v-if="getDateRange(plugin.key).startDate"
+                type="button"
+                class="absolute right-8 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                :title="$t('reports.clearStartDate')"
+                @click="handleClearDateField(plugin.key, 'startDate')"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div class="relative">
+              <LocalizedDateInput
+                :model-value="getDateRange(plugin.key).endDate"
+                :min-date="getMinDateForPlugin(plugin)"
+                :max-date="getMaxDateForPlugin(plugin)"
+                class="input text-sm"
+                @update:model-value="
+                  handleUpdateDateRange(
+                    plugin.key,
+                    'endDate',
+                    $event,
+                  )
+                "
+              />
+              <button
+                v-if="getDateRange(plugin.key).endDate"
+                type="button"
+                class="absolute right-8 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                :title="$t('reports.clearEndDate')"
+                @click="handleClearDateField(plugin.key, 'endDate')"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -225,6 +264,7 @@ import { useTranslation } from "@/composables/useTranslation";
 import { usePluginsStore } from "@/stores/plugins";
 import { useReportsStore } from "@/stores/reports";
 import { usePluginLocalization } from "@/composables/usePluginLocalization";
+import { useReportFilterPersistence } from "@/composables/useFilterPersistence";
 import LocalizedDateInput from "@/components/common/LocalizedDateInput.vue";
 import CategoryAnalyticsReport from "@/components/reports/CategoryAnalyticsReport.vue";
 import PriceTrendsReport from "@/components/reports/PriceTrendsReport.vue";
@@ -238,7 +278,16 @@ const pluginsStore = usePluginsStore();
 const reportsStore = useReportsStore();
 const { localizePlugins } = usePluginLocalization();
 
-const dateRanges = reactive<Record<string, DateRange>>({});
+// Use persisted date ranges
+const {
+  dateRanges,
+  getDateRange,
+  setDateRange,
+  hasActiveFilter,
+  clearDateRange,
+  clearDateField,
+} = useReportFilterPersistence();
+
 const loadingReports = reactive<Record<string, boolean>>({});
 const currentReports = reactive<Record<string, ReportData>>({});
 
@@ -248,19 +297,27 @@ const localizedReportPlugins = computed(() => {
   return localizePlugins(plugins);
 });
 
-const updateDateRange = (
+// Handler for updating date range (uses persisted storage)
+const handleUpdateDateRange = (
   pluginKey: string,
   field: "startDate" | "endDate",
   value: string,
 ) => {
-  if (!dateRanges[pluginKey]) {
-    dateRanges[pluginKey] = { startDate: "", endDate: "" };
-  }
-  dateRanges[pluginKey][field] = value;
+  setDateRange(pluginKey, { [field]: value });
+};
+
+// Handler for clearing entire date range for a plugin
+const handleClearDateRange = (pluginKey: string) => {
+  clearDateRange(pluginKey);
+};
+
+// Handler for clearing a single date field
+const handleClearDateField = (pluginKey: string, field: "startDate" | "endDate") => {
+  clearDateField(pluginKey, field);
 };
 
 const isDateRangeValid = (pluginKey: string) => {
-  const range = dateRanges[pluginKey];
+  const range = getDateRange(pluginKey);
   return (
     range &&
     range.startDate &&
@@ -285,15 +342,16 @@ const getMaxDateForPlugin = (plugin: ReportPlugin) => {
 };
 
 const generateReport = async (plugin: ReportPlugin) => {
+  const dateRange = getDateRange(plugin.key);
+
   // For category analytics, redirect to detailed analytics view
   if (plugin.key === "category-analytics") {
     const query: Record<string, string> = {};
-    const dateRange = dateRanges[plugin.key];
 
-    if (dateRange && dateRange.startDate) {
+    if (dateRange.startDate) {
       query.startDate = dateRange.startDate;
     }
-    if (dateRange && dateRange.endDate) {
+    if (dateRange.endDate) {
       query.endDate = dateRange.endDate;
     }
 
@@ -307,12 +365,11 @@ const generateReport = async (plugin: ReportPlugin) => {
   // For price trends, redirect to dedicated price trends view
   if (plugin.key === "price-trends") {
     const query: Record<string, string> = {};
-    const dateRange = dateRanges[plugin.key];
 
-    if (dateRange && dateRange.startDate) {
+    if (dateRange.startDate) {
       query.startDate = dateRange.startDate;
     }
-    if (dateRange && dateRange.endDate) {
+    if (dateRange.endDate) {
       query.endDate = dateRange.endDate;
     }
 
@@ -344,7 +401,7 @@ const generateReport = async (plugin: ReportPlugin) => {
   try {
     const request = {
       pluginKey: plugin.key,
-      dateRange: plugin.requiresDateRange ? dateRanges[plugin.key] : undefined,
+      dateRange: plugin.requiresDateRange ? dateRange : undefined,
       parameters: {},
     };
 
@@ -359,9 +416,10 @@ const generateReport = async (plugin: ReportPlugin) => {
 
 const exportReport = async (plugin: ReportPlugin, format: string) => {
   try {
+    const dateRange = getDateRange(plugin.key);
     const request = {
       pluginKey: plugin.key,
-      dateRange: plugin.requiresDateRange ? dateRanges[plugin.key] : undefined,
+      dateRange: plugin.requiresDateRange ? dateRange : undefined,
       parameters: {},
     };
 
@@ -371,10 +429,17 @@ const exportReport = async (plugin: ReportPlugin, format: string) => {
   }
 };
 
-// Initialize default date ranges
+// Initialize default date ranges (only for plugins that don't have persisted values)
 const initializeDefaultDateRanges = () => {
   localizedReportPlugins.value.forEach((plugin) => {
     if (plugin.requiresDateRange) {
+      // Check if there are already persisted values
+      const existingRange = getDateRange(plugin.key);
+      if (existingRange.startDate || existingRange.endDate) {
+        // Already has persisted values, skip initialization
+        return;
+      }
+
       const endDate = new Date();
       let startDate = new Date();
 
@@ -394,10 +459,10 @@ const initializeDefaultDateRanges = () => {
         startDate.setMonth(endDate.getMonth() - 1);
       }
 
-      dateRanges[plugin.key] = {
+      setDateRange(plugin.key, {
         startDate: startDate.toISOString().split("T")[0],
         endDate: endDate.toISOString().split("T")[0],
-      };
+      });
     }
   });
 };

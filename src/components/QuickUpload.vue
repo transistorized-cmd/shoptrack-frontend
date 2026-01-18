@@ -964,11 +964,35 @@ const handleQuickUpload = async () => {
     // Store filename before clearing the file
     const filename = selectedFile.value.name;
 
+    // Store the previous score for the callback (captured before upload)
+    const capturedPreviousScore = previousScore.value;
+
     // Use async upload with high priority for user-initiated uploads
     const jobId = await uploadFileAsync(selectedFile.value, {
       priority: 10, // High priority for immediate user uploads
       onUploadProgress: (progressEvent) => {
         console.log('Upload progress:', progressEvent);
+      },
+      // Called when the job completes successfully
+      onComplete: async (_jobId, _status) => {
+        // Fetch score AFTER job completes and show notification
+        if (capturedPreviousScore !== null) {
+          try {
+            const scoreAfterUpload = await analyticsService.getExpenseVisibilityScore(locale.value);
+            console.log('Score after upload:', scoreAfterUpload.totalScore, 'Previous:', capturedPreviousScore);
+
+            // Create and show notification
+            scoreNotification.value = createScoreNotification(
+              capturedPreviousScore,
+              scoreAfterUpload.totalScore,
+              scoreAfterUpload.feedbackMessage || 'Great job tracking your expenses!'
+            );
+            showScoreNotification.value = true;
+          } catch (error) {
+            console.log('Could not fetch score after upload (non-blocking):', error);
+            // Don't show notification if score fetch fails
+          }
+        }
       }
     });
 
@@ -987,28 +1011,6 @@ const handleQuickUpload = async () => {
       errors: [],
       jobId, // Store job ID for reference
     };
-
-    // Fetch score AFTER upload and show notification
-    if (previousScore.value !== null) {
-      try {
-        // Wait a moment for backend to process
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        const scoreAfterUpload = await analyticsService.getExpenseVisibilityScore(locale.value);
-        console.log('Score after upload:', scoreAfterUpload.totalScore, 'Previous:', previousScore.value);
-
-        // Create and show notification
-        scoreNotification.value = createScoreNotification(
-          previousScore.value,
-          scoreAfterUpload.totalScore,
-          scoreAfterUpload.feedbackMessage || 'Great job tracking your expenses!'
-        );
-        showScoreNotification.value = true;
-      } catch (error) {
-        console.log('Could not fetch score after upload (non-blocking):', error);
-        // Don't show notification if score fetch fails
-      }
-    }
 
   } catch (error) {
     console.error("Quick upload failed:", error);

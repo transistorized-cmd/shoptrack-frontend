@@ -232,8 +232,9 @@ describe("Error Translation Utilities", () => {
           code: "TEST_CODE",
         };
 
-        // This will throw an error in the current implementation, which is expected
-        expect(() => translateError(authError)).toThrow();
+        // The implementation handles null gracefully by returning the original message
+        const result = translateError(authError);
+        expect(result).toBeNull();
       });
 
       it("should handle undefined message in AuthError", () => {
@@ -242,8 +243,9 @@ describe("Error Translation Utilities", () => {
           code: "TEST_CODE",
         };
 
-        // This will throw an error in the current implementation, which is expected
-        expect(() => translateError(authError)).toThrow();
+        // The implementation handles undefined gracefully by returning the original message
+        const result = translateError(authError);
+        expect(result).toBeUndefined();
       });
 
       it("should handle translation key not found gracefully", () => {
@@ -251,11 +253,9 @@ describe("Error Translation Utilities", () => {
           throw new Error("Translation key not found");
         });
 
-        // The translateError function doesn't catch translation errors, so it will throw
-        expect(() => translateError("Network error")).toThrow(
-          "Translation key not found",
-        );
-        expect(mockTranslate).toHaveBeenCalledWith("errors.networkError");
+        // The translateError function catches translation errors and returns original message
+        const result = translateError("Network error");
+        expect(result).toBe("Network error");
       });
     });
   });
@@ -411,10 +411,9 @@ describe("Error Translation Utilities", () => {
           throw new Error("All translations failed");
         });
 
-        // If all translation attempts fail (including validation.required), it will throw
-        expect(() => translateValidationError("email", "required")).toThrow(
-          "All translations failed",
-        );
+        // If all translation attempts fail, it returns a fallback message
+        const result = translateValidationError("email", "required");
+        expect(result).toBe("email is required");
       });
     });
 

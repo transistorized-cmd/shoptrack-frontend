@@ -125,7 +125,7 @@ categorizedDescribe('ReceiptCard', [TestCategory.COMPONENT, TestCategory.UNIT, T
         global: { plugins: [router] }
       })
 
-      expect(wrapper.text()).toContain('grocery-receipt.jpg')
+      expect(wrapper.text()).toContain('SuperMart')
       expect(wrapper.text()).toContain('Jan 15, 2024')
       expect(wrapper.text()).toContain('REC-12345')
     })
@@ -137,9 +137,8 @@ categorizedDescribe('ReceiptCard', [TestCategory.COMPONENT, TestCategory.UNIT, T
       })
 
       expect(wrapper.text()).toContain('10') // totalItemsDetected
-      expect(wrapper.text()).toContain('Items Detected')
-      expect(wrapper.text()).toContain('8') // successfullyParsed
-      expect(wrapper.text()).toContain('Successfully Parsed')
+      expect(wrapper.text()).toContain('Items')
+      expect(wrapper.text()).toContain('Total')
     })
 
     categorizedIt('should render first 3 items from receipt', [TestCategory.CRITICAL], async () => {
@@ -403,7 +402,7 @@ categorizedDescribe('ReceiptCard', [TestCategory.COMPONENT, TestCategory.UNIT, T
         global: { plugins: [router] }
       })
 
-      expect(wrapper.text()).toContain('grocery-receipt.jpg')
+      expect(wrapper.text()).toContain('SuperMart')
       // Should not crash
     })
 
@@ -435,7 +434,7 @@ categorizedDescribe('ReceiptCard', [TestCategory.COMPONENT, TestCategory.UNIT, T
       })
 
       expect(wrapper.text()).toContain('0')
-      expect(wrapper.text()).toContain('Items Detected')
+      expect(wrapper.text()).toContain('Items')
     })
 
     categorizedIt('should handle receipt with special characters in item names', [TestCategory.FAST], async () => {

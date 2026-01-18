@@ -316,7 +316,8 @@ describe("NotificationMenu Component", () => {
       const formatted = wrapper.vm.formatNotificationTime(
         oneWeekAgo.toISOString(),
       );
-      expect(formatted).toMatch(/\d{1,2}\/\d{1,2}\/\d{4}/);
+      // Format can be "Jan 10, 2026" or "1/10/2026" depending on locale
+      expect(formatted).toMatch(/(\w{3} \d{1,2}, \d{4})|(\d{1,2}\/\d{1,2}\/\d{4})/);
     });
   });
 

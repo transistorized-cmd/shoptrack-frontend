@@ -236,9 +236,11 @@ describe("receipts store", () => {
       expect(store.error).toBeNull();
       expect(store.receipts[0]).toEqual(mockReceipt);
       expect(result).toEqual(mockProcessingResult);
+      // The method may include an idempotency key as additional argument
       expect(mockReceiptsService.uploadReceipt).toHaveBeenCalledWith(
         mockFile,
         undefined,
+        expect.anything(), // idempotency key
       );
     });
 
@@ -247,9 +249,11 @@ describe("receipts store", () => {
 
       await store.uploadReceipt(mockFile, "test-plugin");
 
+      // The method may include an idempotency key as additional argument
       expect(mockReceiptsService.uploadReceipt).toHaveBeenCalledWith(
         mockFile,
         "test-plugin",
+        expect.anything(), // idempotency key
       );
     });
 

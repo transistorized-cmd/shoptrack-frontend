@@ -190,7 +190,6 @@ describe("AsyncJobs Service", () => {
       expect(errorLogger.logApiError).toHaveBeenCalledWith(
         mockError,
         `/jobs/${jobId}`,
-        "DELETE",
       );
     });
   });

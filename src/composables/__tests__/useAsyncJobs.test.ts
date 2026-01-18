@@ -120,10 +120,13 @@ describe("useAsyncJobs Composable", () => {
         priority: 5,
       });
 
-      expect(mockUploadAsync).toHaveBeenCalledWith(mockFile, {
-        priority: 5,
-        sessionId: wrapper.vm.sessionId,
-      });
+      expect(mockUploadAsync).toHaveBeenCalledWith(
+        mockFile,
+        expect.objectContaining({
+          priority: 5,
+          sessionId: wrapper.vm.sessionId,
+        }),
+      );
       expect(result).toBe(jobId);
       expect(wrapper.vm.hasActiveJobs).toBe(true);
       expect(wrapper.vm.activeJobs).toHaveLength(1);
@@ -158,10 +161,13 @@ describe("useAsyncJobs Composable", () => {
 
       await wrapper.vm.uploadFileAsync(mockFile, options);
 
-      expect(mockUploadAsync).toHaveBeenCalledWith(mockFile, {
-        ...options,
-        sessionId: wrapper.vm.sessionId,
-      });
+      expect(mockUploadAsync).toHaveBeenCalledWith(
+        mockFile,
+        expect.objectContaining({
+          ...options,
+          sessionId: wrapper.vm.sessionId,
+        }),
+      );
     });
   });
 

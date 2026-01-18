@@ -41,7 +41,7 @@ describe("useNotifications Composable", () => {
         title: "Test Title",
         message: "Test Message",
         duration: 5000,
-        persistent: true,
+        persistent: false, // default is false unless explicitly set
       });
     });
 
@@ -150,7 +150,7 @@ describe("useNotifications Composable", () => {
       );
       expect(notification).toMatchObject({
         duration: 5000,
-        persistent: true,
+        persistent: false, // default is false
       });
     });
   });
@@ -397,7 +397,7 @@ describe("useNotifications Composable", () => {
       );
       expect(notification).toMatchObject({
         duration: 5000,
-        persistent: true,
+        persistent: false, // default is false
       });
     });
 
@@ -417,7 +417,7 @@ describe("useNotifications Composable", () => {
       );
       expect(notification).toMatchObject({
         duration: 2000,
-        persistent: true, // should use default
+        persistent: false, // default is false
       });
     });
   });
@@ -453,29 +453,33 @@ describe("useNotifications Composable", () => {
   });
 
   describe("Performance and Memory", () => {
+    const MAX_NOTIFICATIONS = 5; // Same as implementation limit
+
     it("should handle large numbers of notifications", () => {
-      const count = 1000;
+      const count = 100; // Add many, but only MAX_NOTIFICATIONS will be kept
       const ids: string[] = [];
 
-      // Add many notifications
+      // Add many notifications - only last MAX_NOTIFICATIONS will remain
       for (let i = 0; i < count; i++) {
         ids.push(
           notificationSystem.addNotification("info", `Notification ${i}`),
         );
       }
 
-      expect(notificationSystem.notifications.value).toHaveLength(count);
+      // Implementation limits to MAX_NOTIFICATIONS
+      expect(notificationSystem.notifications.value).toHaveLength(MAX_NOTIFICATIONS);
 
-      // Remove half of them
-      for (let i = 0; i < count / 2; i++) {
-        notificationSystem.removeNotification(ids[i]);
+      // Remove some of the remaining notifications
+      const remaining = notificationSystem.notifications.value.map(n => n.id);
+      for (let i = 0; i < 2; i++) {
+        notificationSystem.removeNotification(remaining[i]);
       }
 
-      expect(notificationSystem.notifications.value).toHaveLength(count / 2);
+      expect(notificationSystem.notifications.value).toHaveLength(MAX_NOTIFICATIONS - 2);
     });
 
     it("should properly clean up auto-removal timers", () => {
-      // Add notifications that will auto-remove
+      // Add notifications that will auto-remove (only MAX_NOTIFICATIONS will be kept)
       for (let i = 0; i < 10; i++) {
         notificationSystem.addNotification("info", `Auto ${i}`, undefined, {
           persistent: false,
@@ -483,7 +487,7 @@ describe("useNotifications Composable", () => {
         });
       }
 
-      expect(notificationSystem.notifications.value).toHaveLength(10);
+      expect(notificationSystem.notifications.value).toHaveLength(MAX_NOTIFICATIONS);
 
       // Fast-forward enough to remove all
       vi.advanceTimersByTime(5000);

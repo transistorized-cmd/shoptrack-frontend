@@ -924,38 +924,9 @@ describe("AuthService", () => {
     });
   });
 
-  describe("Token Management", () => {
-    describe("refreshToken", () => {
-      it("should refresh token successfully", async () => {
-        const refreshResponse: AuthResponse = {
-          success: true,
-          message: "Token refreshed successfully",
-        };
-
-        mockApi.post.mockResolvedValue({ data: refreshResponse });
-
-        const result = await authService.refreshToken();
-
-        expect(mockApi.post).toHaveBeenCalledWith("/auth/refresh-token");
-        expect(result).toEqual(refreshResponse);
-      });
-
-      it("should handle token refresh failure", async () => {
-        const errorResponse: AuthResponse = {
-          success: false,
-          message: "Refresh token expired",
-          errors: ["Token is no longer valid"],
-        };
-
-        mockApi.post.mockResolvedValue({ data: errorResponse });
-
-        const result = await authService.refreshToken();
-
-        expect(result).toEqual(errorResponse);
-        expect(result.success).toBe(false);
-      });
-    });
-  });
+  // Note: Token refresh is not needed with cookie authentication.
+  // Cookies are automatically managed by the browser and backend.
+  // The refreshToken method was intentionally removed from AuthService.;
 
   describe("OAuth Account Management", () => {
     describe("connectOAuthAccount", () => {
@@ -1133,14 +1104,15 @@ describe("AuthService", () => {
     });
 
     it("should handle malformed responses", async () => {
+      // When data is null, accessing data.success throws an error
       mockApi.post.mockResolvedValue({ data: null });
 
-      const result = await authService.login({
-        email: "test@example.com",
-        password: "test",
-      });
-
-      expect(result).toBeNull();
+      await expect(
+        authService.login({
+          email: "test@example.com",
+          password: "test",
+        }),
+      ).rejects.toThrow();
     });
 
     it("should handle empty string responses", async () => {

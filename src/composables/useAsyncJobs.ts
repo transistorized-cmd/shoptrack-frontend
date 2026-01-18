@@ -7,12 +7,17 @@ import {
 import { useNotifications } from "./useNotifications";
 import { generateIdempotencyKey } from "@/utils/idempotency";
 
+interface JobCompletionCallback {
+  (jobId: string, status: JobStatus): void;
+}
+
 interface JobTracker {
   jobId: string;
   status: JobStatus | null;
   polling: boolean;
   error: string | null;
   startTime: number;
+  onComplete?: JobCompletionCallback;
 }
 
 const activeJobs = ref<Map<string, JobTracker>>(new Map());
@@ -63,6 +68,7 @@ export const useAsyncJobs = () => {
       priority?: number;
       webhookUrl?: string;
       onUploadProgress?: (progressEvent: any) => void;
+      onComplete?: JobCompletionCallback;
     },
   ): Promise<string> => {
     try {
@@ -82,6 +88,7 @@ export const useAsyncJobs = () => {
         polling: true,
         error: null,
         startTime: Date.now(),
+        onComplete: options?.onComplete,
       };
 
       activeJobs.value.set(result.jobId, tracker);
@@ -230,8 +237,8 @@ export const useAsyncJobs = () => {
    * Handle job completion
    */
   const handleJobCompleted = (jobId: string, status: JobStatus) => {
-    const processingTimeMs =
-      Date.now() - (activeJobs.value.get(jobId)?.startTime || 0);
+    const tracker = activeJobs.value.get(jobId);
+    const processingTimeMs = Date.now() - (tracker?.startTime || 0);
     const processingTimeSec = Math.round(processingTimeMs / 1000);
 
     success(
@@ -239,6 +246,15 @@ export const useAsyncJobs = () => {
       `${status.filename} processed successfully in ${processingTimeSec}s`,
       { persistent: true },
     );
+
+    // Call the onComplete callback if provided
+    if (tracker?.onComplete) {
+      try {
+        tracker.onComplete(jobId, status);
+      } catch (err) {
+        console.error("Error in job completion callback:", err);
+      }
+    }
 
     // Keep the job in tracking for a while for user reference
     setTimeout(() => {

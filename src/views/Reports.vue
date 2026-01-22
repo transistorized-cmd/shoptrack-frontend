@@ -288,17 +288,10 @@ const {
   clearDateField,
 } = useReportFilterPersistence();
 
+import { formatLocalDate } from "@/utils/dateFormatting";
+
 const loadingReports = reactive<Record<string, boolean>>({});
 const currentReports = reactive<Record<string, ReportData>>({});
-
-// Format date to YYYY-MM-DD using local timezone (not UTC)
-// This prevents off-by-one day issues for users in timezones like UTC+1
-const formatLocalDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 // Computed property to get localized plugins
 const localizedReportPlugins = computed(() => {

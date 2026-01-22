@@ -377,6 +377,7 @@ import LocalizedDateInput from "@/components/common/LocalizedDateInput.vue";
 import { getCurrentLocale } from "@/i18n";
 
 import api from "@/services/api";
+import { formatLocalDate } from "@/utils/dateFormatting";
 
 interface CategoryAnalytics {
   categoryId: number;
@@ -424,15 +425,6 @@ const { formatDate } = useDateLocalization();
 const capitalizeFirst = (str: string) => {
   if (!str) return str;
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-};
-
-// Format date to YYYY-MM-DD using local timezone (not UTC)
-// This prevents off-by-one day issues for users in timezones like UTC+1
-const formatLocalDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 };
 
 // Helper functions to read from URL query parameters

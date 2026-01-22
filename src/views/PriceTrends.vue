@@ -143,6 +143,7 @@ import { getCurrentLocale } from "@/i18n";
 import PriceTrendsReport from "@/components/reports/PriceTrendsReport.vue";
 import LocalizedDateInput from "@/components/common/LocalizedDateInput.vue";
 import type { ReportData, DateRange } from "@/types/report";
+import { formatLocalDate } from "@/utils/dateFormatting";
 
 const { t } = useTranslation();
 
@@ -163,15 +164,6 @@ const filters = reactive({
   endDate: "",
   categoryId: "", // Changed from category to categoryId
 });
-
-// Format date to YYYY-MM-DD using local timezone (not UTC)
-// This prevents off-by-one day issues for users in timezones like UTC+1
-const formatLocalDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 // Computed property for current locale categories
 const currentCategories = computed(() => {

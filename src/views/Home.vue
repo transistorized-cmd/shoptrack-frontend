@@ -352,6 +352,7 @@ import { useReceiptsStore } from "@/stores/receipts";
 import { usePluginsStore } from "@/stores/plugins";
 import ShoppingListWidget from "@/components/shopping-list/ShoppingListWidget.vue";
 import api from "@/services/api";
+import { formatLocalDate } from "@/utils/dateFormatting";
 
 const receiptsStore = useReceiptsStore();
 const pluginsStore = usePluginsStore();
@@ -373,15 +374,6 @@ interface TopCategory {
   percentage: number;
 }
 const topCategories = ref<TopCategory[]>([]);
-
-// Format date to YYYY-MM-DD using local timezone (not UTC)
-// This prevents off-by-one day issues for users in timezones like UTC+1
-const formatLocalDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 // Use backend analytics data for receipt count (respects subscription limits)
 const receiptsThisMonth = computed(() => monthlyReceiptsThisMonth.value);

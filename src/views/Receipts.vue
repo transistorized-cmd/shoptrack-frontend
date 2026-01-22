@@ -281,18 +281,10 @@ import SubscriptionModal from "@/components/SubscriptionModal.vue";
 import { useDebounceFn } from "@vueuse/core";
 import { featureService, type FeatureMessage } from "@/services/featureService";
 import { useReceiptFilterPersistence, type ReceiptFilters } from "@/composables/useFilterPersistence";
+import { formatLocalDate } from "@/utils/dateFormatting";
 
 const { t, locale } = useTranslation();
 const receiptsStore = useReceiptsStore();
-
-// Format date to YYYY-MM-DD using local timezone (not UTC)
-// This prevents off-by-one day issues for users in timezones like UTC+1
-const formatLocalDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 // Use persisted filters
 const { filters, hasActiveFilters, clearFilter, clearAllFilters } = useReceiptFilterPersistence();

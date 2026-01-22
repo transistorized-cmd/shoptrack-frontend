@@ -1,9 +1,12 @@
 #!/bin/bash
 
-# Force deployment script to resolve _withMods production errors
+# Force build script to resolve _withMods production errors
 # This script ensures complete cache invalidation and proper build
 
-echo "🚨 FORCE DEPLOYMENT - Resolving _withMods Production Errors"
+# Change to project root (parent of scripts directory)
+cd "$(dirname "$0")/.."
+
+echo "🚨 FORCE BUILD - Resolving _withMods Production Errors"
 echo "=================================================="
 
 # Load nvm and switch to Node v22 like the npm scripts do
@@ -99,7 +102,7 @@ if [ $? -eq 0 ]; then
     fi
 
     echo ""
-    echo "🎉 DEPLOYMENT READY"
+    echo "🎉 BUILD READY"
     echo "==================="
     echo "✅ All caches cleared"
     echo "✅ Dependencies reinstalled"
@@ -107,7 +110,7 @@ if [ $? -eq 0 ]; then
     echo "✅ Vue helpers preserved"
     echo ""
     echo "📝 DEPLOYMENT INSTRUCTIONS:"
-    echo "1. Deploy the ./dist folder to production"
+    echo "1. Run scripts/deploy.sh to deploy to production"
     echo "2. Clear CDN/proxy caches if applicable"
     echo "3. Monitor for _withMods errors after deployment"
     echo "4. Test upload functionality immediately"

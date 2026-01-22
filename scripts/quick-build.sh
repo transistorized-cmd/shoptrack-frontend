@@ -1,7 +1,11 @@
 #!/bin/bash
 
-# Quick deployment using existing npm scripts with auto Node version switching
-echo "🚀 QUICK DEPLOYMENT - Using npm scripts with Node v22 auto-switching"
+# Quick build using existing npm scripts with auto Node version switching
+
+# Change to project root (parent of scripts directory)
+cd "$(dirname "$0")/.."
+
+echo "🚀 QUICK BUILD - Using npm scripts with Node v22 auto-switching"
 echo "=================================================================="
 
 # Clear caches
@@ -27,8 +31,8 @@ if [ $? -eq 0 ]; then
     fi
 
     echo ""
-    echo "🎉 DEPLOYMENT READY!"
-    echo "Deploy the ./dist folder to production"
+    echo "🎉 BUILD READY!"
+    echo "Run scripts/deploy.sh to deploy to production"
 else
     echo "❌ Build failed!"
     exit 1

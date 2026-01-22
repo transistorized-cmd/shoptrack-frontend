@@ -4,6 +4,9 @@ set -e
 # ShopTrack Frontend Deployment Script
 # Deploys to platform.shoptrack.app
 
+# Change to project root (parent of scripts directory)
+cd "$(dirname "$0")/.."
+
 echo "=== ShopTrack Frontend Deployment ==="
 
 # Load nvm

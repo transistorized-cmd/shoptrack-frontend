@@ -791,6 +791,16 @@ const receipt = ref<Receipt | null>(null);
 const formatUnitPrice = (pricePerUnit: number) => {
   return formatAmount(pricePerUnit, receipt.value?.currency || 'USD');
 };
+
+// Format date to YYYY-MM-DD using local timezone (not UTC)
+// This prevents off-by-one day issues for users in timezones like UTC+1
+const formatLocalDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const loading = ref(true);
 const error = ref<string | null>(null);
 const showDebugInfo = ref(false);
@@ -1060,7 +1070,7 @@ const startEditingDate = () => {
   // Convert receipt date to YYYY-MM-DD format for date input
   if (receipt.value?.receiptDate) {
     const date = new Date(receipt.value.receiptDate);
-    editedReceiptDate.value = date.toISOString().split("T")[0];
+    editedReceiptDate.value = formatLocalDate(date);
   } else {
     editedReceiptDate.value = "";
   }

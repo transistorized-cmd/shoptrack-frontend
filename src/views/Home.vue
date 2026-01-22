@@ -374,6 +374,15 @@ interface TopCategory {
 }
 const topCategories = ref<TopCategory[]>([]);
 
+// Format date to YYYY-MM-DD using local timezone (not UTC)
+// This prevents off-by-one day issues for users in timezones like UTC+1
+const formatLocalDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 // Use backend analytics data for receipt count (respects subscription limits)
 const receiptsThisMonth = computed(() => monthlyReceiptsThisMonth.value);
 
@@ -454,14 +463,14 @@ const fetchMonthlySpending = async () => {
     // Get current month date range
     const now = new Date();
     const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startDateThisMonth = firstDayThisMonth.toISOString().split('T')[0];
-    const endDateThisMonth = now.toISOString().split('T')[0];
+    const startDateThisMonth = formatLocalDate(firstDayThisMonth);
+    const endDateThisMonth = formatLocalDate(now);
 
     // Get last month date range
     const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-    const startDateLastMonth = firstDayLastMonth.toISOString().split('T')[0];
-    const endDateLastMonth = lastDayLastMonth.toISOString().split('T')[0];
+    const startDateLastMonth = formatLocalDate(firstDayLastMonth);
+    const endDateLastMonth = formatLocalDate(lastDayLastMonth);
 
     // Fetch this month's spending data from analytics API
     const thisMonthAnalyticsParams = new URLSearchParams({

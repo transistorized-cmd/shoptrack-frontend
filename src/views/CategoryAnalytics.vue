@@ -426,6 +426,15 @@ const capitalizeFirst = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
+// Format date to YYYY-MM-DD using local timezone (not UTC)
+// This prevents off-by-one day issues for users in timezones like UTC+1
+const formatLocalDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 // Helper functions to read from URL query parameters
 function getDateFromQuery(param: string): string | null {
   const value = route.query[param];
@@ -477,11 +486,11 @@ function getInitialView(): "categories" | "items" | "receipts" {
 function getDefaultStartDate(): string {
   const date = new Date();
   date.setMonth(date.getMonth() - 3); // 3 months ago
-  return date.toISOString().split("T")[0];
+  return formatLocalDate(date);
 }
 
 function getDefaultEndDate(): string {
-  return new Date().toISOString().split("T")[0];
+  return formatLocalDate(new Date());
 }
 
 function getExcludedCategoriesFromQuery(): Set<string> {

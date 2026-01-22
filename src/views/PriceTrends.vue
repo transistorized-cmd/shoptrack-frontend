@@ -164,6 +164,15 @@ const filters = reactive({
   categoryId: "", // Changed from category to categoryId
 });
 
+// Format date to YYYY-MM-DD using local timezone (not UTC)
+// This prevents off-by-one day issues for users in timezones like UTC+1
+const formatLocalDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 // Computed property for current locale categories
 const currentCategories = computed(() => {
   const currentLocale = getCurrentLocale();
@@ -179,13 +188,13 @@ const initializeFiltersFromQuery = () => {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setMonth(endDate.getMonth() - 6);
-    filters.startDate = startDate.toISOString().split("T")[0];
+    filters.startDate = formatLocalDate(startDate);
   }
 
   if (route.query.endDate) {
     filters.endDate = route.query.endDate as string;
   } else {
-    filters.endDate = new Date().toISOString().split("T")[0];
+    filters.endDate = formatLocalDate(new Date());
   }
 
   if (route.query.categoryId) {
@@ -293,8 +302,8 @@ const resetFilters = () => {
   const endDate = new Date();
   const startDate = new Date();
   startDate.setMonth(endDate.getMonth() - 6);
-  filters.startDate = startDate.toISOString().split("T")[0];
-  filters.endDate = endDate.toISOString().split("T")[0];
+  filters.startDate = formatLocalDate(startDate);
+  filters.endDate = formatLocalDate(endDate);
 
   updateUrlQuery();
   loadData();

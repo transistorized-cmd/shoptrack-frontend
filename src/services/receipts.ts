@@ -149,4 +149,8 @@ export const receiptsService = {
     });
     return response.data;
   },
+
+  async deleteReceiptItem(itemId: number): Promise<void> {
+    await api.delete(`/receipts/items/${itemId}`);
+  },
 };

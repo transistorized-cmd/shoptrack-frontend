@@ -224,7 +224,10 @@
       "failedToDelete": "Error al eliminar recibo. Por favor intenta de nuevo.",
       "orEnterNew": "O ingresa una nueva categoría",
       "addToFavorites": "Agregar a favoritos",
-      "removeFromFavorites": "Quitar de favoritos"
+      "removeFromFavorites": "Quitar de favoritos",
+      "deleteItem": "Eliminar artículo",
+      "deleteItemConfirmation": "¿Estás seguro de que quieres eliminar \"{itemName}\"?",
+      "itemDeleted": "Artículo eliminado exitosamente"
     }
   },
   "upload": {

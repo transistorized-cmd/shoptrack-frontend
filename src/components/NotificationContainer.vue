@@ -1,12 +1,12 @@
 <template>
-  <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 space-y-2">
+  <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-[600px] px-4 space-y-2">
     <TransitionGroup name="notification" tag="div" class="space-y-2">
       <div
         v-for="notification in notifications"
         :key="notification.id"
-        class="bg-white shadow-lg rounded-lg pointer-events-auto transition-all duration-300"
-        style="width: 600px"
+        class="bg-white shadow-lg rounded-lg pointer-events-auto transition-all duration-300 cursor-pointer"
         :class="getNotificationClasses(notification.type)"
+        @click="removeNotification(notification.id)"
       >
         <div class="p-4">
           <div class="flex items-start">

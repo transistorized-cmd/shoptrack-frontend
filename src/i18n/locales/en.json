@@ -225,7 +225,10 @@
       "failedToDelete": "Failed to delete receipt. Please try again.",
       "orEnterNew": "Or enter new category",
       "addToFavorites": "Add to favorites",
-      "removeFromFavorites": "Remove from favorites"
+      "removeFromFavorites": "Remove from favorites",
+      "deleteItem": "Delete item",
+      "deleteItemConfirmation": "Are you sure you want to delete \"{itemName}\"?",
+      "itemDeleted": "Item deleted successfully"
     }
   },
   "upload": {

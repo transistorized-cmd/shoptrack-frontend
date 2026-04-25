@@ -245,6 +245,21 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false, // allow self-signed dev cert from Kestrel
           credentials: true, // Forward cookies for authentication
+          cookieDomainRewrite: "", // strip Domain attr so cookies bind to localhost
+          configure: (proxy) => {
+            // Rewrite Set-Cookie so Safari accepts it on http://localhost:
+            // strip `Secure` (requires HTTPS in Safari) and downgrade SameSite=None to Lax.
+            proxy.on("proxyRes", (proxyRes) => {
+              const sc = proxyRes.headers["set-cookie"];
+              if (sc) {
+                proxyRes.headers["set-cookie"] = sc.map((c) =>
+                  c
+                    .replace(/;\s*Secure/gi, "")
+                    .replace(/;\s*SameSite=None/gi, "; SameSite=Lax"),
+                );
+              }
+            });
+          },
         },
         // SignalR WebSocket hub proxy
         "/hubs": {
@@ -252,6 +267,7 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false, // allow self-signed dev cert from Kestrel
           ws: true, // Enable WebSocket proxying
+          cookieDomainRewrite: "",
         },
       },
     },

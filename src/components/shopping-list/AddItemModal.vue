@@ -4,6 +4,11 @@ import { useTranslation } from "@/composables/useTranslation";
 import { useShoppingListStore } from "@/stores/shoppingList";
 import type { ProductSearchResult } from "@/types/shoppingList";
 
+const formatPrice = (price: number | undefined, locale: string) => {
+  if (price === undefined || price === null) return null;
+  return new Intl.NumberFormat(locale, { style: "currency", currency: "EUR" }).format(price);
+};
+
 const props = defineProps<{
   isOpen: boolean;
   listLocalId: string;
@@ -14,7 +19,7 @@ const emit = defineEmits<{
   (e: "added", product: ProductSearchResult): void;
 }>();
 
-const { t } = useTranslation();
+const { t, locale } = useTranslation();
 const store = useShoppingListStore();
 
 const searchQuery = ref("");
@@ -242,6 +247,12 @@ const handleToggleFavorite = async (e: Event, product: ProductSearchResult) => {
                 </p>
               </div>
               <div class="flex items-center gap-2">
+                <span
+                  v-if="formatPrice(product.lastPrice, locale)"
+                  class="text-sm font-medium text-emerald-600 dark:text-emerald-400"
+                >
+                  {{ formatPrice(product.lastPrice, locale) }}
+                </span>
                 <button
                   @click="handleToggleFavorite($event, product)"
                   :disabled="togglingFavoriteId === product.id"

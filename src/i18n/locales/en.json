@@ -4,6 +4,7 @@
     "error": "Error",
     "success": "Success",
     "save": "Save",
+    "saving": "Saving...",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
@@ -988,8 +989,8 @@
     },
     "detail": {
       "untitled": "Untitled List",
-      "itemsLeft": "{count} items remaining | {count} item remaining | {count} items remaining",
-      "inCart": "In cart",
+      "itemsLeft": "{count}/{total} items remaining",
+      "cartProgress": "{current}/{total} in cart",
       "empty": {
         "title": "Your list is empty",
         "description": "Add items to start your shopping list"
@@ -1052,6 +1053,11 @@
       "hasNfc": "Has NFC tag",
       "addToFavorites": "Add to favorites",
       "removeFromFavorites": "Remove from favorites"
+    },
+    "editItem": {
+      "title": "Edit Item",
+      "searchPlaceholder": "Search to swap product...",
+      "hint": "Change the quantity above, or search to swap this item for a different product."
     },
     "item": {
       "checked": "Checked",

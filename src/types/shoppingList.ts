@@ -72,6 +72,8 @@ export interface ProductSearchResult {
   category?: string;
   hasNfc: boolean;
   isFavorite: boolean;
+  lastPrice?: number;
+  lastPriceDate?: string;
 }
 
 // API request/response types
@@ -91,6 +93,7 @@ export interface AddShoppingListItemRequest {
 
 export interface UpdateShoppingListItemRequest {
   quantity?: number;
+  productId?: number;
 }
 
 export interface ProductSearchQuery {

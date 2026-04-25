@@ -7,6 +7,7 @@ import type { ShoppingListItem } from "@/types/shoppingList";
 import ShoppingListItemGroup from "@/components/shopping-list/ShoppingListItemGroup.vue";
 import SyncStatusIndicator from "@/components/shopping-list/SyncStatusIndicator.vue";
 import AddItemModal from "@/components/shopping-list/AddItemModal.vue";
+import EditItemModal from "@/components/shopping-list/EditItemModal.vue";
 
 const { t, locale } = useTranslation();
 const route = useRoute();
@@ -14,6 +15,7 @@ const router = useRouter();
 const store = useShoppingListStore();
 
 const showAddModal = ref(false);
+const editingItem = ref<ShoppingListItem | null>(null);
 const editingName = ref(false);
 const newName = ref("");
 const quickStartLoading = ref(false);
@@ -45,20 +47,30 @@ const uncheckedCount = computed(() => {
   return Math.max(0, currentList.value.totalItems - currentList.value.checkedItems);
 });
 
-// Calculate total price of checked items (items in cart)
+const formatEuros = (value: number) =>
+  new Intl.NumberFormat(locale.value, {
+    style: "currency",
+    currency: "EUR",
+  }).format(value);
+
+// Total price of items in cart
 const checkedTotal = computed(() => {
   return store.currentItems
     .filter((item) => item.isChecked && item.lastPrice)
     .reduce((sum, item) => sum + (item.lastPrice! * (item.quantity || 1)), 0);
 });
 
-const formattedCheckedTotal = computed(() => {
-  if (checkedTotal.value === 0) return null;
-  return new Intl.NumberFormat(locale.value, {
-    style: "currency",
-    currency: "EUR",
-  }).format(checkedTotal.value);
+// Grand total: sum of all items (checked and unchecked) with a known price
+const grandTotal = computed(() => {
+  return store.currentItems
+    .filter((item) => item.lastPrice)
+    .reduce((sum, item) => sum + (item.lastPrice! * (item.quantity || 1)), 0);
 });
+
+const formattedCheckedTotal = computed(() => formatEuros(checkedTotal.value));
+const formattedGrandTotal = computed(() =>
+  grandTotal.value === 0 ? null : formatEuros(grandTotal.value)
+);
 
 const handleBack = () => {
   store.clearCurrentList();
@@ -82,6 +94,23 @@ const handleDeleteItem = async (item: ShoppingListItem) => {
       await store.removeItem(currentList.value.localId, localItem.localId);
     }
   }
+};
+
+const handleUpdateQuantity = async (item: ShoppingListItem, quantity: number) => {
+  if (currentList.value) {
+    const localItem = store.currentItems.find((i) => i.id === item.id);
+    if (localItem) {
+      await store.updateItem(currentList.value.localId, localItem.localId, { quantity });
+    }
+  }
+};
+
+const handleEditItem = (item: ShoppingListItem) => {
+  editingItem.value = item;
+};
+
+const closeEditModal = () => {
+  editingItem.value = null;
 };
 
 const handleItemAdded = () => {
@@ -263,24 +292,21 @@ const handleToggleAll = async () => {
         <div class="flex flex-col sm:flex-row sm:items-center gap-4">
           <!-- Progress section -->
           <div class="flex-1 min-w-0">
-            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1.5">
-              <span class="font-medium">
-                {{ t("shoppingList.detail.itemsLeft", { count: uncheckedCount }) }}
+            <div class="flex justify-between items-baseline gap-2 text-sm text-gray-600 dark:text-gray-400 mb-1.5">
+              <span class="font-medium truncate">
+                {{ t("shoppingList.detail.itemsLeft", { count: uncheckedCount, total: currentList?.totalItems ?? 0 }) }}<template v-if="formattedGrandTotal">
+                  <span class="text-emerald-600 dark:text-emerald-400">
+                    · {{ t("shoppingList.detail.cartProgress", { current: formattedCheckedTotal, total: formattedGrandTotal }) }}
+                  </span>
+                </template>
               </span>
-              <span>{{ progressPercent }}%</span>
+              <span class="flex-shrink-0">{{ progressPercent }}%</span>
             </div>
             <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
                 class="h-full bg-green-500 rounded-full transition-all duration-300"
                 :style="{ width: `${progressPercent}%` }"
               ></div>
-            </div>
-            <!-- Checked items total -->
-            <div
-              v-if="formattedCheckedTotal"
-              class="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400"
-            >
-              {{ t("shoppingList.detail.inCart") }}: {{ formattedCheckedTotal }}
             </div>
           </div>
 
@@ -397,6 +423,8 @@ const handleToggleAll = async () => {
             :group="group"
             @toggle="handleToggleItem"
             @delete="handleDeleteItem"
+            @edit="handleEditItem"
+            @update-quantity="handleUpdateQuantity"
           />
         </div>
       </div>
@@ -409,6 +437,16 @@ const handleToggleAll = async () => {
       :list-local-id="listId"
       @close="showAddModal = false"
       @added="handleItemAdded"
+    />
+
+    <!-- Edit Item Modal -->
+    <EditItemModal
+      v-if="currentList"
+      :is-open="editingItem !== null"
+      :list-local-id="currentList.localId"
+      :item="editingItem"
+      @close="closeEditModal"
+      @saved="closeEditModal"
     />
   </div>
 </template>

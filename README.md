@@ -5,6 +5,7 @@ A modern Vue.js 3 frontend application for ShopTrack receipt processing with adv
 ## 📋 Table of Contents
 
 - [Setup & Installation](#setup--installation)
+- [Backend Target (Local vs Remote)](#backend-target-local-vs-remote)
 - [Project Structure](#project-structure)
 - [Features & Components](#features--components)
 - [Analytics & Reporting](#analytics--reporting)
@@ -41,12 +42,60 @@ A modern Vue.js 3 frontend application for ShopTrack receipt processing with adv
 
 4. **Start development server:**
    ```bash
-   npm run dev
+   npm run dev          # talks to local API (https://localhost:5201)
+   npm run dev:remote   # talks to remote API (https://api.shoptrack.app)
    ```
+   See [Backend Target (Local vs Remote)](#backend-target-local-vs-remote) for details.
 
 5. **Access the application:**
    - Local: `http://localhost:5173`
    - The app will automatically proxy API calls to the backend
+
+## 🎯 Backend Target (Local vs Remote)
+
+The dev server can point at either a locally-running API or the deployed server API. The switch is controlled by Vite's `--mode` flag, which selects an env file layered on top of `.env`.
+
+### Commands
+
+```bash
+npm run dev          # default mode → loads .env       → target https://localhost:5201
+npm run dev:remote   # --mode remote → loads .env + .env.remote → target https://api.shoptrack.app
+```
+
+Both commands serve the frontend on `http://localhost:5173`; only the proxy target (`VITE_API_TARGET`) changes.
+
+### Env files
+
+| File | Purpose | Git |
+|---|---|---|
+| `.env` | Default config — points at local Kestrel | ignored |
+| `.env.remote` | Override applied only with `--mode remote` | ignored |
+| `.env.example` | Template for new devs | tracked |
+
+`.env.remote` only needs to override what differs from `.env`:
+
+```env
+# .env.remote
+VITE_API_TARGET=https://api.shoptrack.app
+VITE_API_URL=/api
+```
+
+`VITE_API_URL=/api` is needed because `api.ts` / `useCsrfToken.ts` only auto-use the relative `/api` path when `MODE === "development"`. Since `--mode remote` sets `MODE=remote`, we force the same behavior explicitly so requests go through the dev proxy (instead of being sent directly to the absolute URL built from `VITE_API_HOST`).
+
+To share the remote config with the team, either commit `.env.remote` (add `!.env.remote` to `.gitignore`) or maintain a `.env.remote.example`.
+
+### How the proxy handles auth cookies
+
+`vite.config.ts` rewrites `Set-Cookie` headers on proxied responses so the session cookie is usable from `http://localhost:5173`:
+
+- Strips the `Domain` attribute (`cookieDomainRewrite: ""`) so the cookie binds to `localhost` instead of `api.shoptrack.app`.
+- Removes the `Secure` flag and downgrades `SameSite=None` to `SameSite=Lax`. Safari rejects `Secure; SameSite=None` cookies sent over HTTP localhost; Chrome has an exception but Safari does not.
+
+These rewrites are dev-only (Vite proxy) and apply to both modes — harmless when the local API doesn't set those flags.
+
+### Switching modes
+
+Clear cookies for `localhost:5173` in DevTools → Application (or Storage) → Cookies whenever you switch between local and remote. Stale cookies from the previous backend will be sent to the new one and cause 401s.
 
 ## 🔧 Node Version Management
 

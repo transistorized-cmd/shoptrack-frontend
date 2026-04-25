@@ -603,6 +603,89 @@ export const useShoppingListStore = defineStore("shoppingList", () => {
     }
   };
 
+  // Update item (optimistic) — supports quantity change, product swap, or both
+  const updateItem = async (
+    listLocalId: string,
+    itemLocalId: string,
+    updates: { quantity?: number; product?: ProductSearchResult }
+  ) => {
+    error.value = null;
+
+    const itemIndex = currentItems.value.findIndex(
+      (i) => i.localId === itemLocalId
+    );
+    if (itemIndex === -1) return;
+
+    const item = currentItems.value[itemIndex];
+    const list = lists.value.find((l) => l.localId === listLocalId);
+
+    const newQuantity =
+      updates.quantity !== undefined ? Math.max(1, updates.quantity) : item.quantity;
+
+    // Build optimistic update. When swapping product, pick up the new product's
+    // display fields so the item re-groups / re-renders immediately.
+    const updatedItem: LocalShoppingListItem = {
+      ...item,
+      quantity: newQuantity,
+      ...(updates.product
+        ? {
+            productId: updates.product.id,
+            name: updates.product.nombre,
+            emoji: updates.product.emoji,
+            category: updates.product.category,
+            // lastPrice will be refreshed from the server response below
+            lastPrice: undefined,
+            lastPriceDate: undefined,
+          }
+        : {}),
+      syncStatus: "pending",
+    };
+
+    currentItems.value[itemIndex] = updatedItem;
+    await saveLocalItem(updatedItem);
+
+    const payload: { quantity?: number; productId?: number } = {
+      quantity: newQuantity,
+    };
+    if (updates.product) payload.productId = updates.product.id;
+
+    if (navigator.onLine && list?.id && item.id) {
+      try {
+        const serverItem = await shoppingListService.updateItem(
+          list.id,
+          item.id,
+          payload
+        );
+        const mapped = mapApiItemToFrontend(serverItem as unknown as ApiShoppingListItem);
+        currentItems.value[itemIndex] = {
+          ...updatedItem,
+          ...mapped,
+          localId: updatedItem.localId,
+          localListId: updatedItem.localListId,
+          syncStatus: "synced",
+        };
+        await saveLocalItem(currentItems.value[itemIndex]);
+      } catch (err) {
+        console.error("Error syncing item update:", err);
+        await enqueueChange({
+          type: "update",
+          entityType: "item",
+          entityId: itemLocalId,
+          payload,
+        });
+      }
+    } else {
+      await enqueueChange({
+        type: "update",
+        entityType: "item",
+        entityId: itemLocalId,
+        payload,
+      });
+    }
+
+    return currentItems.value[itemIndex];
+  };
+
   // Delete item (optimistic)
   const removeItem = async (listLocalId: string, itemLocalId: string) => {
     error.value = null;
@@ -1051,6 +1134,7 @@ export const useShoppingListStore = defineStore("shoppingList", () => {
     addCustomItem,
     toggleItem,
     toggleAllItems,
+    updateItem,
     removeItem,
     searchProducts,
     clearSearch,

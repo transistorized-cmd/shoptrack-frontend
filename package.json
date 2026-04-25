@@ -10,6 +10,7 @@
   "scripts": {
     "preinstall": "node scripts/check-node-version.cjs",
     "dev": "node scripts/check-node-version.cjs && vite",
+    "dev:remote": "node scripts/check-node-version.cjs && vite --mode remote",
     "build": "node scripts/check-node-version.cjs && run-p type-check \"build-only {@}\" --",
     "build:analyze": "node scripts/check-node-version.cjs && ANALYZE=true npm run build",
     "build:stats": "node scripts/check-node-version.cjs && ANALYZE=true vite build --mode production",

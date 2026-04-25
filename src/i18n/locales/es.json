@@ -4,6 +4,7 @@
     "error": "Error",
     "success": "Éxito",
     "save": "Guardar",
+    "saving": "Guardando...",
     "cancel": "Cancelar",
     "delete": "Eliminar",
     "edit": "Editar",
@@ -869,8 +870,8 @@
     },
     "detail": {
       "untitled": "Lista Sin Título",
-      "itemsLeft": "{count} artículos restantes | {count} artículo restante | {count} artículos restantes",
-      "inCart": "En el carrito",
+      "itemsLeft": "{count}/{total} artículos restantes",
+      "cartProgress": "{current}/{total} en el carrito",
       "empty": {
         "title": "Tu lista está vacía",
         "description": "Agrega artículos para comenzar tu lista de compras"
@@ -933,6 +934,11 @@
       "hasNfc": "Tiene etiqueta NFC",
       "addToFavorites": "Agregar a favoritos",
       "removeFromFavorites": "Quitar de favoritos"
+    },
+    "editItem": {
+      "title": "Editar Artículo",
+      "searchPlaceholder": "Buscar para cambiar el producto...",
+      "hint": "Cambia la cantidad arriba o busca para reemplazar este artículo por otro producto."
     },
     "item": {
       "checked": "Marcado",

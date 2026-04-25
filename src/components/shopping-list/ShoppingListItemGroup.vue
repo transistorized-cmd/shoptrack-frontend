@@ -13,6 +13,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "toggle", item: ShoppingListItem): void;
   (e: "delete", item: ShoppingListItem): void;
+  (e: "edit", item: ShoppingListItem): void;
+  (e: "updateQuantity", item: ShoppingListItem, quantity: number): void;
 }>();
 
 const { t, locale } = useTranslation();
@@ -54,6 +56,21 @@ const checkedCount = computed(() => {
   return props.group.items.filter((i) => i.isChecked).length;
 });
 
+const groupTotal = computed(() => {
+  return props.group.items.reduce((sum, item) => {
+    if (!item.lastPrice) return sum;
+    return sum + item.lastPrice * (item.quantity || 1);
+  }, 0);
+});
+
+const formattedGroupTotal = computed(() => {
+  if (groupTotal.value === 0) return null;
+  return new Intl.NumberFormat(locale.value, {
+    style: "currency",
+    currency: "EUR",
+  }).format(groupTotal.value);
+});
+
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value;
 };
@@ -64,6 +81,14 @@ const handleToggle = (item: ShoppingListItem) => {
 
 const handleDelete = (item: ShoppingListItem) => {
   emit("delete", item);
+};
+
+const handleEdit = (item: ShoppingListItem) => {
+  emit("edit", item);
+};
+
+const handleUpdateQuantity = (item: ShoppingListItem, quantity: number) => {
+  emit("updateQuantity", item, quantity);
 };
 </script>
 
@@ -83,21 +108,29 @@ const handleDelete = (item: ShoppingListItem) => {
         </span>
       </div>
 
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-5 w-5 text-gray-400 transition-transform"
-        :class="{ 'rotate-180': !isCollapsed }"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M19 9l-7 7-7-7"
-        />
-      </svg>
+      <div class="flex items-center gap-2">
+        <span
+          v-if="formattedGroupTotal"
+          class="text-sm font-medium text-emerald-600 dark:text-emerald-400"
+        >
+          {{ formattedGroupTotal }}
+        </span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-gray-400 transition-transform"
+          :class="{ 'rotate-180': !isCollapsed }"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
     </button>
 
     <!-- Items list -->
@@ -109,6 +142,8 @@ const handleDelete = (item: ShoppingListItem) => {
         :disabled="disabled"
         @toggle="handleToggle"
         @delete="handleDelete"
+        @edit="handleEdit"
+        @update-quantity="handleUpdateQuantity"
       />
     </div>
   </div>

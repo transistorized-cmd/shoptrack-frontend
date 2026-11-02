@@ -159,10 +159,10 @@
               {{ uploadLimitResult.message?.message || $t('upload.limitReached.message', 'You have reached your monthly upload limit.') }}
             </p>
             <div class="text-xs text-orange-700 dark:text-orange-400 mb-3">
-              {{ $t('upload.limitReached.usage', 'Usage: {usage} of {limit}', {
+              {{ $t('upload.limitReached.usage', {
                 usage: uploadLimitResult.usage,
                 limit: uploadLimitResult.limit || 0
-              }) }}
+              }, { default: 'Usage: {usage} of {limit}' }) }}
             </div>
             <div class="flex items-center space-x-3">
               <button

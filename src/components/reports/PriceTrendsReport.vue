@@ -276,7 +276,8 @@ const chartOptions = computed<ChartOptions<"line">>(() => ({
       borderWidth: 1,
       callbacks: {
         label: function (context) {
-          return `$${context.parsed.y.toFixed(2)}`;
+          const value = context.parsed.y;
+          return value == null ? "" : `$${value.toFixed(2)}`;
         },
       },
     },
